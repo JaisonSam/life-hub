@@ -50,7 +50,11 @@ import {
   Check,
   Droplets,
   Sun,
+  FolderSync,
 } from "lucide-react";
+import EpubReaderModal from "@/components/EpubReaderModal";
+import KoboHighlightsModal, { ExtractedHighlight } from "@/components/KoboHighlightsModal";
+import KoboDriveDeck from "@/components/KoboDriveDeck";
 
 interface Project {
   id: string;
@@ -543,6 +547,12 @@ export default function LifeHub() {
   const [newBookTakeaway, setNewBookTakeaway] = useState("");
   const [newBookProgress, setNewBookProgress] = useState(10);
 
+  // Kobo & EPUB Reader State
+  const [readerSource, setReaderSource] = useState<ArrayBuffer | File | string | null>(null);
+  const [readerTitle, setReaderTitle] = useState("EPUB Reader");
+  const [showKoboHighlightsModal, setShowKoboHighlightsModal] = useState(false);
+  const [showKoboDeck, setShowKoboDeck] = useState(true);
+
   // Time & Greeting
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
@@ -994,6 +1004,88 @@ export default function LifeHub() {
   const deleteBook = (id: string) => {
     const updated = bookshelf.filter((b) => b.id !== id);
     saveBookshelf(updated);
+  };
+
+  const handleOpenReader = (source: ArrayBuffer | File | string, title: string) => {
+    setReaderSource(source);
+    setReaderTitle(title);
+  };
+
+  const handleCaptureReaderQuote = (quote: string, chapterTitle: string) => {
+    const matchingBook = bookshelf.find(
+      (b) =>
+        b.title.toLowerCase().includes(readerTitle.toLowerCase()) ||
+        readerTitle.toLowerCase().includes(b.title.toLowerCase())
+    );
+
+    if (matchingBook) {
+      const updated = bookshelf.map((b) =>
+        b.id === matchingBook.id
+          ? {
+              ...b,
+              keyQuote: quote,
+              takeaway: `${b.takeaway} • [${chapterTitle}]: "${quote.slice(0, 100)}..."`,
+            }
+          : b
+      );
+      saveBookshelf(updated);
+    } else {
+      const newBook: StrategicBook = {
+        id: Date.now().toString(),
+        title: readerTitle,
+        author: "eBook Author",
+        category: "Executive Strategy",
+        coverUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80",
+        status: "Currently Reading",
+        progress: 25,
+        rating: 5,
+        keyMentalModel: "Strategic Insight",
+        keyQuote: quote,
+        takeaway: `Captured from ${chapterTitle}`,
+        pagesOrTime: chapterTitle,
+      };
+      saveBookshelf([newBook, ...bookshelf]);
+    }
+  };
+
+  const handleImportKoboHighlights = (highlights: ExtractedHighlight[]) => {
+    let updatedBookshelf = [...bookshelf];
+
+    for (const hl of highlights) {
+      const existingIdx = updatedBookshelf.findIndex(
+        (b) =>
+          b.title.toLowerCase().includes(hl.bookTitle.toLowerCase()) ||
+          hl.bookTitle.toLowerCase().includes(b.title.toLowerCase())
+      );
+
+      if (existingIdx !== -1) {
+        const existing = updatedBookshelf[existingIdx];
+        updatedBookshelf[existingIdx] = {
+          ...existing,
+          keyQuote: hl.quote,
+          keyMentalModel: hl.mentalModel || existing.keyMentalModel,
+          takeaway: hl.note ? `${existing.takeaway} | [Kobo Note]: ${hl.note}` : existing.takeaway,
+        };
+      } else {
+        const newBook: StrategicBook = {
+          id: `kobo-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          title: hl.bookTitle,
+          author: hl.author || "Kobo Author",
+          category: "Executive Strategy",
+          coverUrl: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=600&q=80",
+          status: "Currently Reading",
+          progress: 30,
+          rating: 5,
+          keyMentalModel: hl.mentalModel || "Strategic Model",
+          keyQuote: hl.quote,
+          takeaway: hl.note || `Imported passage from ${hl.chapter}`,
+          pagesOrTime: hl.chapter,
+        };
+        updatedBookshelf = [newBook, ...updatedBookshelf];
+      }
+    }
+
+    saveBookshelf(updatedBookshelf);
   };
 
   // Save changes to localStorage
@@ -2841,6 +2933,26 @@ export default function LifeHub() {
                 </div>
 
                 <button
+                  onClick={() => setShowKoboDeck(!showKoboDeck)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+                    showKoboDeck
+                      ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                      : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
+                  }`}
+                >
+                  <FolderSync className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Kobo & Drive</span>
+                </button>
+
+                <button
+                  onClick={() => setShowKoboHighlightsModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30 text-xs font-semibold transition-all"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Kobo Notes</span>
+                </button>
+
+                <button
                   onClick={() => setShowAddBook(!showAddBook)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-md shadow-indigo-600/20 transition-all text-xs"
                 >
@@ -2943,6 +3055,14 @@ export default function LifeHub() {
               </form>
             )}
 
+            {/* KOBO EREADER & GOOGLE DRIVE CLOUD SHELF */}
+            {showKoboDeck && (
+              <KoboDriveDeck
+                onOpenReader={handleOpenReader}
+                onOpenHighlightsModal={() => setShowKoboHighlightsModal(true)}
+              />
+            )}
+
             {/* MENTAL MODEL MATRIX RIBBON */}
             <div className="p-3.5 rounded-2xl bg-neutral-950/80 border border-neutral-800 flex flex-wrap items-center justify-between gap-3 text-xs">
               <span className="font-bold text-neutral-300 flex items-center gap-1.5">
@@ -3036,7 +3156,15 @@ export default function LifeHub() {
 
                     <div className="flex justify-between items-center text-[10px] text-neutral-500 pt-1">
                       <span>{book.pagesOrTime}</span>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <button
+                          onClick={() => handleOpenReader("/sample-strategy-brief.epub", book.title)}
+                          className="flex items-center gap-1 text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+                          title={`Read ${book.title} in LifeHub EPUB reader`}
+                        >
+                          <BookOpen className="w-3 h-3" />
+                          <span>Read</span>
+                        </button>
                         <span className="text-amber-400">★★★★★</span>
                         {bookshelf.length > 1 && (
                           <button
@@ -3587,6 +3715,25 @@ export default function LifeHub() {
           Connected to GitHub (JaisonSam/life-hub) & Deployed on Vercel
         </div>
       </footer>
+
+      {/* IN-BROWSER EPUB READER MODAL */}
+      {readerSource && (
+        <EpubReaderModal
+          epubSource={readerSource}
+          bookTitle={readerTitle}
+          onClose={() => setReaderSource(null)}
+          onCaptureQuote={handleCaptureReaderQuote}
+        />
+      )}
+
+      {/* KOBO HIGHLIGHTS & ANNOTATIONS IMPORTER MODAL */}
+      {showKoboHighlightsModal && (
+        <KoboHighlightsModal
+          onClose={() => setShowKoboHighlightsModal(false)}
+          onImport={handleImportKoboHighlights}
+          existingBookTitles={bookshelf.map((b) => b.title)}
+        />
+      )}
     </div>
   );
 }
