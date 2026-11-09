@@ -14,7 +14,7 @@ A personal life operating system and daily sanctuary combining:
 3. **Daily Habit Tracker**: Interactive check-ins and streaks with local persistence.
 4. **Projects Tracker**: Goal progress bars, status badges, and project creation.
 5. **Bible Study Organiser**: Book of Romans study guide, YouVersion Android deep-linking, chapter check-offs, and study notes.
-6. **Music & Worship Corner**: Curated YouTube Music playlists & OAuth 2.0 personal playlist sync.
+6. **Music & Worship Sanctuary**: Curated YouTube Music playlists, OAuth 2.0 personal playlist sync, Android Live Playback Mirror (via Last.fm / Pano Scrobbler) with real-time sound equalizer & floating now-playing dock, and aesthetic categorized album deck (Worship Sanctuary, GMAT Sprint Flow, High-Energy Gym).
 
 ## 🛠️ Tech Stack & Locations
 * **Location**: `/Users/jaisappi/Developer/life-hub`
