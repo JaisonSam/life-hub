@@ -52,11 +52,13 @@ import {
   Droplets,
   Sun,
   FolderSync,
+  Briefcase,
 } from "lucide-react";
 import EpubReaderModal from "@/components/EpubReaderModal";
 import KoboHighlightsModal, { ExtractedHighlight } from "@/components/KoboHighlightsModal";
 import DailyRecommendationsDeck from "@/components/DailyRecommendationsDeck";
 import GoogleDriveBookshelf from "@/components/GoogleDriveBookshelf";
+import CareerBrandHub from "@/components/CareerBrandHub";
 
 interface Project {
   id: string;
@@ -472,7 +474,7 @@ const initialStrategicBooks: StrategicBook[] = [
 
 export default function LifeHub() {
   // Navigation tabs
-  const [activeTab, setActiveTab] = useState<"all" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
 
   // Veerakeralapudur Agribusiness State
   const [activeAgriModelId, setActiveAgriModelId] = useState("guava");
@@ -1295,6 +1297,7 @@ export default function LifeHub() {
         <div className="max-w-7xl mx-auto px-4 sm:px-8 flex gap-2 overflow-x-auto pb-3 text-xs font-medium">
           {[
             { id: "all", label: "Overview Hub", icon: Sparkles },
+            { id: "career", label: "Career & Bangalore Jobs", icon: Briefcase },
             { id: "gmat", label: "GMAT 715+ Sprint", icon: Target },
             { id: "farm", label: "VKP Agribusiness", icon: Sprout },
             { id: "books", label: "Strategic Bookshelf", icon: Library },
@@ -1347,6 +1350,11 @@ export default function LifeHub() {
             </div>
           </div>
         </div>
+
+        {/* CAREER BRANDING & BANGALORE JOB RADAR */}
+        {(activeTab === "all" || activeTab === "career") && (
+          <CareerBrandHub />
+        )}
 
         {/* 1. DAILY BIBLE QUOTE MODULE */}
         {(activeTab === "all" || activeTab === "bible") && (

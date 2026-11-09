@@ -26,10 +26,16 @@ A personal life operating system and daily sanctuary combining:
    - **Daily Strategic Read**: Rotates daily featuring high-signal essays from top intellectual publications (Farnam Street, Paul Graham, Stratechery, Morgan Housel/Collaborative Fund, Julian Shapiro, First Round Review, Ribbonfarm) with core mental models and quotes.
    - **Daily Aeon Essay Spotlight**: Rotates daily featuring deep philosophical essays from *Aeon* (`aeon.co`) exploring philosophy of mind, systems dynamics, cognitive cybernetics, and long-term thinking with core inquiries and 1-click reading.
    - Direct "Capture to Notes" integration appending insights into the Strategic Commonplace Notebook.
+10. **Executive Career Branding & Bangalore Job Market Radar**:
+    - Personal career branding hub tailored to Jaison Shanmugiah (Senior ERP Business Analyst • SAP S/4HANA & Digital Manufacturing Specialist).
+    - Verified credentials: B.Tech in Production Engineering from NIT Calicut (CGPA 8.47), Schneider Electric (Bengaluru, 4.3+ yrs).
+    - Quantified executive track record: 6 European plant deployments, 2,500+ operational personnel, 1 TB production order archival, 195+ governance tickets (145 SRs + 50 incidents), Ales go-live locked order resolution, Attibele warehouse 20% workload cut.
+    - Direct profile integration: LinkedIn profile connector (`linkedin.com/in/jaison-shanmugiah-5b29901b5/`), Naukri candidate portal launcher, and 1-click 60-second elevator pitch copier for recruiter InMails.
+    - Live Bangalore Job Openings Radar with 1-click live search queries across LinkedIn Bengaluru and Naukri Bengaluru for SAP S/4HANA PP, Digital Manufacturing, Kinaxis, and MES roles.
+    - 8 Curated top-tier Bangalore employers with campuses, typical CTC bands (₹24L - ₹52L), and direct job search links: SAP Labs India (Whitefield), McKinsey & Company (MG Road), Deloitte India (Prestige Tech Park), Siemens Technology (Electronic City), Bosch Global (Adugodi), Honeywell Technology (Devarabisanahalli), Accenture Strategy & Consulting (Bellandur), Schneider Electric Global Hub (Bengaluru).
 
 ## 🛠️ Tech Stack & Locations
 * **Location**: `/Users/jaisappi/Developer/life-hub`
 * **Framework**: Next.js 16 (App Router), React 19, Tailwind CSS v4, Lucide React, Bun.
 * **GitHub Repository**: `JaisonSam/life-hub`
 * **Vercel Production**: `https://life-hub-lemon-five.vercel.app`
-
