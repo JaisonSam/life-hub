@@ -31,6 +31,11 @@ import {
   Award,
   Trash2,
   LineChart,
+  Radio,
+  Settings,
+  RefreshCw,
+  Disc,
+  PlayCircle,
 } from "lucide-react";
 
 interface Project {
@@ -95,6 +100,123 @@ function getGmatFocusPercentile(score: number): number {
   if (score >= 585) return 52;
   return 45;
 }
+
+interface CuratedAlbum {
+  id: string;
+  title: string;
+  artist: string;
+  category: "worship" | "focus" | "energy";
+  tag: string;
+  trackCount: number;
+  coverUrl: string;
+  ytUrl: string;
+  moodDescription: string;
+  bpmOrVibe: string;
+}
+
+const curatedAlbums: CuratedAlbum[] = [
+  // Worship & Sanctuary
+  {
+    id: "w-1",
+    title: "Acoustic Worship & Intimate Prayer",
+    artist: "Maverick City Music, Elevation, Bethel",
+    category: "worship",
+    tag: "Devotional Sanctuary",
+    trackCount: 38,
+    coverUrl: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=600&q=80",
+    ytUrl: "https://music.youtube.com/search?q=acoustic+worship+intimate+prayer+elevation+maverick+city",
+    moodDescription: "Deep acoustic strings, peaceful worship, and prayerful surrender.",
+    bpmOrVibe: "Acoustic & Piano",
+  },
+  {
+    id: "w-2",
+    title: "Instrumental Peace: Romans Companion",
+    artist: "Peaceful Piano & Ambient Cello Hymns",
+    category: "worship",
+    tag: "Scripture Study",
+    trackCount: 24,
+    coverUrl: "https://images.unsplash.com/photo-1520523839898-507127053c37?auto=format&fit=crop&w=600&q=80",
+    ytUrl: "https://music.youtube.com/search?q=peaceful+christian+instrumental+piano+hymns",
+    moodDescription: "Calm instrumental hymnody calibrated for morning reading in Book of Romans.",
+    bpmOrVibe: "60 BPM Calm",
+  },
+  {
+    id: "w-3",
+    title: "Live Kingdom Anthems & Praise",
+    artist: "Brandon Lake, Phil Wickham, Chris Tomlin",
+    category: "worship",
+    tag: "Faith Anthems",
+    trackCount: 42,
+    coverUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80",
+    ytUrl: "https://music.youtube.com/search?q=brandon+lake+phil+wickham+live+worship+anthems",
+    moodDescription: "Bold, soaring declarations of victory and sovereign faith.",
+    bpmOrVibe: "High Inspiration",
+  },
+
+  // Focus & GMAT Sprint
+  {
+    id: "f-1",
+    title: "GMAT 715+ Quant Flow: Lo-Fi Beats",
+    artist: "Chilled Beats & Calm Keyboard",
+    category: "focus",
+    tag: "GMAT Sprint Flow",
+    trackCount: 50,
+    coverUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80",
+    ytUrl: "https://music.youtube.com/search?q=lofi+beats+to+study+solve+quant+problems",
+    moodDescription: "Steady 80 BPM rhythm designed to eliminate cognitive fatigue during algebra & DI sprints.",
+    bpmOrVibe: "80 BPM Lo-Fi",
+  },
+  {
+    id: "f-2",
+    title: "Alpha Brainwaves & Ambient Focus (432Hz)",
+    artist: "Binaural Synthesis & Deep Space Piano",
+    category: "focus",
+    tag: "Deep Concentration",
+    trackCount: 18,
+    coverUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80",
+    ytUrl: "https://music.youtube.com/search?q=432hz+alpha+waves+deep+study+focus+piano",
+    moodDescription: "Zero-vocal binaural soundscapes for reading comprehension passage mapping.",
+    bpmOrVibe: "432Hz Ambient",
+  },
+  {
+    id: "f-3",
+    title: "Cyberpunk & High-Speed Synthesis",
+    artist: "Synthwave / Dark Ambient Electronic",
+    category: "focus",
+    tag: "Analytical Drive",
+    trackCount: 32,
+    coverUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80",
+    ytUrl: "https://music.youtube.com/search?q=synthwave+coding+focus+electronic+instrumental",
+    moodDescription: "Driving electronic pulse for high-tempo problem solving and data analysis.",
+    bpmOrVibe: "Electronic Drive",
+  },
+
+  // Gym & High Energy
+  {
+    id: "e-1",
+    title: "Kingdom High-BPM Workout & Training",
+    artist: "Lecrae, Andy Mineo, KB, Hulvey",
+    category: "energy",
+    tag: "Physical Training",
+    trackCount: 35,
+    coverUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80",
+    ytUrl: "https://music.youtube.com/search?q=christian+hip+hop+workout+lecrae+kb+mineo",
+    moodDescription: "Heavy bass, high intensity, and spiritually grounded motivation for gym workouts.",
+    bpmOrVibe: "140 BPM Hype",
+  },
+  {
+    id: "e-2",
+    title: "Joyful African & Caribbean Gospel Praise",
+    artist: "Sinach, Moses Bliss, Limoblaze, Ada Ehi",
+    category: "energy",
+    tag: "Celebration",
+    trackCount: 30,
+    coverUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80",
+    ytUrl: "https://music.youtube.com/search?q=afrobeats+gospel+praise+limoblaze+moses+bliss",
+    moodDescription: "Infectious Afro-gospel groove for morning energy and celebratory walks.",
+    bpmOrVibe: "Afrobeats Praise",
+  },
+];
 
 export default function LifeHub() {
   // Navigation tabs
@@ -236,13 +358,34 @@ export default function LifeHub() {
 
   // Music Player state
   const [currentPlaylist, setCurrentPlaylist] = useState({
-    title: "Deep Worship & Peaceful Acoustic",
-    subtitle: "Elevation, Hillsong, Instrumental Hymns",
-    ytUrl: "https://music.youtube.com/search?q=acoustic+worship",
+    title: "Acoustic Worship & Intimate Prayer",
+    subtitle: "Maverick City Music, Elevation, Bethel",
+    ytUrl: "https://music.youtube.com/search?q=acoustic+worship+intimate+prayer+elevation+maverick+city",
+    coverUrl: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=600&q=80",
+    tag: "Devotional Sanctuary",
+    bpmOrVibe: "Acoustic & Piano",
   });
   const [ytConnected, setYtConnected] = useState(false);
   const [ytLoading, setYtLoading] = useState(true);
   const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
+
+  // Last.fm & Android Live Mirror state
+  const [lastFmUser, setLastFmUser] = useState("");
+  const [lastFmApiKey, setLastFmApiKey] = useState("");
+  const [showLastFmConfig, setShowLastFmConfig] = useState(false);
+  const [nowPlayingTrack, setNowPlayingTrack] = useState<{
+    configured: boolean;
+    nowPlaying: boolean;
+    title: string;
+    artist: string;
+    album: string;
+    albumArt: string;
+    ytMusicUrl: string;
+    playedAt: string;
+  } | null>(null);
+  const [isFetchingNowPlaying, setIsFetchingNowPlaying] = useState(false);
+  const [demoNowPlaying, setDemoNowPlaying] = useState(false);
+  const [musicDeckFilter, setMusicDeckFilter] = useState<"all" | "worship" | "focus" | "energy" | "cloud">("all");
 
   // Disconnect YouTube
   const disconnectYouTube = async () => {
@@ -306,10 +449,42 @@ export default function LifeHub() {
 
       const savedErrors = localStorage.getItem("lifehub_gmaterrors");
       if (savedErrors) setGmatErrors(JSON.parse(savedErrors));
+
+      const savedLastFmUser = localStorage.getItem("lifehub_lastfm_user");
+      if (savedLastFmUser) setLastFmUser(savedLastFmUser);
+
+      const savedLastFmKey = localStorage.getItem("lifehub_lastfm_key");
+      if (savedLastFmKey) setLastFmApiKey(savedLastFmKey);
     } catch {}
 
     return () => clearInterval(timer);
   }, []);
+
+  // Poll Last.fm live now-playing track every 10 seconds
+  useEffect(() => {
+    if (!lastFmUser || !lastFmApiKey) return;
+
+    const fetchLiveNowPlaying = async () => {
+      try {
+        setIsFetchingNowPlaying(true);
+        const res = await fetch(
+          `/api/music/now-playing?user=${encodeURIComponent(lastFmUser)}&apiKey=${encodeURIComponent(lastFmApiKey)}`
+        );
+        const data = await res.json();
+        if (data.configured) {
+          setNowPlayingTrack(data);
+        }
+      } catch (e) {
+        console.error("Live now playing fetch error:", e);
+      } finally {
+        setIsFetchingNowPlaying(false);
+      }
+    };
+
+    fetchLiveNowPlaying();
+    const interval = setInterval(fetchLiveNowPlaying, 10000);
+    return () => clearInterval(interval);
+  }, [lastFmUser, lastFmApiKey]);
 
   // 60-minute GMAT focus countdown timer
   useEffect(() => {
@@ -382,6 +557,40 @@ export default function LifeHub() {
   const deleteMock = (id: string) => {
     const updated = mockScores.filter((m) => m.id !== id);
     saveMockScores(updated);
+  };
+
+  // Last.fm Android Mirror Save & Refresh
+  const handleSaveLastFm = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      localStorage.setItem("lifehub_lastfm_user", lastFmUser.trim());
+      localStorage.setItem("lifehub_lastfm_key", lastFmApiKey.trim());
+    } catch {}
+    setShowLastFmConfig(false);
+    if (lastFmUser && lastFmApiKey) {
+      setIsFetchingNowPlaying(true);
+      fetch(
+        `/api/music/now-playing?user=${encodeURIComponent(lastFmUser.trim())}&apiKey=${encodeURIComponent(lastFmApiKey.trim())}`
+      )
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.configured) setNowPlayingTrack(data);
+        })
+        .finally(() => setIsFetchingNowPlaying(false));
+    }
+  };
+
+  const manualRefreshNowPlaying = () => {
+    if (!lastFmUser || !lastFmApiKey) return;
+    setIsFetchingNowPlaying(true);
+    fetch(
+      `/api/music/now-playing?user=${encodeURIComponent(lastFmUser)}&apiKey=${encodeURIComponent(lastFmApiKey)}`
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.configured) setNowPlayingTrack(data);
+      })
+      .finally(() => setIsFetchingNowPlaying(false));
   };
 
   // Save changes to localStorage
@@ -1737,182 +1946,526 @@ export default function LifeHub() {
           </section>
         )}
 
-        {/* 4. MUSIC & WORSHIP RECOMMENDATIONS */}
+        {/* 4. YOUTUBE MUSIC & WORSHIP SANCTUARY */}
         {(activeTab === "all" || activeTab === "music") && (
-          <section className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                  <Headphones className="w-4 h-4" />
+          <section className="p-6 sm:p-8 rounded-3xl border border-rose-500/20 bg-gradient-to-br from-rose-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
+            {/* Top Header & Account Sync Controls */}
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-rose-500 to-red-600 text-white shadow-lg shadow-rose-500/25">
+                  <Headphones className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-base text-white flex items-center gap-2">
-                    YouTube Music & Worship
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-extrabold text-lg text-white tracking-tight">
+                      YouTube Music & Sanctuary Deck
+                    </h2>
                     {ytConnected ? (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-                        ✓ Account Connected
+                      <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Google Connected
                       </span>
                     ) : (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 font-medium">
-                        Not Connected
+                      <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-neutral-800 text-neutral-400 font-medium">
+                        Cloud Sync Optional
                       </span>
                     )}
-                  </h2>
-                  <p className="text-xs text-neutral-400">Personal playlists, worship, and study soundtracks</p>
+                  </div>
+                  <p className="text-xs text-neutral-400">
+                    Curated devotional sanctuary, GMAT study flow, and real-time Android playback mirror
+                  </p>
                 </div>
               </div>
 
-              {ytConnected ? (
+              {/* Action Buttons: Android Sync Settings & Google OAuth */}
+              <div className="flex items-center gap-2.5">
                 <button
-                  onClick={disconnectYouTube}
-                  className="px-3 py-1.5 rounded-lg border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white text-xs transition-colors"
+                  onClick={() => setShowLastFmConfig(!showLastFmConfig)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+                    lastFmUser
+                      ? "bg-rose-500/10 border-rose-500/30 text-rose-300 hover:bg-rose-500/20"
+                      : "bg-neutral-900 border-neutral-800 hover:border-neutral-700 text-neutral-300"
+                  }`}
+                  title="Configure Android YouTube Music Live Mirror"
                 >
-                  Disconnect Account
+                  <Radio className="w-3.5 h-3.5 text-rose-400" />
+                  <span>{lastFmUser ? `Synced: @${lastFmUser}` : "Android Mirror Setup"}</span>
+                  <Settings className="w-3 h-3 text-neutral-400 ml-1" />
                 </button>
-              ) : (
-                <a
-                  href="/api/auth/youtube/login"
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-semibold shadow-lg shadow-rose-600/25 transition-all"
-                >
-                  <Music className="w-3.5 h-3.5" />
-                  Connect YouTube Account
-                </a>
-              )}
+
+                {ytConnected ? (
+                  <button
+                    onClick={disconnectYouTube}
+                    className="px-3 py-1.5 rounded-xl border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white text-xs transition-colors"
+                  >
+                    Disconnect
+                  </button>
+                ) : (
+                  <a
+                    href="/api/auth/youtube/login"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-bold shadow-md shadow-rose-600/25 transition-all"
+                  >
+                    <Music className="w-3.5 h-3.5" />
+                    <span>Connect Google</span>
+                  </a>
+                )}
+              </div>
             </div>
 
-            {/* IF CONNECTED: SHOW AUTHENTIC USER PLAYLISTS */}
-            {ytConnected && (
-              <div className="space-y-3">
-                <div className="text-xs font-semibold text-neutral-300 flex items-center justify-between">
-                  <span>Your Personal YouTube Music Playlists ({userPlaylists.length})</span>
-                  <span className="text-[11px] text-neutral-500">Synced via YouTube Data API</span>
+            {/* LAST.FM / ANDROID LIVE SYNC CONFIG DRAWER */}
+            {showLastFmConfig && (
+              <form
+                onSubmit={handleSaveLastFm}
+                className="p-5 rounded-2xl bg-neutral-950/90 border border-rose-500/40 space-y-4 shadow-2xl animate-in fade-in duration-200"
+              >
+                <div className="flex items-center justify-between border-b border-neutral-800 pb-2.5">
+                  <div className="flex items-center gap-2 text-xs font-bold text-white">
+                    <Radio className="w-4 h-4 text-rose-400 animate-pulse" />
+                    Android YouTube Music Live Mirror Setup (via Last.fm)
+                  </div>
+                  <span className="text-[10px] text-neutral-400">100% Free • Works in background on Android</span>
                 </div>
 
-                {userPlaylists.length === 0 ? (
-                  <div className="p-6 rounded-xl border border-neutral-800/80 bg-neutral-950/60 text-center text-xs text-neutral-400">
-                    No custom playlists found in this YouTube account. Create one in YouTube Music to see it here!
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 rounded-xl bg-neutral-900/60 border border-neutral-800 space-y-1">
+                    <div className="font-bold text-rose-400 flex items-center gap-1.5">
+                      <span className="w-4 h-4 rounded-full bg-rose-500/20 text-rose-300 flex items-center justify-center text-[10px]">1</span>
+                      Install Pano Scrobbler
+                    </div>
+                    <p className="text-[11px] text-neutral-400 leading-relaxed">
+                      Download the free <strong>Pano Scrobbler</strong> app from Google Play Store on your Android phone and toggle on <strong>YouTube Music</strong>.
+                    </p>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {userPlaylists.map((pl: any) => (
-                      <a
-                        key={pl.id}
-                        href={pl.ytMusicUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-3.5 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-rose-500/40 transition-all flex flex-col justify-between space-y-3 group"
-                      >
-                        <div className="flex items-center gap-3">
-                          {pl.thumbnail ? (
-                            <img
-                              src={pl.thumbnail}
-                              alt={pl.title}
-                              className="w-12 h-12 rounded-lg object-cover border border-neutral-800 flex-shrink-0"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-500 flex-shrink-0">
-                              <Music className="w-5 h-5" />
+
+                  <div className="p-3 rounded-xl bg-neutral-900/60 border border-neutral-800 space-y-1">
+                    <div className="font-bold text-rose-400 flex items-center gap-1.5">
+                      <span className="w-4 h-4 rounded-full bg-rose-500/20 text-rose-300 flex items-center justify-center text-[10px]">2</span>
+                      Free Last.fm Account
+                    </div>
+                    <p className="text-[11px] text-neutral-400 leading-relaxed">
+                      Create a free profile at <strong>last.fm</strong> and get a 15-second free API key from <strong>last.fm/api/account/create</strong>.
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-neutral-900/60 border border-neutral-800 space-y-1">
+                    <div className="font-bold text-rose-400 flex items-center gap-1.5">
+                      <span className="w-4 h-4 rounded-full bg-rose-500/20 text-rose-300 flex items-center justify-center text-[10px]">3</span>
+                      Enter Credentials Below
+                    </div>
+                    <p className="text-[11px] text-neutral-400 leading-relaxed">
+                      Paste your username and API key once. Life Hub will automatically mirror whatever song you play on your phone.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
+                  <div className="sm:col-span-5 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
+                      Last.fm Username
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. jaisonsam"
+                      value={lastFmUser}
+                      onChange={(e) => setLastFmUser(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-rose-500"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-5 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
+                      Last.fm API Key (32 characters)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 4a9f5581a9cd..."
+                      value={lastFmApiKey}
+                      onChange={(e) => setLastFmApiKey(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-rose-500 font-mono"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 flex items-end">
+                    <button
+                      type="submit"
+                      className="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/25 transition-colors"
+                    >
+                      Save Mirror
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
+            {/* LIVE ANDROID "NOW PLAYING" DOCK (FEATURED WIDGET) */}
+            {(() => {
+              // Active display data (real nowPlayingTrack or demo mode)
+              const isLive = demoNowPlaying || nowPlayingTrack?.nowPlaying;
+              const displayTrack = demoNowPlaying
+                ? {
+                    title: "Goodness of God (Live)",
+                    artist: "Bethel Music, Jenn Johnson",
+                    album: "VICTORY (Live at Redding)",
+                    albumArt: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=600&q=80",
+                    ytMusicUrl: "https://music.youtube.com/search?q=Goodness+of+God+Bethel+Music",
+                    playedAt: "Streaming now on Android",
+                  }
+                : nowPlayingTrack && nowPlayingTrack.title
+                ? nowPlayingTrack
+                : null;
+
+              return (
+                <div className="relative overflow-hidden rounded-2xl border border-rose-500/30 bg-gradient-to-r from-neutral-950 via-rose-950/20 to-neutral-950 p-4 sm:p-5 shadow-xl">
+                  {/* Background Ambient Glow */}
+                  <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+                    <div className="flex items-center gap-4">
+                      {/* Album Art with Vinyl / Glow Effect */}
+                      <div className="relative group flex-shrink-0">
+                        {displayTrack?.albumArt ? (
+                          <img
+                            src={displayTrack.albumArt}
+                            alt={displayTrack.title}
+                            className={`w-16 h-16 rounded-xl object-cover border border-rose-500/40 shadow-lg shadow-rose-950/50 ${
+                              isLive ? "ring-2 ring-rose-500/50" : ""
+                            }`}
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-rose-400">
+                            <Disc className={`w-8 h-8 ${isLive ? "animate-spin text-rose-500" : "text-neutral-600"}`} />
+                          </div>
+                        )}
+                        {isLive && (
+                          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500" />
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Track Details & Status */}
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                              isLive
+                                ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                                : "bg-neutral-800 text-neutral-400"
+                            }`}
+                          >
+                            {isLive ? (
+                              <>
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+                                Live from Android • YouTube Music
+                              </>
+                            ) : (
+                              "Android Mirror Standby"
+                            )}
+                          </span>
+
+                          {/* Sound Equalizer Bars (When Active) */}
+                          {isLive && (
+                            <div className="flex items-end gap-0.5 h-3">
+                              <span className="w-0.5 bg-rose-500 rounded-full animate-pulse h-full" />
+                              <span className="w-0.5 bg-pink-400 rounded-full animate-bounce h-2/3" />
+                              <span className="w-0.5 bg-amber-400 rounded-full animate-pulse h-5/6" />
+                              <span className="w-0.5 bg-rose-400 rounded-full animate-bounce h-1/2" />
                             </div>
                           )}
-                          <div className="overflow-hidden">
-                            <h4 className="font-bold text-xs text-white truncate group-hover:text-rose-300 transition-colors">
-                              {pl.title}
-                            </h4>
-                            <p className="text-[11px] text-neutral-400 mt-0.5">
-                              {pl.itemCount} tracks
-                            </p>
+                        </div>
+
+                        <h3 className="font-extrabold text-base sm:text-lg text-white tracking-tight leading-tight">
+                          {displayTrack ? displayTrack.title : "No active track detected"}
+                        </h3>
+                        <p className="text-xs text-neutral-400">
+                          {displayTrack
+                            ? `${displayTrack.artist} ${displayTrack.album ? `• ${displayTrack.album}` : ""}`
+                            : lastFmUser
+                            ? "Waiting for playback in YouTube Music on your Android device..."
+                            : "Configure your Last.fm mirror or toggle demo track below to test."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Interactive Controls */}
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-0 border-neutral-800/80">
+                      {displayTrack?.ytMusicUrl && (
+                        <a
+                          href={displayTrack.ytMusicUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-bold shadow-md shadow-rose-600/25 transition-all"
+                        >
+                          <Music className="w-3.5 h-3.5" />
+                          <span>Open in YT Music</span>
+                          <ExternalLink className="w-3 h-3 text-white/80" />
+                        </a>
+                      )}
+
+                      {lastFmUser && (
+                        <button
+                          onClick={manualRefreshNowPlaying}
+                          disabled={isFetchingNowPlaying}
+                          className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white transition-colors"
+                          title="Refresh Now Playing Status"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${isFetchingNowPlaying ? "animate-spin text-rose-400" : ""}`} />
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => setDemoNowPlaying(!demoNowPlaying)}
+                        className={`text-xs px-2.5 py-1.5 rounded-xl border transition-colors ${
+                          demoNowPlaying
+                            ? "bg-rose-500/20 text-rose-300 border-rose-500/40 font-semibold"
+                            : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
+                        }`}
+                        title="Toggle demo song playback state"
+                      >
+                        {demoNowPlaying ? "Stop Demo" : "Test Demo"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* CURATED ALBUM DECK - ORGANIZED CATEGORY TABS */}
+            <div className="space-y-4 pt-2">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Disc className="w-4 h-4 text-rose-400" />
+                  <h3 className="font-bold text-sm text-white">Curated Album & Playlist Deck</h3>
+                </div>
+
+                {/* Category Filter Pills */}
+                <div className="flex flex-wrap items-center gap-1.5 bg-neutral-950/80 border border-neutral-800 p-1 rounded-xl text-xs">
+                  {[
+                    { id: "all", label: "All Decks" },
+                    { id: "worship", label: "🕊️ Worship & Sanctuary" },
+                    { id: "focus", label: "🎯 GMAT & Focus" },
+                    { id: "energy", label: "⚡ Training & Drive" },
+                    ...(ytConnected ? [{ id: "cloud", label: `☁️ My Playlists (${userPlaylists.length})` }] : []),
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setMusicDeckFilter(tab.id as any)}
+                      className={`px-3 py-1 rounded-lg font-semibold transition-all ${
+                        musicDeckFilter === tab.id
+                          ? "bg-rose-500 text-white shadow-sm shadow-rose-500/30"
+                          : "text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* ALBUM CARDS GRID */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* 1. Show Google Cloud Playlists when selected */}
+                {(musicDeckFilter === "all" || musicDeckFilter === "cloud") &&
+                  ytConnected &&
+                  userPlaylists.map((pl: any) => (
+                    <div
+                      key={pl.id}
+                      onClick={() =>
+                        setCurrentPlaylist({
+                          title: pl.title,
+                          subtitle: `${pl.itemCount} tracks • Personal YouTube Playlist`,
+                          ytUrl: pl.ytMusicUrl,
+                          coverUrl: pl.thumbnail || "",
+                          tag: "Cloud Playlist",
+                          bpmOrVibe: "Personal Curated",
+                        })
+                      }
+                      className="group rounded-2xl border border-neutral-800/80 bg-neutral-900/40 hover:border-rose-500/40 backdrop-blur-sm overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-950/20 cursor-pointer"
+                    >
+                      <div className="aspect-square relative overflow-hidden bg-neutral-950">
+                        {pl.thumbnail ? (
+                          <img
+                            src={pl.thumbnail}
+                            alt={pl.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-neutral-600">
+                            <Music className="w-12 h-12" />
                           </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent opacity-80" />
+                        
+                        {/* Floating Top Badges */}
+                        <div className="absolute top-2.5 left-2.5 right-2.5 flex justify-between items-center text-[10px]">
+                          <span className="px-2 py-0.5 rounded-full bg-neutral-900/90 text-emerald-400 font-semibold border border-emerald-500/30 backdrop-blur-md">
+                            Google Cloud
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-neutral-950/80 text-neutral-300 font-mono backdrop-blur-md">
+                            {pl.itemCount} tracks
+                          </span>
+                        </div>
+
+                        {/* Hover Play Button */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="w-12 h-12 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-500/50 scale-90 group-hover:scale-100 transition-transform">
+                            <Play className="w-5 h-5 ml-0.5 fill-white" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 space-y-2">
+                        <div>
+                          <h4 className="font-bold text-sm text-white truncate group-hover:text-rose-300 transition-colors">
+                            {pl.title}
+                          </h4>
+                          <p className="text-[11px] text-neutral-400 mt-0.5">Personal YouTube Playlist</p>
                         </div>
 
                         <div className="flex items-center justify-between text-[11px] text-neutral-500 pt-2 border-t border-neutral-800">
-                          <span>Open in YT Music</span>
-                          <ExternalLink className="w-3.5 h-3.5 text-neutral-400 group-hover:text-rose-400 transition-colors" />
+                          <span>Sync Account</span>
+                          <a
+                            href={pl.ytMusicUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-neutral-400 hover:text-rose-400 flex items-center gap-1 transition-colors"
+                          >
+                            Open <ExternalLink className="w-3 h-3" />
+                          </a>
                         </div>
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* CURATED MOOD CHANNELS (ALWAYS AVAILABLE) */}
-            <div className="space-y-3">
-              <div className="text-xs font-semibold text-neutral-400">
-                {ytConnected ? "Quick Curated Channels" : "Curated Worship & Focus Channels"}
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[
-                  {
-                    title: "Acoustic Worship & Prayer",
-                    artist: "Elevation Worship, Hillsong, Maverick City",
-                    mood: "Spiritual Reflection",
-                    ytQuery: "acoustic+worship+elevation+maverick+city",
-                    tag: "Worship",
-                  },
-                  {
-                    title: "Deep Focus & Study Flow",
-                    artist: "Lo-Fi Instrumental & Ambient Piano",
-                    mood: "Calm & Deep Coding",
-                    ytQuery: "lofi+instrumental+focus+beats",
-                    tag: "Focus",
-                  },
-                  {
-                    title: "Morning Energy & Motivation",
-                    artist: "Uplifting Contemporary Christian & Gospel",
-                    mood: "High Energy & Drive",
-                    ytQuery: "uplifting+christian+contemporary+energy",
-                    tag: "Energy",
-                  },
-                ].map((p, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() =>
-                      setCurrentPlaylist({
-                        title: p.title,
-                        subtitle: p.artist,
-                        ytUrl: `https://music.youtube.com/search?q=${p.ytQuery}`,
-                      })
-                    }
-                    className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-rose-500/40 transition-all cursor-pointer flex flex-col justify-between space-y-3 group"
-                  >
-                    <div>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                        {p.tag}
-                      </span>
-                      <h4 className="font-bold text-sm text-white mt-2 group-hover:text-rose-300 transition-colors">
-                        {p.title}
-                      </h4>
-                      <p className="text-xs text-neutral-400 mt-1">{p.artist}</p>
+                      </div>
                     </div>
+                  ))}
 
-                    <div className="flex items-center justify-between text-xs text-neutral-500 pt-2 border-t border-neutral-800">
-                      <span>{p.mood}</span>
-                      <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:translate-x-1 transition-transform" />
+                {/* 2. Show Curated Albums */}
+                {curatedAlbums
+                  .filter((album) => musicDeckFilter === "all" || album.category === musicDeckFilter)
+                  .map((album) => (
+                    <div
+                      key={album.id}
+                      onClick={() =>
+                        setCurrentPlaylist({
+                          title: album.title,
+                          subtitle: album.artist,
+                          ytUrl: album.ytUrl,
+                          coverUrl: album.coverUrl,
+                          tag: album.tag,
+                          bpmOrVibe: album.bpmOrVibe,
+                        })
+                      }
+                      className="group rounded-2xl border border-neutral-800/80 bg-neutral-900/40 hover:border-rose-500/40 backdrop-blur-sm overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-950/20 cursor-pointer"
+                    >
+                      {/* Album Cover with Badges & Hover Play */}
+                      <div className="aspect-square relative overflow-hidden bg-neutral-950">
+                        <img
+                          src={album.coverUrl}
+                          alt={album.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent opacity-80" />
+
+                        {/* Badges */}
+                        <div className="absolute top-2.5 left-2.5 right-2.5 flex justify-between items-center text-[10px]">
+                          <span
+                            className={`px-2 py-0.5 rounded-full font-semibold border backdrop-blur-md ${
+                              album.category === "worship"
+                                ? "bg-amber-950/70 text-amber-300 border-amber-500/30"
+                                : album.category === "focus"
+                                ? "bg-indigo-950/70 text-indigo-300 border-indigo-500/30"
+                                : "bg-rose-950/70 text-rose-300 border-rose-500/30"
+                            }`}
+                          >
+                            {album.tag}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-neutral-950/80 text-neutral-300 font-mono backdrop-blur-md">
+                            {album.bpmOrVibe}
+                          </span>
+                        </div>
+
+                        {/* Hover Play Button */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="w-12 h-12 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-500/50 scale-90 group-hover:scale-100 transition-transform">
+                            <Play className="w-5 h-5 ml-0.5 fill-white" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-3.5 space-y-2">
+                        <div>
+                          <h4 className="font-bold text-sm text-white group-hover:text-rose-300 transition-colors line-clamp-1">
+                            {album.title}
+                          </h4>
+                          <p className="text-[11px] text-neutral-400 mt-0.5 line-clamp-1">{album.artist}</p>
+                        </div>
+
+                        <p className="text-[11px] text-neutral-400/90 leading-tight line-clamp-2">
+                          {album.moodDescription}
+                        </p>
+
+                        <div className="flex items-center justify-between text-[11px] text-neutral-500 pt-2 border-t border-neutral-800">
+                          <span>{album.trackCount} tracks</span>
+                          <a
+                            href={album.ytUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-neutral-400 hover:text-rose-400 flex items-center gap-1 transition-colors"
+                          >
+                            Listen in YT Music <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
 
-            {/* Currently Selected Bar */}
-            <div className="flex items-center justify-between p-4 rounded-xl border border-neutral-800 bg-neutral-950/80">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400">
-                  <Volume2 className="w-5 h-5 animate-pulse" />
+            {/* CURRENTLY QUEUED SOUNDTRACK DOCK */}
+            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-neutral-800 bg-neutral-950/90 shadow-xl">
+              <div className="flex items-center gap-3.5">
+                <div className="relative">
+                  {currentPlaylist.coverUrl ? (
+                    <img
+                      src={currentPlaylist.coverUrl}
+                      alt={currentPlaylist.title}
+                      className="w-12 h-12 rounded-xl object-cover border border-rose-500/30 shadow-md"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                      <Volume2 className="w-6 h-6 animate-pulse" />
+                    </div>
+                  )}
+                  <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-rose-500 text-white">
+                    <Music className="w-2.5 h-2.5" />
+                  </div>
                 </div>
+
                 <div>
-                  <div className="text-xs font-bold text-white">{currentPlaylist.title}</div>
-                  <div className="text-[11px] text-neutral-400">{currentPlaylist.subtitle}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-white">{currentPlaylist.title}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-medium">
+                      {currentPlaylist.tag || "Queued"}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-neutral-400 mt-0.5">{currentPlaylist.subtitle}</div>
                 </div>
               </div>
-              <a
-                href={currentPlaylist.ytUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white transition-colors flex items-center gap-1"
-              >
-                Listen Now <ExternalLink className="w-3 h-3" />
-              </a>
+
+              <div className="flex items-center gap-2.5">
+                <a
+                  href={currentPlaylist.ytUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition-all"
+                >
+                  <Play className="w-3.5 h-3.5 fill-white" />
+                  <span>Launch in YouTube Music</span>
+                  <ExternalLink className="w-3 h-3 text-white/80" />
+                </a>
+              </div>
             </div>
           </section>
         )}
