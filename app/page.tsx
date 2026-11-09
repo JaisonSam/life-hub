@@ -131,6 +131,16 @@ export default function LifeHub() {
     subtitle: "Elevation, Hillsong, Instrumental Hymns",
     ytUrl: "https://music.youtube.com/search?q=acoustic+worship",
   });
+  const [ytConnected, setYtConnected] = useState(false);
+  const [ytLoading, setYtLoading] = useState(true);
+  const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
+
+  // Disconnect YouTube
+  const disconnectYouTube = async () => {
+    await fetch("/api/auth/youtube/logout", { method: "POST" });
+    setYtConnected(false);
+    setUserPlaylists([]);
+  };
 
   // Load / Save localStorage for persistence
   useEffect(() => {
@@ -158,6 +168,18 @@ export default function LifeHub() {
         if (data.verse) setDailyVerse(data.verse);
       })
       .catch(() => {});
+
+    // Check YouTube Music connection & fetch real playlists
+    fetch("/api/youtube/playlists")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.connected && data.playlists) {
+          setYtConnected(true);
+          setUserPlaylists(data.playlists);
+        }
+        setYtLoading(false);
+      })
+      .catch(() => setYtLoading(false));
 
     // Try reading localStorage for saved habits/projects/notes
     try {
@@ -642,80 +664,159 @@ export default function LifeHub() {
 
         {/* 4. MUSIC & WORSHIP RECOMMENDATIONS */}
         {(activeTab === "all" || activeTab === "music") && (
-          <section className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
+          <section className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
                   <Headphones className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-base text-white">Music & Worship Corner</h2>
-                  <p className="text-xs text-neutral-400">YouTube Music curated moods & playlists</p>
+                  <h2 className="font-bold text-base text-white flex items-center gap-2">
+                    YouTube Music & Worship
+                    {ytConnected ? (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+                        ✓ Account Connected
+                      </span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 font-medium">
+                        Not Connected
+                      </span>
+                    )}
+                  </h2>
+                  <p className="text-xs text-neutral-400">Personal playlists, worship, and study soundtracks</p>
                 </div>
               </div>
 
-              <a
-                href={currentPlaylist.ytUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition-all shadow-md shadow-rose-600/20"
-              >
-                Open in YouTube Music <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+              {ytConnected ? (
+                <button
+                  onClick={disconnectYouTube}
+                  className="px-3 py-1.5 rounded-lg border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white text-xs transition-colors"
+                >
+                  Disconnect Account
+                </button>
+              ) : (
+                <a
+                  href="/api/auth/youtube/login"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-semibold shadow-lg shadow-rose-600/25 transition-all"
+                >
+                  <Music className="w-3.5 h-3.5" />
+                  Connect YouTube Account
+                </a>
+              )}
             </div>
 
-            {/* Playlist Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                {
-                  title: "Acoustic Worship & Prayer",
-                  artist: "Elevation Worship, Hillsong, Maverick City",
-                  mood: "Spiritual Reflection",
-                  ytQuery: "acoustic+worship+elevation+maverick+city",
-                  tag: "Worship",
-                },
-                {
-                  title: "Deep Focus & Study Flow",
-                  artist: "Lo-Fi Instrumental & Ambient Piano",
-                  mood: "Calm & Deep Coding",
-                  ytQuery: "lofi+instrumental+focus+beats",
-                  tag: "Focus",
-                },
-                {
-                  title: "Morning Energy & Motivation",
-                  artist: "Uplifting Contemporary Christian & Gospel",
-                  mood: "High Energy & Drive",
-                  ytQuery: "uplifting+christian+contemporary+energy",
-                  tag: "Energy",
-                },
-              ].map((p, idx) => (
-                <div
-                  key={idx}
-                  onClick={() =>
-                    setCurrentPlaylist({
-                      title: p.title,
-                      subtitle: p.artist,
-                      ytUrl: `https://music.youtube.com/search?q=${p.ytQuery}`,
-                    })
-                  }
-                  className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-rose-500/40 transition-all cursor-pointer flex flex-col justify-between space-y-3 group"
-                >
-                  <div>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                      {p.tag}
-                    </span>
-                    <h4 className="font-bold text-sm text-white mt-2 group-hover:text-rose-300 transition-colors">
-                      {p.title}
-                    </h4>
-                    <p className="text-xs text-neutral-400 mt-1">{p.artist}</p>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs text-neutral-500 pt-2 border-t border-neutral-800">
-                    <span>{p.mood}</span>
-                    <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:translate-x-1 transition-transform" />
-                  </div>
+            {/* IF CONNECTED: SHOW AUTHENTIC USER PLAYLISTS */}
+            {ytConnected && (
+              <div className="space-y-3">
+                <div className="text-xs font-semibold text-neutral-300 flex items-center justify-between">
+                  <span>Your Personal YouTube Music Playlists ({userPlaylists.length})</span>
+                  <span className="text-[11px] text-neutral-500">Synced via YouTube Data API</span>
                 </div>
-              ))}
+
+                {userPlaylists.length === 0 ? (
+                  <div className="p-6 rounded-xl border border-neutral-800/80 bg-neutral-950/60 text-center text-xs text-neutral-400">
+                    No custom playlists found in this YouTube account. Create one in YouTube Music to see it here!
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {userPlaylists.map((pl: any) => (
+                      <a
+                        key={pl.id}
+                        href={pl.ytMusicUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-3.5 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-rose-500/40 transition-all flex flex-col justify-between space-y-3 group"
+                      >
+                        <div className="flex items-center gap-3">
+                          {pl.thumbnail ? (
+                            <img
+                              src={pl.thumbnail}
+                              alt={pl.title}
+                              className="w-12 h-12 rounded-lg object-cover border border-neutral-800 flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-500 flex-shrink-0">
+                              <Music className="w-5 h-5" />
+                            </div>
+                          )}
+                          <div className="overflow-hidden">
+                            <h4 className="font-bold text-xs text-white truncate group-hover:text-rose-300 transition-colors">
+                              {pl.title}
+                            </h4>
+                            <p className="text-[11px] text-neutral-400 mt-0.5">
+                              {pl.itemCount} tracks
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-[11px] text-neutral-500 pt-2 border-t border-neutral-800">
+                          <span>Open in YT Music</span>
+                          <ExternalLink className="w-3.5 h-3.5 text-neutral-400 group-hover:text-rose-400 transition-colors" />
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* CURATED MOOD CHANNELS (ALWAYS AVAILABLE) */}
+            <div className="space-y-3">
+              <div className="text-xs font-semibold text-neutral-400">
+                {ytConnected ? "Quick Curated Channels" : "Curated Worship & Focus Channels"}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                  {
+                    title: "Acoustic Worship & Prayer",
+                    artist: "Elevation Worship, Hillsong, Maverick City",
+                    mood: "Spiritual Reflection",
+                    ytQuery: "acoustic+worship+elevation+maverick+city",
+                    tag: "Worship",
+                  },
+                  {
+                    title: "Deep Focus & Study Flow",
+                    artist: "Lo-Fi Instrumental & Ambient Piano",
+                    mood: "Calm & Deep Coding",
+                    ytQuery: "lofi+instrumental+focus+beats",
+                    tag: "Focus",
+                  },
+                  {
+                    title: "Morning Energy & Motivation",
+                    artist: "Uplifting Contemporary Christian & Gospel",
+                    mood: "High Energy & Drive",
+                    ytQuery: "uplifting+christian+contemporary+energy",
+                    tag: "Energy",
+                  },
+                ].map((p, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() =>
+                      setCurrentPlaylist({
+                        title: p.title,
+                        subtitle: p.artist,
+                        ytUrl: `https://music.youtube.com/search?q=${p.ytQuery}`,
+                      })
+                    }
+                    className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-rose-500/40 transition-all cursor-pointer flex flex-col justify-between space-y-3 group"
+                  >
+                    <div>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                        {p.tag}
+                      </span>
+                      <h4 className="font-bold text-sm text-white mt-2 group-hover:text-rose-300 transition-colors">
+                        {p.title}
+                      </h4>
+                      <p className="text-xs text-neutral-400 mt-1">{p.artist}</p>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-neutral-500 pt-2 border-t border-neutral-800">
+                      <span>{p.mood}</span>
+                      <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Currently Selected Bar */}
