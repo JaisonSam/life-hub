@@ -27,6 +27,10 @@ import {
   RotateCcw,
   AlertCircle,
   TrendingUp,
+  BarChart3,
+  Award,
+  Trash2,
+  LineChart,
 } from "lucide-react";
 
 interface Project {
@@ -62,6 +66,36 @@ interface GmatErrorLog {
   date: string;
 }
 
+interface GmatMockScore {
+  id: string;
+  name: string;
+  date: string;
+  total: number;
+  quant: number;
+  di: number;
+  verbal: number;
+  notes?: string;
+}
+
+function getGmatFocusPercentile(score: number): number {
+  if (score >= 755) return 100;
+  if (score >= 715) return 99;
+  if (score >= 705) return 98;
+  if (score >= 695) return 97;
+  if (score >= 685) return 96;
+  if (score >= 675) return 95;
+  if (score >= 665) return 93;
+  if (score >= 655) return 90;
+  if (score >= 645) return 86;
+  if (score >= 635) return 81;
+  if (score >= 625) return 76;
+  if (score >= 615) return 70;
+  if (score >= 605) return 64;
+  if (score >= 595) return 58;
+  if (score >= 585) return 52;
+  return 45;
+}
+
 export default function LifeHub() {
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"all" | "gmat" | "bible" | "habits" | "projects" | "music">("all");
@@ -74,6 +108,37 @@ export default function LifeHub() {
   // GMAT December Sprint State
   const [gmatTimerSeconds, setGmatTimerSeconds] = useState(3600); // 60 minutes
   const [gmatTimerRunning, setGmatTimerRunning] = useState(false);
+  const [mockScores, setMockScores] = useState<GmatMockScore[]>([
+    {
+      id: "mock-1",
+      name: "Official Practice Exam 1 (Diagnostic)",
+      date: "Nov 2, 2026",
+      total: 615,
+      quant: 81,
+      di: 79,
+      verbal: 81,
+      notes: "Official mba.com baseline. Need to tighten DI pacing and eliminate careless Quant algebra traps.",
+    },
+    {
+      id: "mock-2",
+      name: "Official Practice Exam 2",
+      date: "Nov 8, 2026",
+      total: 645,
+      quant: 83,
+      di: 81,
+      verbal: 82,
+      notes: "+30 pts gained. Quant problem solving was solid. Focus now on Multi-Source Reasoning in DI and CR assumption traps.",
+    },
+  ]);
+  const [showAddMock, setShowAddMock] = useState(false);
+  const [newMockName, setNewMockName] = useState("Official Practice Exam 3");
+  const [newMockDate, setNewMockDate] = useState("");
+  const [newMockTotal, setNewMockTotal] = useState(665);
+  const [newMockQuant, setNewMockQuant] = useState(84);
+  const [newMockDI, setNewMockDI] = useState(82);
+  const [newMockVerbal, setNewMockVerbal] = useState(83);
+  const [newMockNotes, setNewMockNotes] = useState("");
+
   const [gmatErrors, setGmatErrors] = useState<GmatErrorLog[]>([
     {
       id: "1",
@@ -225,7 +290,7 @@ export default function LifeHub() {
       })
       .catch(() => setYtLoading(false));
 
-    // Try reading localStorage for saved habits/projects/notes
+    // Try reading localStorage for saved habits/projects/notes/gmat
     try {
       const savedHabits = localStorage.getItem("lifehub_habits");
       if (savedHabits) setHabits(JSON.parse(savedHabits));
@@ -235,6 +300,12 @@ export default function LifeHub() {
 
       const savedNotes = localStorage.getItem("lifehub_notes");
       if (savedNotes) setNotes(JSON.parse(savedNotes));
+
+      const savedMocks = localStorage.getItem("lifehub_gmat_mocks");
+      if (savedMocks) setMockScores(JSON.parse(savedMocks));
+
+      const savedErrors = localStorage.getItem("lifehub_gmaterrors");
+      if (savedErrors) setGmatErrors(JSON.parse(savedErrors));
     } catch {}
 
     return () => clearInterval(timer);
@@ -279,6 +350,38 @@ export default function LifeHub() {
     } catch {}
     setNewErrorQ("");
     setNewErrorTakeaway("");
+  };
+
+  // Mock scores persistence and handlers
+  const saveMockScores = (updated: GmatMockScore[]) => {
+    setMockScores(updated);
+    try {
+      localStorage.setItem("lifehub_gmat_mocks", JSON.stringify(updated));
+    } catch {}
+  };
+
+  const handleAddMock = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newMock: GmatMockScore = {
+      id: Date.now().toString(),
+      name: newMockName,
+      date: newMockDate.trim() || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      total: Number(newMockTotal) || 655,
+      quant: Number(newMockQuant) || 80,
+      di: Number(newMockDI) || 80,
+      verbal: Number(newMockVerbal) || 80,
+      notes: newMockNotes.trim(),
+    };
+    const updated = [...mockScores, newMock];
+    saveMockScores(updated);
+    setShowAddMock(false);
+    setNewMockNotes("");
+    setNewMockDate("");
+  };
+
+  const deleteMock = (id: string) => {
+    const updated = mockScores.filter((m) => m.id !== id);
+    saveMockScores(updated);
   };
 
   // Save changes to localStorage
@@ -341,6 +444,59 @@ export default function LifeHub() {
     setNewNoteRef("");
     setNewNoteText("");
   };
+
+  // Dynamic metrics from official mocks
+  const latestMock = mockScores[mockScores.length - 1] || {
+    id: "default",
+    name: "Diagnostic Mock",
+    date: "Nov 2, 2026",
+    total: 615,
+    quant: 81,
+    di: 79,
+    verbal: 81,
+    notes: "",
+  };
+  const baselineMock = mockScores[0] || latestMock;
+  const deltaFromBaseline = latestMock.total - baselineMock.total;
+  const pointsToTarget = Math.max(0, 715 - latestMock.total);
+  const currentPercentile = getGmatFocusPercentile(latestMock.total);
+
+  // SVG Trajectory Chart Coordinates
+  const svgWidth = 680;
+  const svgHeight = 170;
+  const chartPadLeft = 60;
+  const chartPadRight = 80;
+  const chartPadTop = 35;
+  const chartPadBottom = 35;
+  const chartUsableWidth = svgWidth - chartPadLeft - chartPadRight;
+  const chartUsableHeight = svgHeight - chartPadTop - chartPadBottom;
+  const minChartScore = 580;
+  const maxChartScore = 740;
+  const scoreSpan = maxChartScore - minChartScore;
+
+  const getSvgY = (score: number) => {
+    const clamped = Math.max(minChartScore, Math.min(maxChartScore, score));
+    return chartPadTop + chartUsableHeight - ((clamped - minChartScore) / scoreSpan) * chartUsableHeight;
+  };
+
+  const totalSlots = Math.max(1, mockScores.length);
+  const mockPlotPoints = mockScores.map((m, idx) => {
+    const x = chartPadLeft + (idx / totalSlots) * (chartUsableWidth * 0.78);
+    const y = getSvgY(m.total);
+    return { ...m, x, y };
+  });
+
+  const targetPlotPoint = {
+    name: "Target Goal (Dec 2026)",
+    total: 715,
+    x: chartPadLeft + chartUsableWidth,
+    y: getSvgY(715),
+  };
+
+  const lastMockPoint = mockPlotPoints[mockPlotPoints.length - 1] || { x: chartPadLeft, y: getSvgY(615) };
+  const areaPath = mockPlotPoints.length > 0
+    ? `M ${mockPlotPoints[0].x},${chartPadTop + chartUsableHeight} L ${mockPlotPoints.map((p) => `${p.x},${p.y}`).join(" L ")} L ${lastMockPoint.x},${chartPadTop + chartUsableHeight} Z`
+    : "";
 
   const completedHabitsCount = habits.filter((h) => h.completedToday).length;
 
@@ -547,7 +703,567 @@ export default function LifeHub() {
               </div>
             </div>
 
-            {/* Score Delta Ladder & 3 Section Breakdown */}
+            {/* MBA.COM OFFICIAL MOCK TRACKER & TRAJECTORY CHART */}
+            <div className="space-y-4 p-5 rounded-2xl border border-indigo-500/30 bg-neutral-950/70 backdrop-blur-sm shadow-xl">
+              {/* Header & mba.com Action Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/25">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                      mba.com Official Mock Trajectory
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-bold">
+                        {deltaFromBaseline >= 0 ? `+${deltaFromBaseline}` : deltaFromBaseline} pts climb
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-neutral-400">
+                      Target: 715+ (99th %ile) by December 2026 • {pointsToTarget} points remaining
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href="https://www.mba.com/exam-prep/gmat-official-practice-exams"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white text-xs font-medium transition-colors"
+                    title="Launch mba.com practice exam portal"
+                  >
+                    <span>mba.com Portal</span>
+                    <ExternalLink className="w-3 h-3 text-neutral-400" />
+                  </a>
+                  <button
+                    onClick={() => setShowAddMock(!showAddMock)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition-all"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    {showAddMock ? "Close Form" : "Log Mock Score"}
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Score Summary Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* Latest Mock Score */}
+                <div className="p-3.5 rounded-xl border border-indigo-500/20 bg-neutral-900/60 space-y-1">
+                  <div className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold flex items-center justify-between">
+                    <span>Latest Mock</span>
+                    <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-[9px] font-bold">
+                      {currentPercentile}th %ile
+                    </span>
+                  </div>
+                  <div className="text-2xl font-extrabold text-white font-mono tracking-tight">
+                    {latestMock.total}
+                  </div>
+                  <div className="text-[11px] text-neutral-400 font-mono">
+                    Q{latestMock.quant} • DI{latestMock.di} • V{latestMock.verbal}
+                  </div>
+                </div>
+
+                {/* Baseline Mock */}
+                <div className="p-3.5 rounded-xl border border-neutral-800 bg-neutral-900/60 space-y-1">
+                  <div className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold flex items-center justify-between">
+                    <span>Baseline Diagnostic</span>
+                    <span className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-[9px]">
+                      {getGmatFocusPercentile(baselineMock.total)}th %ile
+                    </span>
+                  </div>
+                  <div className="text-2xl font-extrabold text-neutral-300 font-mono tracking-tight">
+                    {baselineMock.total}
+                  </div>
+                  <div className="text-[11px] text-neutral-400">
+                    Logged {baselineMock.date}
+                  </div>
+                </div>
+
+                {/* Score Velocity */}
+                <div className="p-3.5 rounded-xl border border-emerald-500/20 bg-neutral-900/60 space-y-1">
+                  <div className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold flex items-center justify-between">
+                    <span>Score Velocity</span>
+                    <span className="text-emerald-400 font-mono text-[9px]">
+                      {mockScores.length} Mocks
+                    </span>
+                  </div>
+                  <div className="text-2xl font-extrabold text-emerald-400 font-mono tracking-tight flex items-center gap-1">
+                    <TrendingUp className="w-5 h-5 text-emerald-400" />
+                    {deltaFromBaseline >= 0 ? `+${deltaFromBaseline}` : deltaFromBaseline} pts
+                  </div>
+                  <div className="text-[11px] text-neutral-400">
+                    Quant +{latestMock.quant - baselineMock.quant} • DI +{latestMock.di - baselineMock.di} • V +{latestMock.verbal - baselineMock.verbal}
+                  </div>
+                </div>
+
+                {/* Target Runway */}
+                <div className="p-3.5 rounded-xl border border-amber-500/20 bg-neutral-900/60 space-y-1">
+                  <div className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold flex items-center justify-between">
+                    <span>December Goal</span>
+                    <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-mono text-[9px] font-bold">
+                      99th %ile
+                    </span>
+                  </div>
+                  <div className="text-2xl font-extrabold text-amber-400 font-mono tracking-tight">
+                    715+
+                  </div>
+                  <div className="text-[11px] text-neutral-400 font-medium">
+                    {pointsToTarget === 0 ? "Target Reached! 🎉" : `${pointsToTarget} pts to 715+`}
+                  </div>
+                </div>
+              </div>
+
+              {/* Visual Trajectory Chart (SVG) */}
+              <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/40 relative overflow-hidden">
+                <div className="flex items-center justify-between text-[11px] text-neutral-400 mb-2">
+                  <span className="font-semibold text-neutral-300 flex items-center gap-1.5">
+                    <LineChart className="w-3.5 h-3.5 text-indigo-400" />
+                    Official Mock Progression to 715+
+                  </span>
+                  <div className="flex items-center gap-3 text-[10px]">
+                    <span className="flex items-center gap-1 text-indigo-400 font-medium">
+                      <span className="w-2 h-2 rounded-full bg-indigo-500" /> Official Mocks
+                    </span>
+                    <span className="flex items-center gap-1 text-amber-400 font-medium">
+                      <span className="w-2 h-0.5 bg-amber-400" /> 715+ Target (99th %ile)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="w-full overflow-x-auto">
+                  <svg
+                    viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+                    className="w-full h-40 sm:h-44 min-w-[540px] text-neutral-400 select-none"
+                  >
+                    <defs>
+                      <linearGradient id="gmatGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#6366f1" stopOpacity="0.35" />
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
+                      </linearGradient>
+                      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
+                    </defs>
+
+                    {/* Horizontal Score Gridlines */}
+                    {[600, 650, 700].map((score) => {
+                      const y = getSvgY(score);
+                      return (
+                        <g key={score}>
+                          <line
+                            x1={chartPadLeft}
+                            y1={y}
+                            x2={chartPadLeft + chartUsableWidth}
+                            y2={y}
+                            stroke="#262626"
+                            strokeDasharray="2 3"
+                            strokeWidth="1"
+                          />
+                          <text
+                            x={chartPadLeft - 8}
+                            y={y + 3}
+                            fill="#737373"
+                            fontSize="9"
+                            fontFamily="monospace"
+                            textAnchor="end"
+                          >
+                            {score}
+                          </text>
+                        </g>
+                      );
+                    })}
+
+                    {/* 715 Target Line (Gold Dashed) */}
+                    <g>
+                      <line
+                        x1={chartPadLeft}
+                        y1={getSvgY(715)}
+                        x2={chartPadLeft + chartUsableWidth}
+                        y2={getSvgY(715)}
+                        stroke="#f59e0b"
+                        strokeDasharray="4 4"
+                        strokeWidth="1.5"
+                        strokeOpacity="0.8"
+                      />
+                      <text
+                        x={chartPadLeft + 10}
+                        y={getSvgY(715) - 6}
+                        fill="#f59e0b"
+                        fontSize="9"
+                        fontWeight="bold"
+                        fontFamily="monospace"
+                      >
+                        Target 715+ (99th %ile)
+                      </text>
+                    </g>
+
+                    {/* Shaded Area Underneath Actual Mocks */}
+                    {areaPath && <path d={areaPath} fill="url(#gmatGradient)" />}
+
+                    {/* Actual Mock Polyline */}
+                    {mockPlotPoints.length > 1 && (
+                      <polyline
+                        points={mockPlotPoints.map((p) => `${p.x},${p.y}`).join(" ")}
+                        fill="none"
+                        stroke="#6366f1"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    )}
+
+                    {/* Projected Dashed Line to 715 Target */}
+                    {lastMockPoint && (
+                      <line
+                        x1={lastMockPoint.x}
+                        y1={lastMockPoint.y}
+                        x2={targetPlotPoint.x}
+                        y2={targetPlotPoint.y}
+                        stroke="#f59e0b"
+                        strokeDasharray="4 4"
+                        strokeWidth="2"
+                        strokeOpacity="0.7"
+                      />
+                    )}
+
+                    {/* Actual Mock Data Nodes */}
+                    {mockPlotPoints.map((pt, idx) => (
+                      <g key={pt.id} className="cursor-pointer group">
+                        {/* Outer Glow */}
+                        <circle
+                          cx={pt.x}
+                          cy={pt.y}
+                          r="7"
+                          fill="#6366f1"
+                          fillOpacity="0.25"
+                          filter="url(#glow)"
+                        />
+                        {/* Core Circle */}
+                        <circle
+                          cx={pt.x}
+                          cy={pt.y}
+                          r="4.5"
+                          fill="#4f46e5"
+                          stroke="#ffffff"
+                          strokeWidth="2"
+                        />
+                        {/* Score Tag Above Node */}
+                        <rect
+                          x={pt.x - 22}
+                          y={pt.y - 28}
+                          width="44"
+                          height="18"
+                          rx="5"
+                          fill="#18181b"
+                          stroke="#4f46e5"
+                          strokeWidth="1"
+                        />
+                        <text
+                          x={pt.x}
+                          y={pt.y - 16}
+                          fill="#ffffff"
+                          fontSize="10"
+                          fontWeight="bold"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                        >
+                          {pt.total}
+                        </text>
+                        {/* Mock Label Below Node */}
+                        <text
+                          x={pt.x}
+                          y={pt.y + 18}
+                          fill="#a3a3a3"
+                          fontSize="9"
+                          fontWeight="600"
+                          textAnchor="middle"
+                        >
+                          {idx === 0 ? "Diagnostic" : `Mock ${idx + 1}`}
+                        </text>
+                        <text
+                          x={pt.x}
+                          y={pt.y + 28}
+                          fill="#737373"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                        >
+                          {pt.date}
+                        </text>
+                      </g>
+                    ))}
+
+                    {/* Target Goal Node (Dec 2026) */}
+                    <g className="cursor-pointer">
+                      <circle
+                        cx={targetPlotPoint.x}
+                        cy={targetPlotPoint.y}
+                        r="9"
+                        fill="#f59e0b"
+                        fillOpacity="0.3"
+                        filter="url(#glow)"
+                      />
+                      <circle
+                        cx={targetPlotPoint.x}
+                        cy={targetPlotPoint.y}
+                        r="5.5"
+                        fill="#f59e0b"
+                        stroke="#ffffff"
+                        strokeWidth="2"
+                      />
+                      <rect
+                        x={targetPlotPoint.x - 30}
+                        y={targetPlotPoint.y - 28}
+                        width="60"
+                        height="18"
+                        rx="5"
+                        fill="#78350f"
+                        stroke="#f59e0b"
+                        strokeWidth="1"
+                      />
+                      <text
+                        x={targetPlotPoint.x}
+                        y={targetPlotPoint.y - 16}
+                        fill="#fef3c7"
+                        fontSize="10"
+                        fontWeight="bold"
+                        fontFamily="monospace"
+                        textAnchor="middle"
+                      >
+                        ★ 715+
+                      </text>
+                      <text
+                        x={targetPlotPoint.x}
+                        y={targetPlotPoint.y + 18}
+                        fill="#fbbf24"
+                        fontSize="9"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                      >
+                        Dec 2026
+                      </text>
+                      <text
+                        x={targetPlotPoint.x}
+                        y={targetPlotPoint.y + 28}
+                        fill="#d97706"
+                        fontSize="8"
+                        fontFamily="monospace"
+                        textAnchor="middle"
+                      >
+                        Target
+                      </text>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+
+              {/* Fast 10-Second Log Form (Collapsible) */}
+              {showAddMock && (
+                <form
+                  onSubmit={handleAddMock}
+                  className="p-4 rounded-xl bg-neutral-900/90 border border-indigo-500/40 space-y-3 shadow-2xl animate-in fade-in duration-200"
+                >
+                  <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                      <Award className="w-4 h-4 text-indigo-400" />
+                      Log mba.com Practice Exam Score (Takes ~10 Seconds)
+                    </div>
+                    <span className="text-[10px] text-neutral-400 font-mono">GMAT Focus Edition (205 - 805)</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                    {/* Exam Name */}
+                    <div className="sm:col-span-4 space-y-1">
+                      <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
+                        Exam Name
+                      </label>
+                      <select
+                        value={newMockName}
+                        onChange={(e) => setNewMockName(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      >
+                        <option value="Official Practice Exam 1 (Free)">Official Practice Exam 1 (Free)</option>
+                        <option value="Official Practice Exam 2 (Free)">Official Practice Exam 2 (Free)</option>
+                        <option value="Official Practice Exam 3">Official Practice Exam 3 (Pack 1)</option>
+                        <option value="Official Practice Exam 4">Official Practice Exam 4 (Pack 1)</option>
+                        <option value="Official Practice Exam 5">Official Practice Exam 5 (Pack 2)</option>
+                        <option value="Official Practice Exam 6">Official Practice Exam 6 (Pack 2)</option>
+                        <option value="Official Diagnostic / Sectional">Official Diagnostic / Sectional</option>
+                        <option value="Official Real Exam">Official Real Exam (Test Center / Online)</option>
+                      </select>
+                    </div>
+
+                    {/* Date */}
+                    <div className="sm:col-span-2 space-y-1">
+                      <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
+                        Date
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Nov 15"
+                        value={newMockDate}
+                        onChange={(e) => setNewMockDate(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+
+                    {/* Total Score */}
+                    <div className="sm:col-span-2 space-y-1">
+                      <label className="text-[10px] uppercase tracking-wider text-indigo-400 font-semibold">
+                        Total Score
+                      </label>
+                      <input
+                        type="number"
+                        min={205}
+                        max={805}
+                        step={10}
+                        value={newMockTotal}
+                        onChange={(e) => setNewMockTotal(Number(e.target.value))}
+                        className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-indigo-500/50 text-xs font-bold text-indigo-300 focus:outline-none focus:border-indigo-400 font-mono"
+                      />
+                    </div>
+
+                    {/* Quant (60-90) */}
+                    <div className="sm:col-span-1 space-y-1">
+                      <label className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold text-center block">
+                        Quant
+                      </label>
+                      <input
+                        type="number"
+                        min={60}
+                        max={90}
+                        value={newMockQuant}
+                        onChange={(e) => setNewMockQuant(Number(e.target.value))}
+                        className="w-full px-2 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 font-mono text-center"
+                      />
+                    </div>
+
+                    {/* Data Insights (60-90) */}
+                    <div className="sm:col-span-1 space-y-1">
+                      <label className="text-[10px] uppercase tracking-wider text-indigo-400 font-semibold text-center block">
+                        DI
+                      </label>
+                      <input
+                        type="number"
+                        min={60}
+                        max={90}
+                        value={newMockDI}
+                        onChange={(e) => setNewMockDI(Number(e.target.value))}
+                        className="w-full px-2 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs font-bold text-indigo-400 focus:outline-none focus:border-indigo-500 font-mono text-center"
+                      />
+                    </div>
+
+                    {/* Verbal (60-90) */}
+                    <div className="sm:col-span-1 space-y-1">
+                      <label className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold text-center block">
+                        Verbal
+                      </label>
+                      <input
+                        type="number"
+                        min={60}
+                        max={90}
+                        value={newMockVerbal}
+                        onChange={(e) => setNewMockVerbal(Number(e.target.value))}
+                        className="w-full px-2 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-500 font-mono text-center"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="sm:col-span-1 flex items-end">
+                      <button
+                        type="submit"
+                        className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/25 transition-colors"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Notes input */}
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Key takeaway / pacing observations (e.g., DI table analysis felt fast; spent too long on Q#14 in Quant)..."
+                      value={newMockNotes}
+                      onChange={(e) => setNewMockNotes(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs text-neutral-300 placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                </form>
+              )}
+
+              {/* Logged Official Mock History Cards */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-xs text-neutral-400">
+                  <span className="font-semibold text-neutral-300 flex items-center gap-1.5">
+                    <BarChart3 className="w-3.5 h-3.5 text-indigo-400" />
+                    Logged Official Practice Exams ({mockScores.length})
+                  </span>
+                  <span className="text-[11px] text-neutral-500">Official algorithm simulation</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                  {mockScores.map((mock) => {
+                    const pct = getGmatFocusPercentile(mock.total);
+                    return (
+                      <div
+                        key={mock.id}
+                        className="p-3 rounded-xl border border-neutral-800/80 bg-neutral-900/60 hover:border-neutral-700/80 transition-all flex flex-col justify-between gap-2"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-xs text-white">{mock.name}</span>
+                              <span className="text-[10px] text-neutral-400 font-mono">{mock.date}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-1 text-[11px]">
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono font-bold border border-emerald-500/20">
+                                Q{mock.quant}
+                              </span>
+                              <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 font-mono font-bold border border-indigo-500/20">
+                                DI{mock.di}
+                              </span>
+                              <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-mono font-bold border border-amber-500/20">
+                                V{mock.verbal}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <div className="text-right">
+                              <div className="font-extrabold text-base text-white font-mono leading-tight">
+                                {mock.total}
+                              </div>
+                              <div className="text-[10px] font-semibold text-indigo-400 font-mono">
+                                {pct}th %ile
+                              </div>
+                            </div>
+                            {mockScores.length > 1 && (
+                              <button
+                                onClick={() => deleteMock(mock.id)}
+                                className="p-1 rounded-lg text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 transition-colors"
+                                title="Delete Mock"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {mock.notes && (
+                          <p className="text-[11px] text-neutral-400 italic bg-neutral-950/60 px-2.5 py-1.5 rounded-lg border border-neutral-800/50">
+                            💡 {mock.notes}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Score Delta Ladder & 3 Section Breakdown (Dynamic from Latest Mock) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Quant Section */}
               <div className="p-4 rounded-2xl border border-neutral-800 bg-neutral-900/60 space-y-2.5">
@@ -556,10 +1272,13 @@ export default function LifeHub() {
                     <span className="w-2 h-2 rounded-full bg-emerald-400" />
                     Quantitative Reasoning
                   </span>
-                  <span className="font-mono text-emerald-400 font-semibold">Q82 → Q88</span>
+                  <span className="font-mono text-emerald-400 font-semibold">Q{latestMock.quant} → Q88</span>
                 </div>
                 <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden">
-                  <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full" style={{ width: "78%" }} />
+                  <div
+                    className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, Math.max(15, ((latestMock.quant - 60) / 30) * 100))}%` }}
+                  />
                 </div>
                 <p className="text-[11px] text-neutral-400 leading-tight">
                   Strengths: Algebra, Arithmetic, Problem Solving. Focus: Trap avoidance.
@@ -573,10 +1292,13 @@ export default function LifeHub() {
                     <span className="w-2 h-2 rounded-full bg-indigo-400" />
                     Data Insights (DI)
                   </span>
-                  <span className="font-mono text-indigo-400 font-semibold">DI80 → DI85</span>
+                  <span className="font-mono text-indigo-400 font-semibold">DI{latestMock.di} → DI85</span>
                 </div>
                 <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden">
-                  <div className="bg-gradient-to-r from-indigo-500 to-blue-400 h-full rounded-full" style={{ width: "70%" }} />
+                  <div
+                    className="bg-gradient-to-r from-indigo-500 to-blue-400 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, Math.max(15, ((latestMock.di - 60) / 30) * 100))}%` }}
+                  />
                 </div>
                 <p className="text-[11px] text-neutral-400 leading-tight">
                   Multi-source reasoning, Table analysis, Data Sufficiency (ERP analytical synergy).
@@ -590,10 +1312,13 @@ export default function LifeHub() {
                     <span className="w-2 h-2 rounded-full bg-amber-400" />
                     Verbal Reasoning
                   </span>
-                  <span className="font-mono text-amber-400 font-semibold">V80 → V84</span>
+                  <span className="font-mono text-amber-400 font-semibold">V{latestMock.verbal} → V84</span>
                 </div>
                 <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden">
-                  <div className="bg-gradient-to-r from-amber-500 to-orange-400 h-full rounded-full" style={{ width: "65%" }} />
+                  <div
+                    className="bg-gradient-to-r from-amber-500 to-orange-400 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, Math.max(15, ((latestMock.verbal - 60) / 30) * 100))}%` }}
+                  />
                 </div>
                 <p className="text-[11px] text-neutral-400 leading-tight">
                   Critical Reasoning & Reading Comprehension. Focus: Structural passage mapping.
