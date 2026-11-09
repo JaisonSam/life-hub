@@ -36,6 +36,20 @@ import {
   RefreshCw,
   Disc,
   PlayCircle,
+  Sprout,
+  Trees,
+  Wheat,
+  Calculator,
+  Coins,
+  BookMarked,
+  Library,
+  Brain,
+  Lightbulb,
+  Layers,
+  Cpu,
+  Check,
+  Droplets,
+  Sun,
 } from "lucide-react";
 
 interface Project {
@@ -218,9 +232,316 @@ const curatedAlbums: CuratedAlbum[] = [
   },
 ];
 
+// VEERAKERALAPUDUR AGRIBUSINESS MODELER DATA
+interface AgriCapexItem {
+  id: string;
+  category: "Infrastructure" | "Irrigation" | "Planting Material" | "Soil & Prep";
+  name: string;
+  budget: number;
+  spent: number;
+  status: "Planned" | "In Progress" | "Completed";
+  notes?: string;
+}
+
+interface CropModel {
+  id: string;
+  name: string;
+  subtitle: string;
+  plantsOrUnits: string;
+  spacing: string;
+  initialCapex: number;
+  annualOpex: number;
+  gestationMonths: number;
+  expectedAnnualYield: string;
+  expectedPricePerUnit: string;
+  grossRevenuePerYear: number;
+  netProfitPerYear: number;
+  paybackPeriodMonths: number;
+  annualRoiPercent: number;
+  laborIntensity: "Low" | "Medium" | "High";
+  waterDemand: "Low" | "Medium" | "Moderate";
+  advantages: string[];
+  risks: string[];
+}
+
+const cropModelsList: CropModel[] = [
+  {
+    id: "guava",
+    name: "High-Density Guava (Taiwan Pink)",
+    subtitle: "High-Value Horticulture • Bi-Annual Harvest",
+    plantsOrUnits: "140 Saplings",
+    spacing: "8 x 8 ft grid",
+    initialCapex: 45000,
+    annualOpex: 12000,
+    gestationMonths: 14,
+    expectedAnnualYield: "3,000 kg / year",
+    expectedPricePerUnit: "₹35 / kg (wholesale)",
+    grossRevenuePerYear: 105000,
+    netProfitPerYear: 93000,
+    paybackPeriodMonths: 18,
+    annualRoiPercent: 206,
+    laborIntensity: "Low",
+    waterDemand: "Medium",
+    advantages: [
+      "Consistent demand across Tenkasi & Tirunelveli wholesale mandis",
+      "Hardy crop once established; responds vigorously to drip irrigation",
+      "Two harvest flushes per year with long 15-year commercial tree life",
+    ],
+    risks: [
+      "Fruit fly sensitivity during heavy monsoons (requires fruit bagging)",
+      "Pruning discipline required twice a year to maintain canopy density",
+    ],
+  },
+  {
+    id: "moringa",
+    name: "Perennial Drumstick (PKM-1 / ODC3)",
+    subtitle: "Fast Cash-Flow • High Drought Resistance",
+    plantsOrUnits: "180 Trees",
+    spacing: "6 x 8 ft spacing",
+    initialCapex: 28000,
+    annualOpex: 8000,
+    gestationMonths: 6,
+    expectedAnnualYield: "3,500 kg pods / year",
+    expectedPricePerUnit: "₹28 / kg average",
+    grossRevenuePerYear: 98000,
+    netProfitPerYear: 90000,
+    paybackPeriodMonths: 9,
+    annualRoiPercent: 321,
+    laborIntensity: "Low",
+    waterDemand: "Low",
+    advantages: [
+      "Rapid break-even: first harvest ready in just 6 months from planting",
+      "Thrives in hot, dry climate with low water footprint (drip friendly)",
+      "High-value byproduct: moringa leaf powder has booming health export demand",
+    ],
+    risks: [
+      "Price volatility during peak harvest season (ranges ₹15 to ₹80/kg)",
+      "High wind vulnerability (requires topping trunk at 3-4 feet height)",
+    ],
+  },
+  {
+    id: "poultry",
+    name: "Free-Range Country Chicken (Nattu Kozhi)",
+    subtitle: "High Turnaround • Synergistic Soil Manure",
+    plantsOrUnits: "250 Birds / Batch (3 Batches/yr)",
+    spacing: "300 sq ft shed + 0.20 acre run",
+    initialCapex: 62000,
+    annualOpex: 165000,
+    gestationMonths: 4,
+    expectedAnnualYield: "700 birds (~1,050 kg live weight)",
+    expectedPricePerUnit: "₹320 / kg live weight",
+    grossRevenuePerYear: 336000,
+    netProfitPerYear: 109000,
+    paybackPeriodMonths: 14,
+    annualRoiPercent: 175,
+    laborIntensity: "Medium",
+    waterDemand: "Low",
+    advantages: [
+      "Huge premium for authentic free-range country chicken in South Tamil Nadu",
+      "High cash liquidity: turnaround every 100-110 days per batch",
+      "Organic chicken manure dramatically boosts soil microbial health for intercrops",
+    ],
+    risks: [
+      "Predator risk (stray dogs, predatory birds) requires chainlink fencing",
+      "Requires daily 30-minute feeding and water sanitation routine",
+    ],
+  },
+  {
+    id: "syntropic",
+    name: "Syntropic Agroforestry (Coconut + Banana + Pepper)",
+    subtitle: "Multi-Tier Regenerative Canopy • Wealth Compounding",
+    plantsOrUnits: "16 Dwarf Palms + 80 G9 Bananas + Pepper",
+    spacing: "Border perimeter + inner alleys",
+    initialCapex: 54000,
+    annualOpex: 14000,
+    gestationMonths: 10,
+    expectedAnnualYield: "80 Banana Bunches + 1,600 Coconuts/yr",
+    expectedPricePerUnit: "₹250/bunch + ₹20/coconut",
+    grossRevenuePerYear: 110000,
+    netProfitPerYear: 96000,
+    paybackPeriodMonths: 24,
+    annualRoiPercent: 177,
+    laborIntensity: "Low",
+    waterDemand: "Medium",
+    advantages: [
+      "Tiered cash flows: bananas start in month 10, coconuts compound in year 3.5+",
+      "Natural shade and heavy biomass mulch conserve 50% more soil moisture",
+      "Self-sustaining perennial ecosystem with high asset value appreciation",
+    ],
+    risks: [
+      "Longer gestation period for coconut palms (3 to 4 years)",
+      "Banana plants require wind staking during South-West monsoon",
+    ],
+  },
+];
+
+// STRATEGIC BOOKSHELF DATA
+interface StrategicBook {
+  id: string;
+  title: string;
+  author: string;
+  category: "Geopolitics & Tech" | "Systems Thinking" | "Macroeconomics" | "Executive Strategy" | "Personal Systems";
+  coverUrl: string;
+  status: "Currently Reading" | "Completed" | "Queue";
+  progress: number;
+  rating: number;
+  keyMentalModel: string;
+  keyQuote: string;
+  takeaway: string;
+  pagesOrTime: string;
+}
+
+const initialStrategicBooks: StrategicBook[] = [
+  {
+    id: "b-1",
+    title: "Chip War: The Fight for the World's Most Critical Technology",
+    author: "Chris Miller",
+    category: "Geopolitics & Tech",
+    coverUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80",
+    status: "Currently Reading",
+    progress: 85,
+    rating: 5,
+    keyMentalModel: "Chokepoint Capitalism & Lithography Moats (ASML, TSMC)",
+    keyQuote: "Microchips are the new oil — the scarce resource the modern world depends on. But unlike oil, which is distributed across continents, 90% of the world's most advanced chips are made by one company on an island 100 miles from China.",
+    takeaway: "Extreme technological concentration creates structural geopolitics. In software and enterprise architecture, identify and master single-point-of-leverage dependencies.",
+    pagesOrTime: "370 of 430 pages",
+  },
+  {
+    id: "b-2",
+    title: "Thinking in Systems: A Primer",
+    author: "Donella H. Meadows",
+    category: "Systems Thinking",
+    coverUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80",
+    status: "Completed",
+    progress: 100,
+    rating: 5,
+    keyMentalModel: "Stocks, Flows, and Reinforcing Feedback Delays",
+    keyQuote: "You think that because you understand 'one' that you must therefore understand 'two' because one and one make two. But you must also understand 'and'.",
+    takeaway: "Never fix complex enterprise or agricultural systems through linear symptom treatment. Alter system rules, information flows, and delays at the leverage points.",
+    pagesOrTime: "Completed • Essential mental model reference",
+  },
+  {
+    id: "b-3",
+    title: "Principles for Navigating Big Debt Crises",
+    author: "Ray Dalio",
+    category: "Macroeconomics",
+    coverUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=600&q=80",
+    status: "Currently Reading",
+    progress: 60,
+    rating: 5,
+    keyMentalModel: "Short vs Long-Term Debt Cycles & Beautiful Deleveraging",
+    keyQuote: "An economy's capacity to grow is ultimately determined by productivity growth, while its volatility is determined by debt cycles.",
+    takeaway: "Distinguish strictly between cash-flowing productive equity (farms, high-margin software skills) and consumption liabilities. Protect downside runway before levering upside.",
+    pagesOrTime: "Part 2: Case Studies",
+  },
+  {
+    id: "b-4",
+    title: "High Output Management",
+    author: "Andrew S. Grove (Former Intel CEO)",
+    category: "Executive Strategy",
+    coverUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80",
+    status: "Completed",
+    progress: 100,
+    rating: 5,
+    keyMentalModel: "Managerial Leverage & Limiting Steps in Production",
+    keyQuote: "A manager's output = the output of his organization + the output of the neighboring organizations under his influence.",
+    takeaway: "Find the single limiting step in every production line (whether manufacturing, GMAT Verbal pacing, or farm planting) and build all other activities around it.",
+    pagesOrTime: "Completed • Core engineering framework",
+  },
+  {
+    id: "b-5",
+    title: "Atomic Habits",
+    author: "James Clear",
+    category: "Personal Systems",
+    coverUrl: "https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&w=600&q=80",
+    status: "Completed",
+    progress: 100,
+    rating: 5,
+    keyMentalModel: "1% Daily Compounding & Environment Architecture",
+    keyQuote: "You do not rise to the level of your goals. You fall to the level of your systems.",
+    takeaway: "Life Hub is the software architecture of this principle — frictionless daily logging, streaks, and visible metric feedback loops build destiny automatically.",
+    pagesOrTime: "Completed",
+  },
+];
+
 export default function LifeHub() {
   // Navigation tabs
-  const [activeTab, setActiveTab] = useState<"all" | "gmat" | "bible" | "habits" | "projects" | "music">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
+
+  // Veerakeralapudur Agribusiness State
+  const [activeAgriModelId, setActiveAgriModelId] = useState("guava");
+  const [agriCapex, setAgriCapex] = useState<AgriCapexItem[]>([
+    {
+      id: "c-1",
+      category: "Infrastructure",
+      name: "Perimeter Fencing (Chainlink + Stone Posts)",
+      budget: 35000,
+      spent: 0,
+      status: "Planned",
+      notes: "Crucial for stray cattle and poultry biosecurity.",
+    },
+    {
+      id: "c-2",
+      category: "Irrigation",
+      name: "Borewell Tie-in & Drip Automation Lines",
+      budget: 22000,
+      spent: 6000,
+      status: "In Progress",
+      notes: "Main 1-inch line + lateral drippers for 0.25 acre.",
+    },
+    {
+      id: "c-3",
+      category: "Soil & Prep",
+      name: "Soil Conditioning (4 Tons FYM & Biochar)",
+      budget: 10000,
+      spent: 0,
+      status: "Planned",
+      notes: "Enriches red sandy loam for high microbial activity.",
+    },
+    {
+      id: "c-4",
+      category: "Planting Material",
+      name: "Certified High-Density Saplings Stock",
+      budget: 15000,
+      spent: 0,
+      status: "Planned",
+      notes: "140 Taiwan Pink / PKM-1 stock from certified nursery.",
+    },
+    {
+      id: "c-5",
+      category: "Infrastructure",
+      name: "Tool Locker & Weatherproof Storage Shed",
+      budget: 8000,
+      spent: 3500,
+      status: "Completed",
+      notes: "Secure lockable cabinet for tools, drip spares, and organic inputs.",
+    },
+  ]);
+  const [showAddCapex, setShowAddCapex] = useState(false);
+  const [newCapexName, setNewCapexName] = useState("");
+  const [newCapexCategory, setNewCapexCategory] = useState<AgriCapexItem["category"]>("Infrastructure");
+  const [newCapexBudget, setNewCapexBudget] = useState(15000);
+  const [newCapexSpent, setNewCapexSpent] = useState(0);
+  const [newCapexNotes, setNewCapexNotes] = useState("");
+
+  // Interactive ROI Simulator State
+  const [simCapex, setSimCapex] = useState(45000);
+  const [simOpex, setSimOpex] = useState(12000);
+  const [simYield, setSimYield] = useState(3000);
+  const [simPrice, setSimPrice] = useState(35);
+
+  // Strategic Bookshelf State
+  const [bookshelf, setBookshelf] = useState<StrategicBook[]>(initialStrategicBooks);
+  const [bookFilter, setBookFilter] = useState<"all" | "reading" | "completed" | "queue">("all");
+  const [selectedBookModal, setSelectedBookModal] = useState<StrategicBook | null>(null);
+  const [showAddBook, setShowAddBook] = useState(false);
+  const [newBookTitle, setNewBookTitle] = useState("");
+  const [newBookAuthor, setNewBookAuthor] = useState("");
+  const [newBookCategory, setNewBookCategory] = useState<StrategicBook["category"]>("Geopolitics & Tech");
+  const [newBookModel, setNewBookModel] = useState("");
+  const [newBookQuote, setNewBookQuote] = useState("");
+  const [newBookTakeaway, setNewBookTakeaway] = useState("");
+  const [newBookProgress, setNewBookProgress] = useState(10);
 
   // Time & Greeting
   const [currentTime, setCurrentTime] = useState("");
@@ -455,6 +776,12 @@ export default function LifeHub() {
 
       const savedLastFmKey = localStorage.getItem("lifehub_lastfm_key");
       if (savedLastFmKey) setLastFmApiKey(savedLastFmKey);
+
+      const savedCapex = localStorage.getItem("lifehub_agri_capex");
+      if (savedCapex) setAgriCapex(JSON.parse(savedCapex));
+
+      const savedBooks = localStorage.getItem("lifehub_bookshelf");
+      if (savedBooks) setBookshelf(JSON.parse(savedBooks));
     } catch {}
 
     return () => clearInterval(timer);
@@ -593,6 +920,82 @@ export default function LifeHub() {
       .finally(() => setIsFetchingNowPlaying(false));
   };
 
+  // Agribusiness CapEx Handlers
+  const saveCapex = (updated: AgriCapexItem[]) => {
+    setAgriCapex(updated);
+    try {
+      localStorage.setItem("lifehub_agri_capex", JSON.stringify(updated));
+    } catch {}
+  };
+
+  const handleAddCapex = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCapexName.trim()) return;
+    const newItem: AgriCapexItem = {
+      id: Date.now().toString(),
+      name: newCapexName.trim(),
+      category: newCapexCategory,
+      budget: Number(newCapexBudget) || 10000,
+      spent: Number(newCapexSpent) || 0,
+      status: Number(newCapexSpent) >= Number(newCapexBudget) && Number(newCapexBudget) > 0
+        ? "Completed"
+        : Number(newCapexSpent) > 0
+        ? "In Progress"
+        : "Planned",
+      notes: newCapexNotes.trim(),
+    };
+    const updated = [newItem, ...agriCapex];
+    saveCapex(updated);
+    setShowAddCapex(false);
+    setNewCapexName("");
+    setNewCapexNotes("");
+  };
+
+  const deleteCapex = (id: string) => {
+    const updated = agriCapex.filter((c) => c.id !== id);
+    saveCapex(updated);
+  };
+
+  // Strategic Bookshelf Handlers
+  const saveBookshelf = (updated: StrategicBook[]) => {
+    setBookshelf(updated);
+    try {
+      localStorage.setItem("lifehub_bookshelf", JSON.stringify(updated));
+    } catch {}
+  };
+
+  const handleAddBook = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBookTitle.trim() || !newBookAuthor.trim()) return;
+    const newBook: StrategicBook = {
+      id: Date.now().toString(),
+      title: newBookTitle.trim(),
+      author: newBookAuthor.trim(),
+      category: newBookCategory,
+      coverUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80",
+      status: Number(newBookProgress) >= 100 ? "Completed" : Number(newBookProgress) > 0 ? "Currently Reading" : "Queue",
+      progress: Math.min(100, Math.max(0, Number(newBookProgress) || 0)),
+      rating: 5,
+      keyMentalModel: newBookModel.trim() || "Strategic Systems Leverage",
+      keyQuote: newBookQuote.trim() || "Deep reading compounds cognitive leverage.",
+      takeaway: newBookTakeaway.trim() || "Key strategic insight applied to current operations.",
+      pagesOrTime: `${newBookProgress}% completed`,
+    };
+    const updated = [newBook, ...bookshelf];
+    saveBookshelf(updated);
+    setShowAddBook(false);
+    setNewBookTitle("");
+    setNewBookAuthor("");
+    setNewBookModel("");
+    setNewBookQuote("");
+    setNewBookTakeaway("");
+  };
+
+  const deleteBook = (id: string) => {
+    const updated = bookshelf.filter((b) => b.id !== id);
+    saveBookshelf(updated);
+  };
+
   // Save changes to localStorage
   const saveHabits = (updated: Habit[]) => {
     setHabits(updated);
@@ -709,6 +1112,26 @@ export default function LifeHub() {
 
   const completedHabitsCount = habits.filter((h) => h.completedToday).length;
 
+  // Computed variables for Agribusiness
+  const selectedModel = cropModelsList.find((m) => m.id === activeAgriModelId) || cropModelsList[0];
+  const totalAgriBudget = agriCapex.reduce((acc, item) => acc + item.budget, 0);
+  const totalAgriSpent = agriCapex.reduce((acc, item) => acc + item.spent, 0);
+  const simGross = Math.max(0, simYield * simPrice);
+  const simNet = Math.max(0, simGross - simOpex);
+  const simRoi = simCapex > 0 ? Math.round((simNet / simCapex) * 100) : 0;
+  const simPayback = simNet > 0 ? (simCapex / (simNet / 12)).toFixed(1) : "N/A";
+
+  // Computed variables for Bookshelf
+  const booksCompleted = bookshelf.filter((b) => b.status === "Completed").length;
+  const booksReading = bookshelf.filter((b) => b.status === "Currently Reading").length;
+  const filteredBooks = bookshelf.filter((b) => {
+    if (bookFilter === "all") return true;
+    if (bookFilter === "reading") return b.status === "Currently Reading";
+    if (bookFilter === "completed") return b.status === "Completed";
+    if (bookFilter === "queue") return b.status === "Queue";
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans selection:bg-amber-500/20">
       {/* Top Header / Status Bar */}
@@ -754,10 +1177,12 @@ export default function LifeHub() {
           {[
             { id: "all", label: "Overview Hub", icon: Sparkles },
             { id: "gmat", label: "GMAT 715+ Sprint", icon: Target },
+            { id: "farm", label: "VKP Agribusiness", icon: Sprout },
+            { id: "books", label: "Strategic Bookshelf", icon: Library },
             { id: "bible", label: "Bible & Scripture", icon: BookOpen },
             { id: "habits", label: "Habit Tracker", icon: Flame },
             { id: "projects", label: "Projects Tracker", icon: FolderKanban },
-            { id: "music", label: "Music & Worship", icon: Music },
+            { id: "music", label: "Music & Sanctuary", icon: Music },
           ].map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
@@ -1938,6 +2363,690 @@ export default function LifeHub() {
                         className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all"
                         style={{ width: `${proj.progress}%` }}
                       />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* VEERAKERALAPUDUR 0.25-ACRE AGRIBUSINESS MODELER */}
+        {(activeTab === "all" || activeTab === "farm") && (
+          <section className="p-6 sm:p-8 rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-emerald-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
+            {/* Top Header & Overview */}
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
+                  <Sprout className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-extrabold text-lg text-white tracking-tight">
+                      Veerakeralapudur Agribusiness Modeler
+                    </h2>
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold font-mono">
+                      0.25 Acre (11 Cents)
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-400">
+                    Tenkasi District, Tamil Nadu • High-Density Horticulture & Cash Flow Engineering
+                  </p>
+                </div>
+              </div>
+
+              {/* CapEx Summary Badges */}
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <div className="px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center gap-2">
+                  <span className="text-neutral-400">CapEx Budget:</span>
+                  <span className="font-bold text-white font-mono">₹{totalAgriBudget.toLocaleString("en-IN")}</span>
+                </div>
+                <div className="px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center gap-2">
+                  <span className="text-neutral-400">Spent:</span>
+                  <span className="font-bold text-emerald-400 font-mono">₹{totalAgriSpent.toLocaleString("en-IN")}</span>
+                </div>
+                <button
+                  onClick={() => setShowAddCapex(!showAddCapex)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md shadow-emerald-600/20 transition-all text-xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  {showAddCapex ? "Close" : "Add CapEx Item"}
+                </button>
+              </div>
+            </div>
+
+            {/* ADD CAPEX FORM DRAWER */}
+            {showAddCapex && (
+              <form
+                onSubmit={handleAddCapex}
+                className="p-4 rounded-2xl bg-neutral-900/90 border border-emerald-500/30 space-y-3 shadow-xl animate-in fade-in duration-200"
+              >
+                <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
+                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Coins className="w-4 h-4 text-emerald-400" />
+                    Record Capital Investment Item (CapEx)
+                  </span>
+                  <span className="text-[10px] text-neutral-400">Veerakeralapudur 0.25 Acre Site</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                  <div className="sm:col-span-4 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
+                      Item Description
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Solar Drip Automation Timer..."
+                      value={newCapexName}
+                      onChange={(e) => setNewCapexName(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-3 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
+                      Category
+                    </label>
+                    <select
+                      value={newCapexCategory}
+                      onChange={(e: any) => setNewCapexCategory(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    >
+                      <option value="Infrastructure">Infrastructure (Fencing, Shed)</option>
+                      <option value="Irrigation">Irrigation (Drip, Piping)</option>
+                      <option value="Planting Material">Planting Material (Saplings)</option>
+                      <option value="Soil & Prep">Soil & Prep (FYM, Biochar)</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
+                      Budget (₹)
+                    </label>
+                    <input
+                      type="number"
+                      step={500}
+                      value={newCapexBudget}
+                      onChange={(e) => setNewCapexBudget(Number(e.target.value))}
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
+                      Spent (₹)
+                    </label>
+                    <input
+                      type="number"
+                      step={500}
+                      value={newCapexSpent}
+                      onChange={(e) => setNewCapexSpent(Number(e.target.value))}
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-1 flex items-end">
+                    <button
+                      type="submit"
+                      className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-colors"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Vendor / specifications / timing notes..."
+                    value={newCapexNotes}
+                    onChange={(e) => setNewCapexNotes(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs text-neutral-300 placeholder-neutral-500 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </form>
+            )}
+
+            {/* CROP MODEL BENCHMARK SELECTION (4 MODELS FOR 0.25 ACRE) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-white flex items-center gap-1.5">
+                  <Trees className="w-4 h-4 text-emerald-400" />
+                  Select Agribusiness Prototype Model for 0.25 Acre
+                </span>
+                <span className="text-[11px] text-neutral-400">Click a model to load live ROI simulation</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                {cropModelsList.map((model) => {
+                  const isSelected = activeAgriModelId === model.id;
+                  return (
+                    <div
+                      key={model.id}
+                      onClick={() => {
+                        setActiveAgriModelId(model.id);
+                        setSimCapex(model.initialCapex);
+                        setSimOpex(model.annualOpex);
+                        const yVal = parseInt(model.expectedAnnualYield.replace(/\D/g, "")) || 3000;
+                        setSimYield(yVal);
+                        const pVal = parseInt(model.expectedPricePerUnit.replace(/\D/g, "")) || 35;
+                        setSimPrice(pVal);
+                      }}
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 group ${
+                        isSelected
+                          ? "bg-emerald-950/40 border-emerald-500 shadow-xl shadow-emerald-950/40 scale-[1.02]"
+                          : "bg-neutral-900/60 border-neutral-800 hover:border-neutral-700"
+                      }`}
+                    >
+                      <div>
+                        <div className="flex justify-between items-start gap-2">
+                          <span
+                            className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                              isSelected
+                                ? "bg-emerald-500 text-neutral-950 font-mono"
+                                : "bg-neutral-800 text-neutral-400 font-mono"
+                            }`}
+                          >
+                            {model.plantsOrUnits}
+                          </span>
+                          <span className="text-[11px] font-mono text-emerald-400 font-bold">
+                            ROI: {model.annualRoiPercent}%
+                          </span>
+                        </div>
+
+                        <h4 className="font-bold text-sm text-white mt-2 group-hover:text-emerald-300 transition-colors">
+                          {model.name}
+                        </h4>
+                        <p className="text-[11px] text-neutral-400 mt-0.5">{model.subtitle}</p>
+                      </div>
+
+                      {/* Financial Metrics */}
+                      <div className="p-2.5 rounded-xl bg-neutral-950/70 border border-neutral-800/80 space-y-1 text-xs">
+                        <div className="flex justify-between text-[11px]">
+                          <span className="text-neutral-400">Est. Net Profit:</span>
+                          <span className="font-bold text-emerald-400 font-mono">
+                            ₹{model.netProfitPerYear.toLocaleString("en-IN")}/yr
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-[11px]">
+                          <span className="text-neutral-400">Payback Period:</span>
+                          <span className="font-mono text-white font-semibold">{model.paybackPeriodMonths} Months</span>
+                        </div>
+                        <div className="flex justify-between text-[11px]">
+                          <span className="text-neutral-400">Labor Demand:</span>
+                          <span className="font-semibold text-neutral-300">{model.laborIntensity}</span>
+                        </div>
+                      </div>
+
+                      {/* Advantages pill list */}
+                      <div className="space-y-1 text-[11px] text-neutral-400">
+                        <p className="line-clamp-2">✓ {model.advantages[0]}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 2-COLUMN: INTERACTIVE ROI SIMULATOR & CAPEX EXPENDITURE MATRIX */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
+              {/* INTERACTIVE FINANCIAL SIMULATOR (7 COLS) */}
+              <div className="lg:col-span-7 p-5 rounded-2xl border border-neutral-800 bg-neutral-950/70 space-y-4">
+                <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Calculator className="w-4 h-4 text-emerald-400" />
+                    <h3 className="font-bold text-sm text-white">Live ROI & Financial Simulator</h3>
+                  </div>
+                  <span className="text-[10px] text-neutral-400 font-mono">Active: {selectedModel.name}</span>
+                </div>
+
+                {/* 4 Interactive Input Sliders/Fields */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold block">
+                      CapEx (₹)
+                    </label>
+                    <input
+                      type="number"
+                      step={1000}
+                      value={simCapex}
+                      onChange={(e) => setSimCapex(Number(e.target.value))}
+                      className="w-full bg-transparent font-bold text-sm text-white font-mono focus:outline-none border-b border-neutral-700"
+                    />
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold block">
+                      Annual OpEx (₹)
+                    </label>
+                    <input
+                      type="number"
+                      step={500}
+                      value={simOpex}
+                      onChange={(e) => setSimOpex(Number(e.target.value))}
+                      className="w-full bg-transparent font-bold text-sm text-white font-mono focus:outline-none border-b border-neutral-700"
+                    />
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold block">
+                      Yield (kg/units)
+                    </label>
+                    <input
+                      type="number"
+                      step={100}
+                      value={simYield}
+                      onChange={(e) => setSimYield(Number(e.target.value))}
+                      className="w-full bg-transparent font-bold text-sm text-white font-mono focus:outline-none border-b border-neutral-700"
+                    />
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold block">
+                      Price / Unit (₹)
+                    </label>
+                    <input
+                      type="number"
+                      step={1}
+                      value={simPrice}
+                      onChange={(e) => setSimPrice(Number(e.target.value))}
+                      className="w-full bg-transparent font-bold text-sm text-emerald-400 font-mono focus:outline-none border-b border-neutral-700"
+                    />
+                  </div>
+                </div>
+
+                {/* Real-Time Computed Returns Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                  <div className="p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-950/20 space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">
+                      Net Profit / Year
+                    </div>
+                    <div className="text-xl font-extrabold text-emerald-400 font-mono">
+                      ₹{simNet.toLocaleString("en-IN")}
+                    </div>
+                    <div className="text-[10px] text-neutral-400">
+                      ₹{Math.round(simNet / 12).toLocaleString("en-IN")}/month
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-neutral-800 bg-neutral-900/60 space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
+                      Gross Revenue
+                    </div>
+                    <div className="text-xl font-extrabold text-white font-mono">
+                      ₹{simGross.toLocaleString("en-IN")}
+                    </div>
+                    <div className="text-[10px] text-neutral-400">From {simYield} units</div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-neutral-800 bg-neutral-900/60 space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
+                      Payback Period
+                    </div>
+                    <div className="text-xl font-extrabold text-amber-400 font-mono">
+                      {simPayback} mos
+                    </div>
+                    <div className="text-[10px] text-neutral-400">To recover CapEx</div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-neutral-800 bg-neutral-900/60 space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
+                      Return on CapEx
+                    </div>
+                    <div className="text-xl font-extrabold text-teal-400 font-mono">
+                      {simRoi}%
+                    </div>
+                    <div className="text-[10px] text-neutral-400">Annualized yield</div>
+                  </div>
+                </div>
+
+                {/* Model Details Briefing */}
+                <div className="p-3.5 rounded-xl bg-neutral-900/40 border border-neutral-800 text-xs space-y-1.5">
+                  <div className="font-bold text-neutral-300 flex items-center justify-between">
+                    <span>💡 Model Highlights for {selectedModel.name}</span>
+                    <span className="text-[10px] text-neutral-500 font-mono">Water: {selectedModel.waterDemand}</span>
+                  </div>
+                  <ul className="space-y-1 text-[11px] text-neutral-400">
+                    {selectedModel.advantages.map((adv, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5">
+                        <span className="text-emerald-400">✔</span> {adv}
+                      </li>
+                    ))}
+                    <li className="flex items-start gap-1.5 text-amber-400/90">
+                      <span>⚠</span> Risk Mitigation: {selectedModel.risks[0]}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* CAPEX BUDGET & EXPENDITURE MATRIX (5 COLS) */}
+              <div className="lg:col-span-5 p-5 rounded-2xl border border-neutral-800 bg-neutral-950/70 space-y-4">
+                <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Coins className="w-4 h-4 text-emerald-400" />
+                    <h3 className="font-bold text-sm text-white">CapEx Expenditure Tracker</h3>
+                  </div>
+                  <span className="text-[11px] text-neutral-400 font-mono">
+                    {Math.round((totalAgriSpent / (totalAgriBudget || 1)) * 100)}% Deployed
+                  </span>
+                </div>
+
+                {/* CapEx Budget Progress Bar */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs text-neutral-400">
+                    <span>Deployed: ₹{totalAgriSpent.toLocaleString("en-IN")}</span>
+                    <span>Budget: ₹{totalAgriBudget.toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="w-full bg-neutral-800 h-2.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(100, (totalAgriSpent / (totalAgriBudget || 1)) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Items List */}
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  {agriCapex.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-3 rounded-xl border border-neutral-800/80 bg-neutral-900/60 flex items-start justify-between gap-3 text-xs"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white text-xs">{item.name}</span>
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${
+                              item.status === "Completed"
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                : item.status === "In Progress"
+                                ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                : "bg-neutral-800 text-neutral-400"
+                            }`}
+                          >
+                            {item.status}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-neutral-400">{item.notes}</p>
+                      </div>
+
+                      <div className="text-right flex-shrink-0">
+                        <div className="font-mono font-bold text-emerald-400">
+                          ₹{item.spent.toLocaleString("en-IN")}
+                        </div>
+                        <div className="text-[10px] text-neutral-500 font-mono">
+                          of ₹{item.budget.toLocaleString("en-IN")}
+                        </div>
+                        {agriCapex.length > 1 && (
+                          <button
+                            onClick={() => deleteCapex(item.id)}
+                            className="text-[10px] text-neutral-500 hover:text-rose-400 transition-colors mt-1"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* STRATEGIC BOOKSHELF & COMMONPLACE NOTEBOOK */}
+        {(activeTab === "all" || activeTab === "books") && (
+          <section className="p-6 sm:p-8 rounded-3xl border border-indigo-500/25 bg-gradient-to-br from-indigo-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
+            {/* Top Header */}
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
+                  <Library className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-extrabold text-lg text-white tracking-tight">
+                      Strategic Bookshelf & Commonplace
+                    </h2>
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-semibold font-mono">
+                      {booksCompleted} Completed • {booksReading} Active
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-400">
+                    High-leverage mental models: Semiconductor supply chains, Systems dynamics & Macroeconomics
+                  </p>
+                </div>
+              </div>
+
+              {/* Filter Pills & Add Book */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1 bg-neutral-950/80 border border-neutral-800 p-1 rounded-xl text-xs">
+                  {[
+                    { id: "all", label: `All (${bookshelf.length})` },
+                    { id: "reading", label: `Reading (${booksReading})` },
+                    { id: "completed", label: `Completed (${booksCompleted})` },
+                  ].map((btn) => (
+                    <button
+                      key={btn.id}
+                      onClick={() => setBookFilter(btn.id as any)}
+                      className={`px-3 py-1 rounded-lg font-semibold transition-all ${
+                        bookFilter === btn.id
+                          ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/30"
+                          : "text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      {btn.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setShowAddBook(!showAddBook)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-md shadow-indigo-600/20 transition-all text-xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  {showAddBook ? "Close" : "Log Book"}
+                </button>
+              </div>
+            </div>
+
+            {/* ADD BOOK FORM DRAWER */}
+            {showAddBook && (
+              <form
+                onSubmit={handleAddBook}
+                className="p-4 rounded-2xl bg-neutral-950/90 border border-indigo-500/40 space-y-3 shadow-xl animate-in fade-in duration-200"
+              >
+                <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
+                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <BookMarked className="w-4 h-4 text-indigo-400" />
+                    Log Strategic Work & Mental Model
+                  </span>
+                  <span className="text-[10px] text-neutral-400">Synthesize deep takeaways</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                  <div className="sm:col-span-4 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">Title</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Zero to One..."
+                      value={newBookTitle}
+                      onChange={(e) => setNewBookTitle(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-3 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">Author</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Peter Thiel..."
+                      value={newBookAuthor}
+                      onChange={(e) => setNewBookAuthor(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-3 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">Category</label>
+                    <select
+                      value={newBookCategory}
+                      onChange={(e: any) => setNewBookCategory(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="Geopolitics & Tech">Geopolitics & Tech</option>
+                      <option value="Systems Thinking">Systems Thinking</option>
+                      <option value="Macroeconomics">Macroeconomics</option>
+                      <option value="Executive Strategy">Executive Strategy</option>
+                      <option value="Personal Systems">Personal Systems</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-1 space-y-1">
+                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">Progress %</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={newBookProgress}
+                      onChange={(e) => setNewBookProgress(Number(e.target.value))}
+                      className="w-full px-2 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono text-center"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-1 flex items-end">
+                    <button
+                      type="submit"
+                      className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/25 transition-colors"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <input
+                    type="text"
+                    placeholder="Core Mental Model (e.g. Monopoly Moats vs Perfect Competition)..."
+                    value={newBookModel}
+                    onChange={(e) => setNewBookModel(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Actionable strategic takeaway for your operations..."
+                    value={newBookTakeaway}
+                    onChange={(e) => setNewBookTakeaway(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+              </form>
+            )}
+
+            {/* MENTAL MODEL MATRIX RIBBON */}
+            <div className="p-3.5 rounded-2xl bg-neutral-950/80 border border-neutral-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <span className="font-bold text-neutral-300 flex items-center gap-1.5">
+                <Brain className="w-4 h-4 text-purple-400" />
+                Active Strategic Mental Models
+              </span>
+              <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
+                  ⚡ Chokepoint Moats
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
+                  🔄 Feedback Loop Delays
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
+                  🎯 Limiting Bottleneck
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
+                  📈 Productive Equity
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
+                  🔁 1% Compounding
+                </span>
+              </div>
+            </div>
+
+            {/* STRATEGIC BOOK CARDS GRID */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredBooks.map((book) => (
+                <div
+                  key={book.id}
+                  className="p-5 rounded-2xl border border-neutral-800/80 bg-neutral-900/60 hover:border-indigo-500/40 backdrop-blur-sm transition-all duration-300 flex flex-col justify-between space-y-4 group hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-950/20"
+                >
+                  <div className="space-y-3">
+                    {/* Header Row */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                          {book.category}
+                        </span>
+                        <h3 className="font-extrabold text-base text-white group-hover:text-indigo-300 transition-colors leading-snug">
+                          {book.title}
+                        </h3>
+                        <p className="text-xs text-neutral-400">by {book.author}</p>
+                      </div>
+
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0 ${
+                          book.status === "Completed"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        }`}
+                      >
+                        {book.status}
+                      </span>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[11px] text-neutral-400">
+                        <span>Reading Progress</span>
+                        <span className="font-mono text-white font-semibold">{book.progress}%</span>
+                      </div>
+                      <div className="w-full bg-neutral-800 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full transition-all duration-500"
+                          style={{ width: `${book.progress}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Core Mental Model Card */}
+                    <div className="p-3 rounded-xl bg-neutral-950/70 border border-neutral-800/80 space-y-1 text-xs">
+                      <div className="text-[10px] font-bold text-indigo-300 flex items-center gap-1 uppercase tracking-wider">
+                        <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+                        Mental Model
+                      </div>
+                      <div className="font-bold text-white text-xs">{book.keyMentalModel}</div>
+                    </div>
+
+                    {/* Key Quote */}
+                    <blockquote className="text-[11px] text-neutral-300 italic border-l-2 border-indigo-500/50 pl-3 leading-relaxed">
+                      "{book.keyQuote}"
+                    </blockquote>
+                  </div>
+
+                  {/* Strategic Takeaway & Footer */}
+                  <div className="pt-3 border-t border-neutral-800/80 space-y-2 text-xs">
+                    <p className="text-[11px] text-neutral-400 leading-relaxed">
+                      <strong className="text-neutral-300 font-semibold">Strategic Takeaway:</strong> {book.takeaway}
+                    </p>
+
+                    <div className="flex justify-between items-center text-[10px] text-neutral-500 pt-1">
+                      <span>{book.pagesOrTime}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-amber-400">★★★★★</span>
+                        {bookshelf.length > 1 && (
+                          <button
+                            onClick={() => deleteBook(book.id)}
+                            className="text-neutral-500 hover:text-rose-400 transition-colors"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
