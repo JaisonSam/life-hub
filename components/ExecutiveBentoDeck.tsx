@@ -20,7 +20,9 @@ import {
   ShieldCheck,
   BookMarked,
   MapPin,
+  LayoutGrid,
 } from "lucide-react";
+import ExecutiveViewCarousel from "./ExecutiveViewCarousel";
 
 interface Habit {
   id: string;
@@ -40,6 +42,7 @@ interface ExecutiveBentoDeckProps {
   greeting: string;
   verseBookmarked: boolean;
   onToggleBookmarkVerse: () => void;
+  projectsCount?: number;
 }
 
 const ROLES = [
@@ -59,8 +62,10 @@ export default function ExecutiveBentoDeck({
   greeting,
   verseBookmarked,
   onToggleBookmarkVerse,
+  projectsCount = 6,
 }: ExecutiveBentoDeckProps) {
   const habitCompletionPct = habits.length > 0 ? Math.round((completedHabitsCount / habits.length) * 100) : 0;
+  const [deckDisplayMode, setDeckDisplayMode] = useState<"carousel" | "grid">("carousel");
 
   // EkiZR-inspired Typewriter Subtitle Effect
   const [typedText, setTypedText] = useState("");
@@ -227,8 +232,56 @@ export default function ExecutiveBentoDeck({
         </div>
       </div>
 
-      {/* 2. EXECUTIVE BENTO GRID WITH EKIZR BACKLIT HALO CARDS (Desktop only, mobile scrolls full modules) */}
-      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* 2. DECK DISPLAY MODE SELECTOR (3D Coverflow Carousel vs Bento Grid Deck) */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1 pt-2">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 font-semibold">
+            Deck View:
+          </span>
+          <div className="inline-flex items-center p-1 rounded-2xl bg-neutral-950/80 border border-white/10 text-xs shadow-inner">
+            <button
+              onClick={() => setDeckDisplayMode("carousel")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold transition-all ${
+                deckDisplayMode === "carousel"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-neutral-950 font-bold shadow-md shadow-amber-500/25"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>3D Carousel</span>
+            </button>
+            <button
+              onClick={() => setDeckDisplayMode("grid")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold transition-all ${
+                deckDisplayMode === "grid"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-neutral-950 font-bold shadow-md shadow-amber-500/25"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Bento Grid</span>
+            </button>
+          </div>
+        </div>
+
+        <span className="text-[11px] font-mono text-neutral-500 hidden sm:inline-block">
+          Select any view to enter isolated focus
+        </span>
+      </div>
+
+      {/* 3A. 3D COVERFLOW CAROUSEL (Interactive, tactile, liquid glass) */}
+      {deckDisplayMode === "carousel" && (
+        <ExecutiveViewCarousel
+          onSelectTab={onSelectTab}
+          completedHabitsCount={completedHabitsCount}
+          totalHabitsCount={habits.length}
+          projectsCount={projectsCount}
+        />
+      )}
+
+      {/* 3B. EXECUTIVE BENTO GRID (Alternative full deck layout) */}
+      {deckDisplayMode === "grid" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-300">
         {/* CARD 1: CAREER BRANDING & BANGALORE RADAR */}
         <div
           onClick={() => onSelectTab("career")}
@@ -563,6 +616,7 @@ export default function ExecutiveBentoDeck({
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

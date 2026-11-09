@@ -1439,6 +1439,7 @@ export default function LifeHub() {
             greeting={greeting}
             verseBookmarked={verseBookmarked}
             onToggleBookmarkVerse={() => setVerseBookmarked(!verseBookmarked)}
+            projectsCount={projects.length}
           />
         </div>
 
