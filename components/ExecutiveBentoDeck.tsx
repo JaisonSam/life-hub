@@ -95,8 +95,12 @@ export default function ExecutiveBentoDeck({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 relative z-10">
-      {/* 1. ZEN SANCTUARY HERO BANNER WITH EKIZR BACKLIT GLOW */}
-      <div className="relative group">
+      {/* 1. ZEN SANCTUARY HERO BANNER WITH EKIZR SCROLL REVEAL */}
+      <div
+        className="relative group"
+        data-aos="fade-down"
+        data-aos-duration="800"
+      >
         {/* EkiZR Floating Ambient Underlay */}
         <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/30 via-indigo-500/20 to-purple-600/30 rounded-3xl blur-xl opacity-40 group-hover:opacity-70 transition duration-1000 pointer-events-none" />
 
@@ -108,7 +112,11 @@ export default function ExecutiveBentoDeck({
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div className="space-y-3.5 max-w-2xl">
               {/* EkiZR-Style Double-Ring Backlit Status Badge */}
-              <div className="flex flex-wrap items-center gap-3">
+              <div
+                className="flex flex-wrap items-center gap-3"
+                data-aos="zoom-in"
+                data-aos-delay="100"
+              >
                 <div className="relative group/badge inline-block">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-[#f59e0b] via-[#6366f1] to-[#10b981] rounded-full blur opacity-35 group-hover/badge:opacity-65 transition duration-500" />
                   <div className="relative px-3.5 py-1.5 rounded-full bg-[#030014]/90 backdrop-blur-xl border border-white/10 flex items-center gap-2">
@@ -125,7 +133,11 @@ export default function ExecutiveBentoDeck({
               </div>
 
               {/* Greeting */}
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.15]">
+              <h1
+                className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.15]"
+                data-aos="fade-right"
+                data-aos-delay="200"
+              >
                 {greeting},{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 font-extrabold">
                   Jaison.
@@ -133,7 +145,11 @@ export default function ExecutiveBentoDeck({
               </h1>
 
               {/* EkiZR Typewriter Subtitle */}
-              <div className="h-6 flex items-center">
+              <div
+                className="h-6 flex items-center"
+                data-aos="fade-right"
+                data-aos-delay="300"
+              >
                 <span className="text-xs sm:text-sm md:text-base font-mono bg-gradient-to-r from-indigo-200 via-purple-200 to-amber-200 bg-clip-text text-transparent font-medium">
                   {typedText}
                 </span>
@@ -141,7 +157,11 @@ export default function ExecutiveBentoDeck({
               </div>
 
               {/* Scripture Anchor in Editorial Serif */}
-              <p className="text-sm sm:text-base text-neutral-300 font-serif italic leading-relaxed border-l-2 border-amber-500/40 pl-4 py-1">
+              <p
+                className="text-sm sm:text-base text-neutral-300 font-serif italic leading-relaxed border-l-2 border-amber-500/40 pl-4 py-1"
+                data-aos="fade-up"
+                data-aos-delay="400"
+              >
                 "Commit your actions to the LORD, and your plans will succeed."
                 <span className="block not-italic text-xs text-amber-400/80 font-mono mt-1 font-normal">
                   — Proverbs 16:3
@@ -150,7 +170,11 @@ export default function ExecutiveBentoDeck({
             </div>
 
             {/* Quick Metrics Capsule */}
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 shrink-0">
+            <div
+              className="flex flex-wrap sm:flex-nowrap items-center gap-4 shrink-0"
+              data-aos="zoom-in"
+              data-aos-delay="300"
+            >
               {/* Daily Habit Progress Radial / Metric */}
               <div className="p-4 rounded-2xl glass-card flex items-center gap-4 border border-white/[0.08]">
                 <div className="relative w-14 h-14 flex items-center justify-center">
@@ -203,12 +227,15 @@ export default function ExecutiveBentoDeck({
         </div>
       </div>
 
-      {/* 2. EXECUTIVE BENTO GRID WITH EKIZR BACKLIT HALO CARDS */}
+      {/* 2. EXECUTIVE BENTO GRID WITH EKIZR BACKLIT HALO CARDS & SCROLL ANIMATIONS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {/* CARD 1: CAREER BRANDING & BANGALORE RADAR */}
         <div
           onClick={() => onSelectTab("career")}
           className="relative group cursor-pointer"
+          data-aos="fade-up"
+          data-aos-delay="100"
+          data-aos-duration="700"
         >
           {/* EkiZR Ambient Backlight */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur-lg opacity-0 group-hover:opacity-45 transition-all duration-700 pointer-events-none" />
@@ -258,6 +285,9 @@ export default function ExecutiveBentoDeck({
         <div
           onClick={() => onSelectTab("gmat")}
           className="relative group cursor-pointer"
+          data-aos="fade-up"
+          data-aos-delay="200"
+          data-aos-duration="700"
         >
           {/* EkiZR Ambient Backlight */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-orange-600 rounded-3xl blur-lg opacity-0 group-hover:opacity-45 transition-all duration-700 pointer-events-none" />
@@ -307,6 +337,9 @@ export default function ExecutiveBentoDeck({
         <div
           onClick={() => onSelectTab("books")}
           className="relative group cursor-pointer"
+          data-aos="fade-up"
+          data-aos-delay="300"
+          data-aos-duration="700"
         >
           {/* EkiZR Ambient Backlight */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl blur-lg opacity-0 group-hover:opacity-45 transition-all duration-700 pointer-events-none" />
@@ -354,6 +387,9 @@ export default function ExecutiveBentoDeck({
         <div
           onClick={() => onSelectTab("farm")}
           className="relative group cursor-pointer"
+          data-aos="fade-up"
+          data-aos-delay="150"
+          data-aos-duration="700"
         >
           {/* EkiZR Ambient Backlight */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl blur-lg opacity-0 group-hover:opacity-45 transition-all duration-700 pointer-events-none" />
@@ -402,6 +438,9 @@ export default function ExecutiveBentoDeck({
         <div
           onClick={() => onSelectTab("music")}
           className="relative group cursor-pointer"
+          data-aos="fade-up"
+          data-aos-delay="250"
+          data-aos-duration="700"
         >
           {/* EkiZR Ambient Backlight */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-3xl blur-lg opacity-0 group-hover:opacity-45 transition-all duration-700 pointer-events-none" />
@@ -448,7 +487,12 @@ export default function ExecutiveBentoDeck({
         </div>
 
         {/* CARD 6: DAILY HABITS QUICK CHECK-IN */}
-        <div className="relative group">
+        <div
+          className="relative group"
+          data-aos="fade-up"
+          data-aos-delay="350"
+          data-aos-duration="700"
+        >
           {/* EkiZR Ambient Backlight */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 to-amber-600 rounded-3xl blur-lg opacity-0 group-hover:opacity-45 transition-all duration-700 pointer-events-none" />
 

@@ -61,6 +61,7 @@ import GoogleDriveBookshelf from "@/components/GoogleDriveBookshelf";
 import CareerBrandHub from "@/components/CareerBrandHub";
 import ExecutiveBentoDeck from "@/components/ExecutiveBentoDeck";
 import AnimatedCosmicBackground from "@/components/AnimatedCosmicBackground";
+import AOSInit from "@/components/AOSInit";
 
 interface Project {
   id: string;
@@ -477,7 +478,6 @@ const initialStrategicBooks: StrategicBook[] = [
 export default function LifeHub() {
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
-  const [overviewMode, setOverviewMode] = useState<"bento" | "stream">("bento");
 
   // Veerakeralapudur Agribusiness State
   const [activeAgriModelId, setActiveAgriModelId] = useState("guava");
@@ -1256,12 +1256,13 @@ export default function LifeHub() {
     return true;
   });
 
-  const showInStream = activeTab === "all" && overviewMode === "stream";
-
   return (
     <div className="min-h-screen bg-[#030014] text-neutral-100 font-sans selection:bg-amber-500/30 selection:text-amber-200 relative pb-16">
       {/* EkiZR-inspired Ambient Cosmic Background with domain orbs & technical grid */}
       <AnimatedCosmicBackground />
+
+      {/* AOS Scroll Animation Engine for Mobile & Desktop */}
+      <AOSInit />
 
       {/* Top Floating Glass Header (EkiZR + Anime.js style) */}
       <header className="sticky top-3 z-50 max-w-7xl mx-auto px-3 sm:px-6 mb-6">
@@ -1296,34 +1297,8 @@ export default function LifeHub() {
                 </div>
               </div>
 
-              {/* Right: Technical Ticker, Coleman-style View Mode Switcher & Time */}
+              {/* Right: Technical Ticker & Time */}
               <div className="flex items-center gap-2 sm:gap-3 text-xs">
-                {/* Density / View Mode Switcher (Coleman Progressive Disclosure) */}
-                {activeTab === "all" && (
-                  <div className="flex items-center gap-1 bg-[#030014]/90 p-1 rounded-2xl border border-white/[0.08] text-[11px]">
-                    <button
-                      onClick={() => setOverviewMode("bento")}
-                      className={`px-3 py-1 rounded-xl font-medium transition-all ${
-                        overviewMode === "bento"
-                          ? "bg-amber-500 text-neutral-950 font-bold shadow-md shadow-amber-500/20"
-                          : "text-neutral-400 hover:text-white"
-                      }`}
-                    >
-                      ✨ Bento Command
-                    </button>
-                    <button
-                      onClick={() => setOverviewMode("stream")}
-                      className={`px-3 py-1 rounded-xl font-medium transition-all ${
-                        overviewMode === "stream"
-                          ? "bg-amber-500 text-neutral-950 font-bold shadow-md shadow-amber-500/20"
-                          : "text-neutral-400 hover:text-white"
-                      }`}
-                    >
-                      📜 Full Stream
-                    </button>
-                  </div>
-                )}
-
                 {/* Time pill */}
                 <div className="flex items-center gap-1.5 glass-pill px-3 py-1.5 rounded-full text-xs font-mono text-neutral-300">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
@@ -1387,7 +1362,7 @@ export default function LifeHub() {
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-8">
         {/* EXECUTIVE BENTO SANCTUARY DECK (Uncluttered, High-Signal, Aesthetic) */}
-        {activeTab === "all" && overviewMode === "bento" && (
+        {activeTab === "all" && (
           <ExecutiveBentoDeck
             onSelectTab={(tabId) => setActiveTab(tabId)}
             completedHabitsCount={completedHabitsCount}
@@ -1401,38 +1376,15 @@ export default function LifeHub() {
           />
         )}
 
-        {/* Welcome Greeting Banner (Shown in Full Stream or when on individual non-all tabs) */}
-        {showInStream && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-3xl glass-card border border-white/[0.08] shadow-xl">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                {greeting}, Jaison.
-              </h1>
-              <p className="text-sm text-neutral-400 mt-1">
-                "Commit your actions to the LORD, and your plans will succeed." — Proverbs 16:3
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-xs text-neutral-400">Daily Habits</div>
-                <div className="text-sm font-bold text-amber-400 font-mono">
-                  {completedHabitsCount} / {habits.length} Done
-                </div>
-              </div>
-              <div className="h-10 w-10 rounded-full border border-amber-500/30 bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-xs">
-                {Math.round((completedHabitsCount / habits.length) * 100)}%
-              </div>
-            </div>
+        {/* CAREER BRANDING & BANGALORE JOB RADAR */}
+        {activeTab === "career" && (
+          <div data-aos="fade-up" data-aos-duration="600">
+            <CareerBrandHub />
           </div>
         )}
 
-        {/* CAREER BRANDING & BANGALORE JOB RADAR */}
-        {(showInStream || activeTab === "career") && (
-          <CareerBrandHub />
-        )}
-
         {/* 1. DAILY BIBLE QUOTE MODULE */}
-        {(showInStream || activeTab === "bible") && (
+        {activeTab === "bible" && (
           <section className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/20 via-neutral-900 to-neutral-950 p-6 sm:p-8 shadow-2xl">
             <div className="flex items-center justify-between gap-4 mb-4">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400">
@@ -1486,8 +1438,8 @@ export default function LifeHub() {
         )}
 
         {/* GMAT FOCUS EDITION DECEMBER SPRINT MODULE */}
-        {(showInStream || activeTab === "gmat") && (
-          <section className="p-6 sm:p-8 rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/25 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
+        {activeTab === "gmat" && (
+          <section data-aos="fade-up" data-aos-duration="600" className="p-6 sm:p-8 rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/25 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-md">
@@ -2233,11 +2185,9 @@ export default function LifeHub() {
           </section>
         )}
 
-        {/* 2-COLUMN GRID: HABITS & BIBLE ORGANISER */}
-        <div className={`grid grid-cols-1 gap-8 ${showInStream ? "lg:grid-cols-2" : ""}`}>
-          {/* HABIT TRACKER */}
-          {(showInStream || activeTab === "habits") && (
-            <section className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
+        {/* HABIT TRACKER */}
+        {activeTab === "habits" && (
+          <section data-aos="fade-up" data-aos-duration="600" className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/20">
@@ -2292,8 +2242,8 @@ export default function LifeHub() {
           )}
 
           {/* BIBLE ORGANISER & YOUVERSION INTEGRATION */}
-          {(showInStream || activeTab === "bible") && (
-            <section className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
+          {activeTab === "bible" && (
+            <section data-aos="fade-up" data-aos-duration="600" className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -2478,11 +2428,10 @@ export default function LifeHub() {
               </div>
             </section>
           )}
-        </div>
 
         {/* 3. PROJECTS TRACKER MODULE */}
-        {(showInStream || activeTab === "projects") && (
-          <section className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
+        {activeTab === "projects" && (
+          <section data-aos="fade-up" data-aos-duration="600" className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -2574,8 +2523,8 @@ export default function LifeHub() {
         )}
 
         {/* VEERAKERALAPUDUR 0.25-ACRE AGRIBUSINESS MODELER */}
-        {(showInStream || activeTab === "farm") && (
-          <section className="p-6 sm:p-8 rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-emerald-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
+        {activeTab === "farm" && (
+          <section data-aos="fade-up" data-aos-duration="600" className="p-6 sm:p-8 rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-emerald-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
             {/* Top Header & Overview */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
               <div className="flex items-center gap-3">
@@ -2997,8 +2946,8 @@ export default function LifeHub() {
         )}
 
         {/* KOBO E-READER BOOKSHELF & INTELLECTUAL DIGEST */}
-        {(showInStream || activeTab === "books") && (
-          <section className="p-6 sm:p-8 rounded-3xl border border-indigo-500/25 bg-gradient-to-br from-indigo-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-8">
+        {activeTab === "books" && (
+          <section data-aos="fade-up" data-aos-duration="600" className="p-6 sm:p-8 rounded-3xl border border-indigo-500/25 bg-gradient-to-br from-indigo-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-8">
             {/* Top Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
               <div className="flex items-center gap-3">
@@ -3220,8 +3169,8 @@ export default function LifeHub() {
         )}
 
         {/* 4. YOUTUBE MUSIC & WORSHIP SANCTUARY */}
-        {(showInStream || activeTab === "music") && (
-          <section className="p-6 sm:p-8 rounded-3xl border border-rose-500/20 bg-gradient-to-br from-rose-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
+        {activeTab === "music" && (
+          <section data-aos="fade-up" data-aos-duration="600" className="p-6 sm:p-8 rounded-3xl border border-rose-500/20 bg-gradient-to-br from-rose-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
             {/* Top Header & Account Sync Controls */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
               <div className="flex items-center gap-3">
