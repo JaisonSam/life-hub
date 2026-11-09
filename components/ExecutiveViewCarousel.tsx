@@ -80,7 +80,7 @@ export default function ExecutiveViewCarousel({
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => {
       setActiveIndex(index);
-    }, 140);
+    }, 240);
   }, []);
 
   const handleCardLeave = useCallback(() => {
@@ -272,7 +272,7 @@ export default function ExecutiveViewCarousel({
   // Autoplay timer with pause on hover
   useEffect(() => {
     if (!isAutoplay || isHovered) return;
-    const interval = setInterval(handleNext, 5500);
+    const interval = setInterval(handleNext, 6500);
     return () => clearInterval(interval);
   }, [handleNext, isAutoplay, isHovered]);
 
@@ -402,7 +402,8 @@ export default function ExecutiveViewCarousel({
           className="absolute w-[500px] h-[300px] rounded-full blur-[100px] pointer-events-none -z-10"
           style={{
             backgroundColor: activeItem.haloColor,
-            transition: "all 900ms cubic-bezier(0.16, 1, 0.3, 1)",
+            transition: "background-color 1150ms cubic-bezier(0.25, 0.1, 0.25, 1)",
+            willChange: "background-color",
           }}
         />
 
@@ -415,10 +416,6 @@ export default function ExecutiveViewCarousel({
             if (offset > total / 2) offset -= total; // range: e.g. -3, -2, -1, 0, 1, 2, 3
 
             const isCenter = offset === 0;
-            const absOffset = Math.abs(offset);
-
-            // Hide cards beyond 2 steps away
-            if (absOffset > 2) return null;
 
             // Geometry calculations for Apple 3D Coverflow
             let translateX = "0%";
@@ -427,6 +424,7 @@ export default function ExecutiveViewCarousel({
             let scale = 1;
             let opacity = 1;
             let zIndex = 30;
+            let pointerEvents: "auto" | "none" = "auto";
 
             if (isCenter) {
               translateX = "0%";
@@ -435,6 +433,7 @@ export default function ExecutiveViewCarousel({
               scale = 1;
               opacity = 1;
               zIndex = 30;
+              pointerEvents = "auto";
             } else if (offset === -1) {
               // Left immediate neighbor
               translateX = "-58%";
@@ -443,6 +442,7 @@ export default function ExecutiveViewCarousel({
               scale = 0.88;
               opacity = 0.65;
               zIndex = 20;
+              pointerEvents = "auto";
             } else if (offset === 1) {
               // Right immediate neighbor
               translateX = "58%";
@@ -451,6 +451,7 @@ export default function ExecutiveViewCarousel({
               scale = 0.88;
               opacity = 0.65;
               zIndex = 20;
+              pointerEvents = "auto";
             } else if (offset === -2) {
               // Far left
               translateX = "-96%";
@@ -459,6 +460,7 @@ export default function ExecutiveViewCarousel({
               scale = 0.76;
               opacity = 0.25;
               zIndex = 10;
+              pointerEvents = "auto";
             } else if (offset === 2) {
               // Far right
               translateX = "96%";
@@ -467,6 +469,17 @@ export default function ExecutiveViewCarousel({
               scale = 0.76;
               opacity = 0.25;
               zIndex = 10;
+              pointerEvents = "auto";
+            } else {
+              // Cards 3 or more steps away: smoothly fade in/out off-stage so there's zero sudden popping
+              const isLeft = offset < 0;
+              translateX = isLeft ? "-128%" : "128%";
+              translateZ = "-150px";
+              rotateY = isLeft ? "28deg" : "-28deg";
+              scale = 0.65;
+              opacity = 0;
+              zIndex = 0;
+              pointerEvents = "none";
             }
 
             return (
@@ -485,7 +498,9 @@ export default function ExecutiveViewCarousel({
                   transform: `translateX(${translateX}) translateZ(${translateZ}) rotateY(${rotateY}) scale(${scale})`,
                   opacity,
                   zIndex,
-                  transition: "all 800ms cubic-bezier(0.16, 1, 0.3, 1)",
+                  pointerEvents,
+                  transition: "transform 1150ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 1150ms cubic-bezier(0.25, 0.1, 0.25, 1)",
+                  willChange: "transform, opacity",
                 }}
                 className={`absolute w-[90%] sm:w-[540px] md:w-[600px] h-[340px] sm:h-[350px] rounded-3xl p-6 sm:p-7 flex flex-col justify-between cursor-pointer select-none group border transition-shadow duration-700 backdrop-blur-2xl ${
                   isCenter
@@ -579,7 +594,7 @@ export default function ExecutiveViewCarousel({
                 }
               }}
               onMouseLeave={handleCardLeave}
-              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-500 ease-out ${
                 isActive
                   ? "bg-amber-500 text-neutral-950 font-bold shadow-lg shadow-amber-500/25 scale-105"
                   : "bg-neutral-900/60 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-white/5"
