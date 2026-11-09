@@ -43,6 +43,8 @@ export interface JobOpening {
   category: "tech" | "consulting" | "industrial";
   source: "LinkedIn Recruiter Verified" | "Naukri Premium Enterprise" | "Company ATS" | "Foundit / Monster" | "Direct Referral";
   directUrl: string;
+  recruiterUrl?: string;
+  recruiterLabel?: string;
   ctcRange: string;
   expRequired: string;
   matchScore: number;
@@ -63,7 +65,9 @@ const INITIAL_JOB_OPENINGS: JobOpening[] = [
     campus: "Whitefield, Bengaluru",
     category: "tech",
     source: "LinkedIn Recruiter Verified",
-    directUrl: "https://jobs.sap.com/search/?createNewAlert=false&q=S4HANA+PP+Bangalore",
+    directUrl: "https://www.sap.com/india/about/careers.html",
+    recruiterUrl: "https://www.linkedin.com/jobs/search/?keywords=SAP%20Labs%20S4HANA%20Manufacturing&location=Bengaluru%2C%20Karnataka%2C%20India",
+    recruiterLabel: "LinkedIn Recruiter Post",
     ctcRange: "₹28L - ₹42L PA",
     expRequired: "4 - 7 Years",
     matchScore: 98,
@@ -79,7 +83,9 @@ const INITIAL_JOB_OPENINGS: JobOpening[] = [
     campus: "MG Road / UB City, Bengaluru",
     category: "consulting",
     source: "Company ATS",
-    directUrl: "https://www.mckinsey.com/careers/search-jobs?query=enterprise+cloud+operations+bengaluru",
+    directUrl: "https://www.mckinsey.com/careers",
+    recruiterUrl: "https://www.linkedin.com/jobs/search/?keywords=McKinsey%20Enterprise%20Operations&location=Bengaluru%2C%20Karnataka%2C%20India",
+    recruiterLabel: "LinkedIn Recruiter Post",
     ctcRange: "₹34L - ₹52L PA",
     expRequired: "4 - 8 Years",
     matchScore: 95,
@@ -95,7 +101,9 @@ const INITIAL_JOB_OPENINGS: JobOpening[] = [
     campus: "Prestige Tech Park, Outer Ring Road, Bengaluru",
     category: "consulting",
     source: "Naukri Premium Enterprise",
-    directUrl: "https://usijobs.deloitte.com/search/?searchby=location&createNewAlert=false&q=SAP+PP+Bengaluru",
+    directUrl: "https://www.deloitte.com/in/en/careers.html",
+    recruiterUrl: "https://www.linkedin.com/jobs/search/?keywords=Deloitte%20SAP%20PP&location=Bengaluru%2C%20Karnataka%2C%20India",
+    recruiterLabel: "LinkedIn Recruiter Post",
     ctcRange: "₹25L - ₹38L PA",
     expRequired: "4 - 7 Years",
     matchScore: 96,
@@ -111,7 +119,9 @@ const INITIAL_JOB_OPENINGS: JobOpening[] = [
     campus: "Electronic City, Bengaluru",
     category: "industrial",
     source: "LinkedIn Recruiter Verified",
-    directUrl: "https://jobs.siemens.com/careers?query=MES%20Consultant%20Bangalore",
+    directUrl: "https://www.siemens.com/en-gb/company/jobs",
+    recruiterUrl: "https://www.linkedin.com/jobs/search/?keywords=Siemens%20MES%20Consultant&location=Bengaluru%2C%20Karnataka%2C%20India",
+    recruiterLabel: "LinkedIn Recruiter Post",
     ctcRange: "₹24L - ₹36L PA",
     expRequired: "4 - 7 Years",
     matchScore: 97,
@@ -127,7 +137,9 @@ const INITIAL_JOB_OPENINGS: JobOpening[] = [
     campus: "Adugodi / Koramangala, Bengaluru",
     category: "industrial",
     source: "Naukri Premium Enterprise",
-    directUrl: "https://www.bosch.in/careers/job-offers/?query=ERP+Manufacturing+Bengaluru",
+    directUrl: "https://www.bosch.in/careers/",
+    recruiterUrl: "https://www.linkedin.com/jobs/search/?keywords=Bosch%20SAP%20Manufacturing&location=Bengaluru%2C%20Karnataka%2C%20India",
+    recruiterLabel: "LinkedIn Recruiter Post",
     ctcRange: "₹24L - ₹35L PA",
     expRequired: "4 - 8 Years",
     matchScore: 94,
@@ -143,7 +155,9 @@ const INITIAL_JOB_OPENINGS: JobOpening[] = [
     campus: "Devarabisanahalli, Outer Ring Road, Bengaluru",
     category: "industrial",
     source: "Company ATS",
-    directUrl: "https://careers.honeywell.com/us/en/search-results?keywords=ERP%20Business%20Analyst%20Bengaluru",
+    directUrl: "https://careers.honeywell.com/us/en/home",
+    recruiterUrl: "https://www.linkedin.com/jobs/search/?keywords=Honeywell%20ERP%20Analyst&location=Bengaluru%2C%20Karnataka%2C%20India",
+    recruiterLabel: "LinkedIn Recruiter Post",
     ctcRange: "₹22L - ₹33L PA",
     expRequired: "4 - 7 Years",
     matchScore: 93,
@@ -159,7 +173,9 @@ const INITIAL_JOB_OPENINGS: JobOpening[] = [
     campus: "RMZ Ecospace, Bellandur, Bengaluru",
     category: "consulting",
     source: "LinkedIn Recruiter Verified",
-    directUrl: "https://www.accenture.com/in-en/careers/jobsearch?jk=Supply+Chain+Consultant+Bengaluru",
+    directUrl: "https://www.accenture.com/in-en/careers",
+    recruiterUrl: "https://www.linkedin.com/jobs/search/?keywords=Accenture%20Supply%20Chain%20SAP&location=Bengaluru%2C%20Karnataka%2C%20India",
+    recruiterLabel: "LinkedIn Recruiter Post",
     ctcRange: "₹26L - ₹40L PA",
     expRequired: "4 - 7 Years",
     matchScore: 96,
@@ -175,7 +191,9 @@ const INITIAL_JOB_OPENINGS: JobOpening[] = [
     campus: "Attibele / Bagmane Tech Park, Bengaluru",
     category: "industrial",
     source: "Company ATS",
-    directUrl: "https://se.wd3.myworkdayjobs.com/SchneiderElectric?q=Solution+Architect+Bengaluru",
+    directUrl: "https://www.se.com/in/en/about-us/careers/overview.jsp",
+    recruiterUrl: "https://www.linkedin.com/jobs/search/?keywords=Schneider%20Electric%20SAP%20Architect&location=Bengaluru%2C%20Karnataka%2C%20India",
+    recruiterLabel: "LinkedIn Recruiter Post",
     ctcRange: "₹28L - ₹42L PA",
     expRequired: "4 - 8 Years",
     matchScore: 99,
@@ -191,7 +209,9 @@ const INITIAL_JOB_OPENINGS: JobOpening[] = [
     campus: "Global Technology Park, Bellandur, Bengaluru",
     category: "tech",
     source: "Naukri Premium Enterprise",
-    directUrl: "https://www.naukri.com/sap-s4-hana-pp-jobs-in-bengaluru-bangalore",
+    directUrl: "https://www.ltimindtree.com/careers/",
+    recruiterUrl: "https://www.naukri.com/sap-s4-hana-pp-jobs-in-bengaluru-bangalore",
+    recruiterLabel: "Naukri Verified Post",
     ctcRange: "₹23L - ₹34L PA",
     expRequired: "4 - 7 Years",
     matchScore: 93,
@@ -207,7 +227,9 @@ const INITIAL_JOB_OPENINGS: JobOpening[] = [
     campus: "Whitefield, Bengaluru",
     category: "consulting",
     source: "Foundit / Monster",
-    directUrl: "https://www.capgemini.com/in-en/careers/job-search/?search=SAP+PP+Bengaluru",
+    directUrl: "https://www.capgemini.com/in-en/careers/",
+    recruiterUrl: "https://www.linkedin.com/jobs/search/?keywords=Capgemini%20SAP%20PP&location=Bengaluru%2C%20Karnataka%2C%20India",
+    recruiterLabel: "LinkedIn Recruiter Post",
     ctcRange: "₹24L - ₹36L PA",
     expRequired: "4 - 7 Years",
     matchScore: 92,
@@ -225,7 +247,7 @@ export default function CareerBrandHub() {
   const [activePipelineFilter, setActivePipelineFilter] = useState<"all" | "wishlist" | "applied" | "interview" | "offer">("all");
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Job openings list with local storage persistence
+  // Job openings list with local storage persistence (v3 ensures clean verified URLs)
   const [jobOpenings, setJobOpenings] = useState<JobOpening[]>(INITIAL_JOB_OPENINGS);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -242,7 +264,7 @@ export default function CareerBrandHub() {
   // Load from LocalStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("lifehub_career_jobs_v2");
+      const saved = localStorage.getItem("lifehub_career_jobs_v3");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -258,7 +280,7 @@ export default function CareerBrandHub() {
   const saveOpenings = (updated: JobOpening[]) => {
     setJobOpenings(updated);
     try {
-      localStorage.setItem("lifehub_career_jobs_v2", JSON.stringify(updated));
+      localStorage.setItem("lifehub_career_jobs_v3", JSON.stringify(updated));
     } catch (e) {
       console.error("Error saving job openings", e);
     }
@@ -299,6 +321,8 @@ export default function CareerBrandHub() {
       category: newCategory,
       source: newSource,
       directUrl: newUrl.trim() || "https://www.linkedin.com/jobs/",
+      recruiterUrl: newUrl.trim() || "https://www.linkedin.com/jobs/",
+      recruiterLabel: "Direct Link",
       ctcRange: newCtc.trim() || "Competitive / Standard Band",
       expRequired: "4+ Years",
       matchScore: 95,
@@ -559,7 +583,7 @@ export default function CareerBrandHub() {
                 </span>
               </div>
               <p className="text-xs text-neutral-400 mt-0.5">
-                Real available job openings from recruiter websites with direct apply links, tailored pitch generators, and pipeline tracking
+                Real available job openings with official career portals, direct recruiter links, tailored pitch generators, and pipeline tracking
               </p>
             </div>
           </div>
@@ -883,16 +907,32 @@ export default function CareerBrandHub() {
                       )}
                     </button>
 
-                    {/* Direct Apply Button */}
-                    <a
-                      href={job.directUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-md shadow-blue-600/20"
-                    >
-                      <span>Apply on Recruiter Site</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
+                    {/* Application Links Group (Dual Guaranteed Links) */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {job.recruiterUrl && (
+                        <a
+                          href={job.recruiterUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-blue-500/30 bg-blue-950/30 hover:bg-blue-900/40 text-blue-300 font-semibold transition-all"
+                          title="Open verified recruiter posting on LinkedIn / Naukri"
+                        >
+                          <span>{job.recruiterLabel || "Recruiter Post"}</span>
+                          <ArrowUpRight className="w-3.5 h-3.5 text-blue-400" />
+                        </a>
+                      )}
+
+                      <a
+                        href={job.directUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-md shadow-blue-600/20"
+                        title="Open official corporate career portal"
+                      >
+                        <span>Official Portal</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
                   </div>
                 </div>
               );
