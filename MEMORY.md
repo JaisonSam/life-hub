@@ -9,7 +9,7 @@
 
 ## 🎯 Project Vision
 A personal life operating system and daily sanctuary combining:
-1. **GMAT Focus Edition Sprint Center**: Target 715+ (December 2026 timeline), 60-minute compounding timer, and error diagnosis log.
+1. **GMAT Focus Edition Sprint Center**: Target 715+ (December 2026 timeline), 60-minute compounding timer, mba.com Official Mock Score Tracker with SVG Trajectory Ladder & Percentile Engine, and error diagnosis log.
 2. **Daily Scripture Inspiration**: Automated verse of the day, bookmarking, and reflections.
 3. **Daily Habit Tracker**: Interactive check-ins and streaks with local persistence.
 4. **Projects Tracker**: Goal progress bars, status badges, and project creation.
@@ -20,4 +20,4 @@ A personal life operating system and daily sanctuary combining:
 * **Location**: `/Users/jaisappi/Developer/life-hub`
 * **Framework**: Next.js 16 (App Router), React 19, Tailwind CSS v4, Lucide React, Bun.
 * **GitHub Repository**: `JaisonSam/life-hub`
-* **Vercel Production**: `https://life-hub-nu.vercel.app` (or assigned production URL)
+* **Vercel Production**: `https://life-hub-lemon-five.vercel.app`
