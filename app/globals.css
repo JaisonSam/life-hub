@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #090a0f;
+  --background: #030014;
   --foreground: #f4f4f6;
   --accent-amber: #f59e0b;
   --accent-blue: #3b82f6;
@@ -17,7 +17,7 @@
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
-  background-color: #090a0f;
+  background-color: #030014;
 }
 
 body {
@@ -31,31 +31,31 @@ body {
 
 /* Subtle Technical Dot Grid Background (Wodniack & Anime.js style) */
 .bg-tech-grid {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
-/* Glassmorphic Luxury Surfaces */
+/* Glassmorphic Luxury Surfaces (EkiZR + Anime.js) */
 .glass-panel {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  background: rgba(13, 15, 22, 0.65);
+  background: rgba(11, 12, 22, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-card {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  background: rgba(18, 20, 29, 0.55);
+  background: rgba(14, 15, 26, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  background: rgba(22, 25, 36, 0.75);
-  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(19, 21, 35, 0.85);
+  border-color: rgba(255, 255, 255, 0.16);
   transform: translateY(-2px);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 20px -5px rgba(245, 158, 11, 0.08);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
 }
 
 .glass-pill {
@@ -68,7 +68,7 @@ body {
 
 .glass-pill:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 /* Minimalist Dark Scrollbars */
@@ -92,13 +92,23 @@ body {
 
 /* Animations */
 @keyframes subtlePulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.04); }
 }
 
 @keyframes gentleFloat {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-4px); }
+}
+
+@keyframes blinkCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes spinSlower {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .animate-subtle-pulse {
@@ -107,4 +117,12 @@ body {
 
 .animate-gentle-float {
   animation: gentleFloat 5s ease-in-out infinite;
+}
+
+.animate-blink {
+  animation: blinkCursor 1s step-end infinite;
+}
+
+.animate-spin-slower {
+  animation: spinSlower 24s linear infinite;
 }
