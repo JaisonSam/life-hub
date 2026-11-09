@@ -72,6 +72,29 @@ export default function ExecutiveViewCarousel({
   const [isHovered, setIsHovered] = useState(false);
   const touchStartXRef = useRef<number | null>(null);
   const touchEndXRef = useRef<number | null>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Hover on adjacent cards or tabs smoothly rotates the carousel
+  const handleCardHover = useCallback((index: number, isCenter: boolean) => {
+    if (isCenter) return;
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => {
+      setActiveIndex(index);
+    }, 140);
+  }, []);
+
+  const handleCardLeave = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    };
+  }, []);
 
   const views: CarouselViewItem[] = [
     {
@@ -249,7 +272,7 @@ export default function ExecutiveViewCarousel({
   // Autoplay timer with pause on hover
   useEffect(() => {
     if (!isAutoplay || isHovered) return;
-    const interval = setInterval(handleNext, 4500);
+    const interval = setInterval(handleNext, 5500);
     return () => clearInterval(interval);
   }, [handleNext, isAutoplay, isHovered]);
 
@@ -376,8 +399,11 @@ export default function ExecutiveViewCarousel({
       <div className="relative w-full h-[400px] sm:h-[420px] flex items-center justify-center overflow-hidden py-4 perspective-1000">
         {/* Ambient Backlight Halo mirroring the active card */}
         <div
-          className="absolute w-[500px] h-[300px] rounded-full blur-[100px] pointer-events-none transition-all duration-700 -z-10"
-          style={{ backgroundColor: activeItem.haloColor }}
+          className="absolute w-[500px] h-[300px] rounded-full blur-[100px] pointer-events-none -z-10"
+          style={{
+            backgroundColor: activeItem.haloColor,
+            transition: "all 900ms cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
         />
 
         {/* Carousel Cards Container */}
@@ -453,13 +479,15 @@ export default function ExecutiveViewCarousel({
                     setActiveIndex(index);
                   }
                 }}
+                onMouseEnter={() => handleCardHover(index, isCenter)}
+                onMouseLeave={handleCardLeave}
                 style={{
                   transform: `translateX(${translateX}) translateZ(${translateZ}) rotateY(${rotateY}) scale(${scale})`,
                   opacity,
                   zIndex,
-                  transition: "all 500ms cubic-bezier(0.25, 1, 0.5, 1)",
+                  transition: "all 800ms cubic-bezier(0.16, 1, 0.3, 1)",
                 }}
-                className={`absolute w-[90%] sm:w-[540px] md:w-[600px] h-[340px] sm:h-[350px] rounded-3xl p-6 sm:p-7 flex flex-col justify-between cursor-pointer select-none group border transition-shadow duration-500 backdrop-blur-2xl ${
+                className={`absolute w-[90%] sm:w-[540px] md:w-[600px] h-[340px] sm:h-[350px] rounded-3xl p-6 sm:p-7 flex flex-col justify-between cursor-pointer select-none group border transition-shadow duration-700 backdrop-blur-2xl ${
                   isCenter
                     ? "bg-[#0b0c16]/95 border-white/[0.14] shadow-2xl shadow-black/80 ring-1 ring-white/10"
                     : "bg-[#0b0c16]/75 border-white/[0.06] hover:border-white/20 hover:opacity-85"
@@ -545,6 +573,12 @@ export default function ExecutiveViewCarousel({
             <button
               key={v.id}
               onClick={() => setActiveIndex(vi)}
+              onMouseEnter={() => {
+                if (vi !== activeIndex) {
+                  handleCardHover(vi, false);
+                }
+              }}
+              onMouseLeave={handleCardLeave}
               className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                 isActive
                   ? "bg-amber-500 text-neutral-950 font-bold shadow-lg shadow-amber-500/25 scale-105"

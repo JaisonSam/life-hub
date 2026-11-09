@@ -18,6 +18,7 @@ import {
   Calendar,
   ExternalLink,
   ChevronRight,
+  ChevronLeft,
   Heart,
   Volume2,
   Target,
@@ -1331,12 +1332,16 @@ export default function LifeHub() {
           {/* Subtle Ambient Backlight Glow */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/20 via-indigo-500/20 to-purple-600/20 rounded-3xl blur-md opacity-30 group-hover/header:opacity-50 transition duration-500 pointer-events-none" />
 
-          <div className="relative glass-panel rounded-3xl p-3 sm:p-4 border border-white/[0.08] shadow-2xl space-y-3 bg-[#0b0c16]/85 backdrop-blur-2xl">
-            <div className="flex flex-wrap items-center justify-between gap-3 px-1 sm:px-2">
-              {/* Left: Brand Monogram & Live Status */}
-              <div className="flex items-center gap-3">
+          <div className="relative glass-panel rounded-3xl p-3 sm:p-3.5 border border-white/[0.08] shadow-2xl bg-[#0b0c16]/85 backdrop-blur-2xl">
+            <div className="flex items-center justify-between gap-3 px-1 sm:px-2">
+              {/* Left: Brand Monogram & Live Status (clickable to return to Carousel) */}
+              <div
+                onClick={() => handleSelectTab("all")}
+                className="flex items-center gap-3 cursor-pointer group/brand"
+                title="Return to Overview & Carousel"
+              >
                 <div className="relative group/logo">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl blur opacity-35 group-hover/logo:opacity-75 transition duration-300" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl blur opacity-35 group-hover/brand:opacity-85 transition duration-300" />
                   <div className="relative h-9 w-9 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-bold text-white shadow-lg shadow-amber-500/20 text-sm">
                     ✝
                   </div>
@@ -1344,7 +1349,7 @@ export default function LifeHub() {
 
                 <div>
                   <div className="font-bold text-sm sm:text-base text-white tracking-tight flex items-center gap-2">
-                    <span className="bg-gradient-to-r from-white via-neutral-100 to-neutral-300 bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-white via-neutral-100 to-neutral-300 bg-clip-text text-transparent group-hover/brand:text-amber-300 transition-colors">
                       Jaison's Life OS
                     </span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium flex items-center gap-1">
@@ -1358,8 +1363,20 @@ export default function LifeHub() {
                 </div>
               </div>
 
-              {/* Right: Technical Ticker & Time */}
+              {/* Right: Technical Ticker, Return to Carousel & Time */}
               <div className="flex items-center gap-2 sm:gap-3 text-xs">
+                {activeTab !== "all" && (
+                  <button
+                    onClick={() => handleSelectTab("all")}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-neutral-950 font-bold text-xs shadow-md shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all"
+                    title="Return to Overview & Carousel"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Overview & Carousel</span>
+                    <span className="sm:hidden">Home</span>
+                  </button>
+                )}
+
                 {/* Time pill */}
                 <div className="flex items-center gap-1.5 glass-pill px-3 py-1.5 rounded-full text-xs font-mono text-neutral-300">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
@@ -1377,49 +1394,6 @@ export default function LifeHub() {
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
-            </div>
-
-            {/* Navigation Filter Tabs Strip with EkiZR Sliding Gradient Underline */}
-            <div className="flex gap-1.5 overflow-x-auto pb-1 pt-1 text-xs font-medium no-scrollbar">
-              {[
-                { id: "all", label: "Overview Hub", icon: Sparkles },
-                { id: "career", label: "Career & Bangalore Jobs", icon: Briefcase },
-                { id: "gmat", label: "GMAT 715+ Sprint", icon: Target },
-                { id: "farm", label: "VKP Agribusiness", icon: Sprout },
-                { id: "books", label: "Strategic Bookshelf", icon: Library },
-                { id: "bible", label: "Bible & Scripture", icon: BookOpen },
-                { id: "habits", label: "Habit Tracker", icon: Flame },
-                { id: "projects", label: "Projects Tracker", icon: FolderKanban },
-                { id: "music", label: "Music & Sanctuary", icon: Music },
-              ].map((tab) => {
-                const Icon = tab.icon;
-                const active = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={(e) => {
-                      handleSelectTab(tab.id as any);
-                      if (typeof window !== "undefined" && window.innerWidth < 768) {
-                        e.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-                      }
-                    }}
-                    className={`relative flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap text-xs group ${
-                      active
-                        ? "bg-amber-500 text-neutral-950 font-bold shadow-lg shadow-amber-500/20 scale-[1.02]"
-                        : "glass-pill text-neutral-400 hover:text-white"
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{tab.label}</span>
-                    {/* EkiZR Sliding Gradient Underline on hover */}
-                    <span
-                      className={`absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-amber-400 via-indigo-400 to-purple-400 rounded-full transform origin-left transition-transform duration-300 ${
-                        active ? "scale-x-0" : "scale-x-0 group-hover:scale-x-100"
-                      }`}
-                    />
-                  </button>
-                );
-              })}
             </div>
           </div>
         </div>
