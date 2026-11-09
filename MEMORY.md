@@ -9,11 +9,12 @@
 
 ## 🎯 Project Vision
 A personal life operating system and daily sanctuary combining:
-1. **Daily Scripture Inspiration**: Automated verse of the day, bookmarking, and reflections.
-2. **Daily Habit Tracker**: Interactive check-ins and streaks with local persistence.
-3. **Projects Tracker**: Goal progress bars, status badges, and project creation.
-4. **Bible Study Organiser**: Reading plan chapter check-offs and study notes.
-5. **Music & Worship Corner**: Curated YouTube Music playlists for worship and deep focus.
+1. **GMAT Focus Edition Sprint Center**: Target 715+ (December 2026 timeline), 60-minute compounding timer, and error diagnosis log.
+2. **Daily Scripture Inspiration**: Automated verse of the day, bookmarking, and reflections.
+3. **Daily Habit Tracker**: Interactive check-ins and streaks with local persistence.
+4. **Projects Tracker**: Goal progress bars, status badges, and project creation.
+5. **Bible Study Organiser**: Book of Romans study guide, YouVersion Android deep-linking, chapter check-offs, and study notes.
+6. **Music & Worship Corner**: Curated YouTube Music playlists & OAuth 2.0 personal playlist sync.
 
 ## 🛠️ Tech Stack & Locations
 * **Location**: `/Users/jaisappi/Developer/life-hub`

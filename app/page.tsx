@@ -19,6 +19,14 @@ import {
   ChevronRight,
   Heart,
   Volume2,
+  Target,
+  GraduationCap,
+  Timer,
+  Play,
+  Pause,
+  RotateCcw,
+  AlertCircle,
+  TrendingUp,
 } from "lucide-react";
 
 interface Project {
@@ -45,14 +53,49 @@ interface StudyNote {
   date: string;
 }
 
+interface GmatErrorLog {
+  id: string;
+  question: string;
+  section: "Quant" | "Data Insights" | "Verbal";
+  trapType: "Math Trap" | "RC Scope Shift" | "Careless / Arithmetic" | "Timing Pressure";
+  takeaway: string;
+  date: string;
+}
+
 export default function LifeHub() {
   // Navigation tabs
-  const [activeTab, setActiveTab] = useState<"all" | "bible" | "habits" | "projects" | "music">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "gmat" | "bible" | "habits" | "projects" | "music">("all");
 
   // Time & Greeting
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
   const [greeting, setGreeting] = useState("Welcome");
+
+  // GMAT December Sprint State
+  const [gmatTimerSeconds, setGmatTimerSeconds] = useState(3600); // 60 minutes
+  const [gmatTimerRunning, setGmatTimerRunning] = useState(false);
+  const [gmatErrors, setGmatErrors] = useState<GmatErrorLog[]>([
+    {
+      id: "1",
+      question: "OG Quant PS #42",
+      section: "Quant",
+      trapType: "Math Trap",
+      takeaway: "Check constraint x < 0 before simplifying inequalities with variables.",
+      date: "Nov 9",
+    },
+    {
+      id: "2",
+      question: "Data Insights Multi-Source",
+      section: "Data Insights",
+      trapType: "Timing Pressure",
+      takeaway: "Skim Tab 1 first to grasp structure; don't read full paragraphs until checking question.",
+      date: "Nov 8",
+    },
+  ]);
+  const [newErrorQ, setNewErrorQ] = useState("");
+  const [newErrorSection, setNewErrorSection] = useState<"Quant" | "Data Insights" | "Verbal">("Quant");
+  const [newErrorTrap, setNewErrorTrap] = useState<"Math Trap" | "RC Scope Shift" | "Careless / Arithmetic" | "Timing Pressure">("Math Trap");
+  const [newErrorTakeaway, setNewErrorTakeaway] = useState("");
 
   // Bible Verse State
   const [dailyVerse, setDailyVerse] = useState({
@@ -85,39 +128,39 @@ export default function LifeHub() {
   const [newNoteRef, setNewNoteRef] = useState("");
   const [newNoteText, setNewNoteText] = useState("");
 
-  // Habits State
+  // Calibrated Habits State (Reflecting Jaison's 4 Core Pillars)
   const [habits, setHabits] = useState<Habit[]>([
-    { id: "1", name: "Morning Scripture & Prayer", category: "Spiritual", streak: 7, completedToday: true },
-    { id: "2", name: "30-min Physical Workout", category: "Health", streak: 4, completedToday: false },
-    { id: "3", name: "Read 1 Chapter (Bible Organiser)", category: "Spiritual", streak: 12, completedToday: false },
-    { id: "4", name: "Build & Code (Personal Website)", category: "Growth", streak: 3, completedToday: true },
+    { id: "1", name: "GMAT 60-min Focus Session", category: "Growth", streak: 5, completedToday: false },
+    { id: "2", name: "Morning Scripture (Romans) & Prayer", category: "Spiritual", streak: 7, completedToday: true },
+    { id: "3", name: "30-min Physical Training / Workout", category: "Health", streak: 4, completedToday: false },
+    { id: "4", name: "AI & Tech Strategy Synthesis", category: "Growth", streak: 3, completedToday: true },
   ]);
 
   // Projects State
   const [projects, setProjects] = useState<Project[]>([
     {
       id: "1",
-      name: "Life Operating System (life-hub)",
-      category: "Personal Website",
-      progress: 80,
+      name: "GMAT Focus Edition 715+ Sprint (Dec 2026)",
+      category: "Career & Education",
+      progress: 65,
       status: "In Progress",
-      deadline: "Nov 2026",
+      deadline: "Dec 2026",
     },
     {
       id: "2",
-      name: "Bible Reading & Study Organiser",
-      category: "Spiritual Growth",
-      progress: 50,
-      status: "In Progress",
-      deadline: "Dec 2026",
+      name: "Veerakeralapudur Farm Model (0.25 Acre)",
+      category: "Entrepreneurship",
+      progress: 25,
+      status: "Planning",
+      deadline: "2027",
     },
     {
       id: "3",
-      name: "YouTube Music Playlist Sync",
-      category: "Media & Audio",
-      progress: 30,
-      status: "Planning",
-      deadline: "Dec 2026",
+      name: "Life Operating System (life-hub)",
+      category: "Applied AI & Portfolio",
+      progress: 90,
+      status: "In Progress",
+      deadline: "Nov 2026",
     },
   ]);
 
@@ -196,6 +239,47 @@ export default function LifeHub() {
 
     return () => clearInterval(timer);
   }, []);
+
+  // 60-minute GMAT focus countdown timer
+  useEffect(() => {
+    let interval: any = null;
+    if (gmatTimerRunning && gmatTimerSeconds > 0) {
+      interval = setInterval(() => {
+        setGmatTimerSeconds((s) => s - 1);
+      }, 1000);
+    } else if (gmatTimerSeconds === 0 && gmatTimerRunning) {
+      setGmatTimerRunning(false);
+      // Auto-complete GMAT focus habit
+      const updated = habits.map((h) => {
+        if (h.name.includes("GMAT 60-min")) {
+          return { ...h, completedToday: true, streak: h.completedToday ? h.streak : h.streak + 1 };
+        }
+        return h;
+      });
+      saveHabits(updated);
+    }
+    return () => clearInterval(interval);
+  }, [gmatTimerRunning, gmatTimerSeconds, habits]);
+
+  const addGmatError = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newErrorQ.trim() || !newErrorTakeaway.trim()) return;
+    const item: GmatErrorLog = {
+      id: Date.now().toString(),
+      question: newErrorQ,
+      section: newErrorSection,
+      trapType: newErrorTrap,
+      takeaway: newErrorTakeaway,
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    };
+    const updated = [item, ...gmatErrors];
+    setGmatErrors(updated);
+    try {
+      localStorage.setItem("lifehub_gmaterrors", JSON.stringify(updated));
+    } catch {}
+    setNewErrorQ("");
+    setNewErrorTakeaway("");
+  };
 
   // Save changes to localStorage
   const saveHabits = (updated: Habit[]) => {
@@ -304,6 +388,7 @@ export default function LifeHub() {
         <div className="max-w-7xl mx-auto px-4 sm:px-8 flex gap-2 overflow-x-auto pb-3 text-xs font-medium">
           {[
             { id: "all", label: "Overview Hub", icon: Sparkles },
+            { id: "gmat", label: "GMAT 715+ Sprint", icon: Target },
             { id: "bible", label: "Bible & Scripture", icon: BookOpen },
             { id: "habits", label: "Habit Tracker", icon: Flame },
             { id: "projects", label: "Projects Tracker", icon: FolderKanban },
@@ -404,6 +489,185 @@ export default function LifeHub() {
               <p className="text-xs text-neutral-400 max-w-md italic">
                 💡 Reflection: {dailyVerse.reflection}
               </p>
+            </div>
+          </section>
+        )}
+
+        {/* GMAT FOCUS EDITION DECEMBER SPRINT MODULE */}
+        {(activeTab === "all" || activeTab === "gmat") && (
+          <section className="p-6 sm:p-8 rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/25 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-md">
+                  <Target className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="font-extrabold text-lg text-white flex items-center gap-2">
+                    GMAT Focus Edition Sprint
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-semibold">
+                      Target: 715+ (99th %ile)
+                    </span>
+                  </h2>
+                  <p className="text-xs text-neutral-400">
+                    Exam Target: <span className="text-indigo-300 font-semibold">December 2026</span> • ~45 Days Runway • 1 Hour Daily Compounding
+                  </p>
+                </div>
+              </div>
+
+              {/* 60-Minute Focus Session Stopwatch / Countdown */}
+              <div className="flex items-center gap-3 p-2 px-3 rounded-2xl border border-neutral-800 bg-neutral-950/80">
+                <Timer className="w-4 h-4 text-indigo-400 animate-pulse" />
+                <div className="text-sm font-mono font-bold text-white">
+                  {Math.floor(gmatTimerSeconds / 60)
+                    .toString()
+                    .padStart(2, "0")}
+                  :{(gmatTimerSeconds % 60).toString().padStart(2, "0")}
+                </div>
+                <button
+                  onClick={() => setGmatTimerRunning(!gmatTimerRunning)}
+                  className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                    gmatTimerRunning
+                      ? "bg-amber-500 text-neutral-950"
+                      : "bg-indigo-600 hover:bg-indigo-500 text-white"
+                  }`}
+                  title={gmatTimerRunning ? "Pause Focus Hour" : "Start 60m Focus Hour"}
+                >
+                  {gmatTimerRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                </button>
+                <button
+                  onClick={() => {
+                    setGmatTimerRunning(false);
+                    setGmatTimerSeconds(3600);
+                  }}
+                  className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors"
+                  title="Reset to 60 Minutes"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Score Delta Ladder & 3 Section Breakdown */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Quant Section */}
+              <div className="p-4 rounded-2xl border border-neutral-800 bg-neutral-900/60 space-y-2.5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    Quantitative Reasoning
+                  </span>
+                  <span className="font-mono text-emerald-400 font-semibold">Q82 → Q88</span>
+                </div>
+                <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden">
+                  <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full" style={{ width: "78%" }} />
+                </div>
+                <p className="text-[11px] text-neutral-400 leading-tight">
+                  Strengths: Algebra, Arithmetic, Problem Solving. Focus: Trap avoidance.
+                </p>
+              </div>
+
+              {/* Data Insights Section */}
+              <div className="p-4 rounded-2xl border border-neutral-800 bg-neutral-900/60 space-y-2.5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-indigo-400" />
+                    Data Insights (DI)
+                  </span>
+                  <span className="font-mono text-indigo-400 font-semibold">DI80 → DI85</span>
+                </div>
+                <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden">
+                  <div className="bg-gradient-to-r from-indigo-500 to-blue-400 h-full rounded-full" style={{ width: "70%" }} />
+                </div>
+                <p className="text-[11px] text-neutral-400 leading-tight">
+                  Multi-source reasoning, Table analysis, Data Sufficiency (ERP analytical synergy).
+                </p>
+              </div>
+
+              {/* Verbal Section */}
+              <div className="p-4 rounded-2xl border border-neutral-800 bg-neutral-900/60 space-y-2.5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                    Verbal Reasoning
+                  </span>
+                  <span className="font-mono text-amber-400 font-semibold">V80 → V84</span>
+                </div>
+                <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden">
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-400 h-full rounded-full" style={{ width: "65%" }} />
+                </div>
+                <p className="text-[11px] text-neutral-400 leading-tight">
+                  Critical Reasoning & Reading Comprehension. Focus: Structural passage mapping.
+                </p>
+              </div>
+            </div>
+
+            {/* Error Log & Trap Notebook Drawer */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-neutral-300 flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                  Trap & Error Diagnosis Notebook ({gmatErrors.length} Logged)
+                </span>
+                <span className="text-[11px] text-neutral-500">Every error understood is +5 points</span>
+              </div>
+
+              {/* Error Entry Form */}
+              <form onSubmit={addGmatError} className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                <input
+                  type="text"
+                  placeholder="Question / Source (e.g. OG Quant PS #45)..."
+                  value={newErrorQ}
+                  onChange={(e) => setNewErrorQ(e.target.value)}
+                  className="sm:col-span-3 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
+                />
+                <select
+                  value={newErrorSection}
+                  onChange={(e: any) => setNewErrorSection(e.target.value)}
+                  className="sm:col-span-2 px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-neutral-300 focus:outline-none focus:border-indigo-500"
+                >
+                  <option value="Quant">Quant</option>
+                  <option value="Data Insights">Data Insights</option>
+                  <option value="Verbal">Verbal</option>
+                </select>
+                <select
+                  value={newErrorTrap}
+                  onChange={(e: any) => setNewErrorTrap(e.target.value)}
+                  className="sm:col-span-2 px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-neutral-300 focus:outline-none focus:border-indigo-500"
+                >
+                  <option value="Math Trap">Math Trap</option>
+                  <option value="RC Scope Shift">RC Scope Shift</option>
+                  <option value="Careless / Arithmetic">Careless</option>
+                  <option value="Timing Pressure">Timing</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="What was the trap & takeaway rule?..."
+                  value={newErrorTakeaway}
+                  onChange={(e) => setNewErrorTakeaway(e.target.value)}
+                  className="sm:col-span-4 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
+                />
+                <button
+                  type="submit"
+                  className="sm:col-span-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-colors"
+                >
+                  Log
+                </button>
+              </form>
+
+              {/* Error Log Entries */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-36 overflow-y-auto pr-1">
+                {gmatErrors.map((err) => (
+                  <div key={err.id} className="p-3 rounded-xl border border-neutral-800/80 bg-neutral-950/70 text-xs space-y-1">
+                    <div className="flex justify-between items-center text-[10px]">
+                      <span className="font-bold text-indigo-300">{err.question}</span>
+                      <span className="px-2 py-0.5 rounded bg-neutral-800 text-amber-400 font-semibold">{err.trapType}</span>
+                    </div>
+                    <p className="text-neutral-300 text-[11px] leading-relaxed">
+                      💡 {err.takeaway}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}
