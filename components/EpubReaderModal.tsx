@@ -231,36 +231,79 @@ export default function EpubReaderModal({
 
   const currentChapter = chapters[currentChapterIdx];
 
-  // Theme styles
+  // Theme styles with explicit color hexes and contrast palettes
   const themeClasses = {
     dark: {
       bg: "bg-neutral-950",
-      contentBg: "bg-neutral-900/60",
-      text: "text-neutral-200",
+      pageBg: "bg-neutral-900/80 border border-neutral-800/80 shadow-2xl",
+      text: "text-neutral-100",
+      subtext: "text-neutral-400",
       border: "border-neutral-800",
-      navBg: "bg-neutral-900/90",
+      navBg: "bg-neutral-900/95",
       accent: "text-indigo-400",
+      colorHex: "#f3f4f6",
+      headingHex: "#ffffff",
+      quoteBorder: "#6366f1",
+      divider: "border-neutral-800",
+      hoverBg: "hover:bg-neutral-800/60",
     },
     sepia: {
       bg: "bg-[#f4ecd8]",
-      contentBg: "bg-[#fdf6e2]",
-      text: "text-[#433422]",
+      pageBg: "bg-[#fcf8ed] border border-[#e0d3bc] shadow-xl",
+      text: "text-[#3d2e1e]",
+      subtext: "text-[#7a644c]",
       border: "border-[#e0d3bc]",
-      navBg: "bg-[#ebdcc3]/90",
+      navBg: "bg-[#ebdcc3]/95",
       accent: "text-amber-800",
+      colorHex: "#3d2e1e",
+      headingHex: "#261c12",
+      quoteBorder: "#b45309",
+      divider: "border-[#e0d3bc]",
+      hoverBg: "hover:bg-[#ebdcc3]",
     },
     light: {
       bg: "bg-neutral-100",
-      contentBg: "bg-white",
+      pageBg: "bg-white border border-neutral-200/90 shadow-2xl shadow-neutral-400/20",
       text: "text-neutral-900",
+      subtext: "text-neutral-500",
       border: "border-neutral-200",
-      navBg: "bg-white/90",
+      navBg: "bg-white/95",
       accent: "text-indigo-600",
+      colorHex: "#111827",
+      headingHex: "#030712",
+      quoteBorder: "#4f46e5",
+      divider: "border-neutral-200",
+      hoverBg: "hover:bg-neutral-200/70",
     },
   }[theme];
 
   return (
-    <div className={`fixed inset-0 z-50 flex flex-col ${themeClasses.bg} backdrop-blur-xl animate-in fade-in duration-200`}>
+    <div className={`fixed inset-0 z-50 flex flex-col ${themeClasses.bg} ${themeClasses.text} backdrop-blur-xl animate-in fade-in duration-200`}>
+      {/* Scoped CSS enforcing high-contrast text across all themes */}
+      <style>{`
+        .epub-content, .epub-content p, .epub-content div, .epub-content span, .epub-content li, .epub-content section, .epub-content article {
+          color: ${themeClasses.colorHex} !important;
+        }
+        .epub-content h1, .epub-content h2, .epub-content h3, .epub-content h4, .epub-content h5, .epub-content h6, .epub-content strong, .epub-content b {
+          color: ${themeClasses.headingHex} !important;
+          font-weight: 700 !important;
+        }
+        .epub-content blockquote {
+          border-left: 3px solid ${themeClasses.quoteBorder} !important;
+          padding-left: 1.25rem !important;
+          margin: 1.5rem 0 !important;
+          font-style: italic !important;
+          color: ${themeClasses.colorHex} !important;
+        }
+        .epub-content p {
+          margin-bottom: 1.25rem !important;
+          line-height: 1.8 !important;
+        }
+        .epub-content a {
+          color: ${theme === "sepia" ? "#92400e" : "#4f46e5"} !important;
+          text-decoration: underline !important;
+        }
+      `}</style>
       {/* Top Reader Navigation Bar */}
       <header
         className={`flex items-center justify-between px-4 sm:px-8 py-3.5 border-b ${themeClasses.border} ${themeClasses.navBg} backdrop-blur-md sticky top-0 z-20`}
@@ -277,7 +320,7 @@ export default function EpubReaderModal({
             <h1 className={`font-bold text-sm sm:text-base ${themeClasses.text} truncate max-w-[200px] sm:max-w-md`}>
               {bookTitle}
             </h1>
-            <p className="text-[10px] text-neutral-400">
+            <p className={`text-[10px] ${themeClasses.subtext}`}>
               {chapters.length > 0
                 ? `Chapter ${currentChapterIdx + 1} of ${chapters.length} • ${Math.round(
                     ((currentChapterIdx + 1) / chapters.length) * 100
@@ -372,7 +415,7 @@ export default function EpubReaderModal({
                   className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-colors flex items-center justify-between ${
                     idx === currentChapterIdx
                       ? "bg-indigo-600 text-white font-bold"
-                      : `${themeClasses.text} hover:bg-neutral-800/30`
+                      : `${themeClasses.text} ${themeClasses.hoverBg}`
                   }`}
                 >
                   <span className="truncate pr-2">{ch.title || `Chapter ${idx + 1}`}</span>
@@ -411,10 +454,10 @@ export default function EpubReaderModal({
           )}
 
           {!loading && !error && currentChapter && (
-            <div className="w-full max-w-3xl space-y-8 animate-in fade-in duration-300 pb-20">
+            <div className={`w-full max-w-3xl ${themeClasses.pageBg} p-6 sm:p-12 md:p-16 rounded-3xl space-y-8 animate-in fade-in duration-300 pb-20 transition-all`}>
               {/* Chapter Header */}
-              <div className="pb-4 border-b border-neutral-800/40 text-center space-y-1">
-                <span className="text-[10px] uppercase font-mono tracking-widest text-indigo-400 font-bold">
+              <div className={`pb-4 border-b ${themeClasses.divider} text-center space-y-1`}>
+                <span className="text-[10px] uppercase font-mono tracking-widest text-indigo-500 font-bold">
                   Chapter {currentChapterIdx + 1} of {chapters.length}
                 </span>
                 <h2 className={`text-xl sm:text-2xl font-extrabold ${themeClasses.text}`}>
@@ -424,9 +467,7 @@ export default function EpubReaderModal({
 
               {/* Rendered Chapter HTML with scoped typography */}
               <div
-                className={`epub-content prose ${
-                  theme === "dark" ? "prose-invert" : ""
-                } max-w-none leading-relaxed transition-all`}
+                className="epub-content max-w-none leading-relaxed transition-all"
                 style={{ fontSize: `${fontSize}px` }}
                 dangerouslySetInnerHTML={{ __html: currentChapter.contentHtml }}
               />
