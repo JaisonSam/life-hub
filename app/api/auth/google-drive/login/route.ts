@@ -3,7 +3,9 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const host = request.headers.get("host") || "localhost:3000";
   const protocol = host.includes("localhost") ? "http" : "https";
-  const redirectUri = `${protocol}://${host}/api/auth/google-drive/callback`;
+  
+  // Use the whitelisted redirect URI already registered in Google Cloud Console
+  const redirectUri = `${protocol}://${host}/api/auth/youtube/callback`;
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   if (!clientId) {
@@ -13,7 +15,7 @@ export async function GET(request: Request) {
     );
   }
 
-  // Scopes for Google Drive: view metadata, download files, and upload EPUBs to Kobo folder
+  // Scopes for Google Drive: metadata view, EPUB download, and upload to Kobo folder
   const scopes = [
     "https://www.googleapis.com/auth/drive.readonly",
     "https://www.googleapis.com/auth/drive.file",
@@ -23,7 +25,7 @@ export async function GET(request: Request) {
     redirectUri
   )}&response_type=code&scope=${encodeURIComponent(
     scopes
-  )}&access_type=offline&prompt=consent`;
+  )}&access_type=offline&prompt=consent&state=gdrive`;
 
   return NextResponse.redirect(authUrl);
 }

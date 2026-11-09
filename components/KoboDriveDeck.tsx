@@ -43,6 +43,9 @@ export default function KoboDriveDeck({
   const [uploading, setUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [needsApiEnable, setNeedsApiEnable] = useState(false);
+  const [apiEnableUrl, setApiEnableUrl] = useState("https://console.cloud.google.com/apis/library/drive.googleapis.com");
 
   // Check URL params for gdrive status
   useEffect(() => {
@@ -65,6 +68,9 @@ export default function KoboDriveDeck({
       setFolderFound(!!data.folderFound);
       if (data.folderName) setFolderName(data.folderName);
       setFiles(data.files || []);
+      setApiError(data.error || null);
+      setNeedsApiEnable(!!data.needsApiEnable);
+      if (data.apiEnableUrl) setApiEnableUrl(data.apiEnableUrl);
     } catch (err) {
       console.error("Failed to fetch Google Drive files:", err);
     } finally {
@@ -205,6 +211,28 @@ export default function KoboDriveDeck({
         <div className="p-3 rounded-2xl bg-indigo-950/60 border border-indigo-500/50 text-indigo-200 text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200">
           <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
           {uploadMessage}
+        </div>
+      )}
+
+      {/* Google Drive API Enable Alert */}
+      {needsApiEnable && (
+        <div className="p-4 rounded-2xl bg-amber-950/50 border border-amber-500/50 text-amber-200 text-xs space-y-2 animate-in fade-in duration-200">
+          <div className="flex items-center gap-2 font-bold text-amber-300">
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+            1-Click Setup: Enable Google Drive API for your Google Cloud Project
+          </div>
+          <p className="text-[11px] text-amber-200/90 leading-relaxed">
+            Your Google Account signed in successfully! However, Google Drive access is disabled by default on new Google Cloud projects. Click below to toggle it on:
+          </p>
+          <a
+            href={apiEnableUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs shadow-md shadow-amber-600/30 transition-all"
+          >
+            <span>Enable Google Drive API</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
         </div>
       )}
 

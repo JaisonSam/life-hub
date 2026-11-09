@@ -80,9 +80,13 @@ export async function GET() {
 
     if (!filesRes.ok) {
       console.error("Google Drive API error:", filesData);
+      const errMsg = filesData.error?.message || "Failed to list Drive files";
+      const needsEnable = errMsg.includes("has not been used") || errMsg.includes("disabled");
       return NextResponse.json({
         connected: true,
-        error: filesData.error?.message || "Failed to list Drive files",
+        error: errMsg,
+        needsApiEnable: needsEnable,
+        apiEnableUrl: "https://console.cloud.google.com/apis/library/drive.googleapis.com",
         files: [],
       });
     }
