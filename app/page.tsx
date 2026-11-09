@@ -59,6 +59,7 @@ import KoboHighlightsModal, { ExtractedHighlight } from "@/components/KoboHighli
 import DailyRecommendationsDeck from "@/components/DailyRecommendationsDeck";
 import GoogleDriveBookshelf from "@/components/GoogleDriveBookshelf";
 import CareerBrandHub from "@/components/CareerBrandHub";
+import ExecutiveBentoDeck from "@/components/ExecutiveBentoDeck";
 
 interface Project {
   id: string;
@@ -475,6 +476,7 @@ const initialStrategicBooks: StrategicBook[] = [
 export default function LifeHub() {
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
+  const [overviewMode, setOverviewMode] = useState<"bento" | "stream">("bento");
 
   // Veerakeralapudur Agribusiness State
   const [activeAgriModelId, setActiveAgriModelId] = useState("guava");
@@ -1253,111 +1255,163 @@ export default function LifeHub() {
     return true;
   });
 
+  const showInStream = activeTab === "all" && overviewMode === "stream";
+
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans selection:bg-amber-500/20">
-      {/* Top Header / Status Bar */}
-      <header className="border-b border-neutral-800/70 bg-neutral-900/40 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-bold text-white shadow-lg shadow-amber-500/20">
-              ✝
-            </div>
-            <div>
-              <div className="font-bold text-lg text-white tracking-tight flex items-center gap-2">
-                Jaison's Life OS
-                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">
-                  Personal Hub
-                </span>
+    <div className="min-h-screen bg-[#090A0F] text-neutral-100 font-sans selection:bg-amber-500/30 selection:text-amber-200 bg-tech-grid relative pb-16">
+      {/* Top Floating Glass Header (Wodniack & Anime.js style) */}
+      <header className="sticky top-3 z-50 max-w-7xl mx-auto px-3 sm:px-6 mb-6">
+        <div className="glass-panel rounded-3xl p-3 sm:p-4 border border-white/[0.08] shadow-2xl space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-1 sm:px-2">
+            {/* Left: Brand Monogram & Live Status */}
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-bold text-white shadow-lg shadow-amber-500/20 text-sm">
+                ✝
               </div>
-              <div className="text-xs text-neutral-400 flex items-center gap-2">
-                <Calendar className="w-3 h-3" />
-                {currentDate || "Loading date..."}
+              <div>
+                <div className="font-bold text-sm sm:text-base text-white tracking-tight flex items-center gap-2">
+                  Jaison's Life OS
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                    LIVE • BLR
+                  </span>
+                </div>
+                <div className="text-[11px] text-neutral-400 flex items-center gap-2 font-mono">
+                  <span>{currentDate || "Syncing date..."}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Time & Quick Stats */}
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-3.5 py-1.5 rounded-full text-xs font-mono text-neutral-300">
-              <Clock className="w-3.5 h-3.5 text-amber-400" />
-              {currentTime || "--:--"}
-            </div>
-            <a
-              href="https://github.com/JaisonSam/life-hub"
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs text-neutral-400 hover:text-white flex items-center gap-1 transition-colors"
-            >
-              GitHub <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
-        </div>
+            {/* Right: Technical Ticker, Coleman-style View Mode Switcher & Time */}
+            <div className="flex items-center gap-2 sm:gap-3 text-xs">
+              {/* Density / View Mode Switcher (Coleman Progressive Disclosure) */}
+              {activeTab === "all" && (
+                <div className="flex items-center gap-1 bg-neutral-950/80 p-1 rounded-2xl border border-white/[0.08] text-[11px]">
+                  <button
+                    onClick={() => setOverviewMode("bento")}
+                    className={`px-3 py-1 rounded-xl font-medium transition-all ${
+                      overviewMode === "bento"
+                        ? "bg-amber-500 text-neutral-950 font-bold shadow-md shadow-amber-500/20"
+                        : "text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    ✨ Bento Command
+                  </button>
+                  <button
+                    onClick={() => setOverviewMode("stream")}
+                    className={`px-3 py-1 rounded-xl font-medium transition-all ${
+                      overviewMode === "stream"
+                        ? "bg-amber-500 text-neutral-950 font-bold shadow-md shadow-amber-500/20"
+                        : "text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    📜 Full Stream
+                  </button>
+                </div>
+              )}
 
-        {/* Navigation Filter Tabs */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex gap-2 overflow-x-auto pb-3 text-xs font-medium">
-          {[
-            { id: "all", label: "Overview Hub", icon: Sparkles },
-            { id: "career", label: "Career & Bangalore Jobs", icon: Briefcase },
-            { id: "gmat", label: "GMAT 715+ Sprint", icon: Target },
-            { id: "farm", label: "VKP Agribusiness", icon: Sprout },
-            { id: "books", label: "Strategic Bookshelf", icon: Library },
-            { id: "bible", label: "Bible & Scripture", icon: BookOpen },
-            { id: "habits", label: "Habit Tracker", icon: Flame },
-            { id: "projects", label: "Projects Tracker", icon: FolderKanban },
-            { id: "music", label: "Music & Sanctuary", icon: Music },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const active = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
-                  active
-                    ? "bg-amber-500 text-neutral-950 font-semibold shadow-md shadow-amber-500/20"
-                    : "bg-neutral-900/60 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800/60"
-                }`}
+              {/* Time pill */}
+              <div className="flex items-center gap-1.5 glass-pill px-3 py-1.5 rounded-full text-xs font-mono text-neutral-300">
+                <Clock className="w-3.5 h-3.5 text-amber-400" />
+                <span>{currentTime || "--:--"}</span>
+              </div>
+
+              {/* GitHub Link */}
+              <a
+                href="https://github.com/JaisonSam/life-hub"
+                target="_blank"
+                rel="noreferrer"
+                className="hidden sm:flex items-center gap-1 text-[11px] font-mono text-neutral-400 hover:text-white transition-colors glass-pill px-2.5 py-1.5 rounded-full"
               >
-                <Icon className="w-3.5 h-3.5" />
-                {tab.label}
-              </button>
-            );
-          })}
+                <span>GH</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          </div>
+
+          {/* Navigation Filter Tabs Strip with Glass Pills */}
+          <div className="flex gap-1.5 overflow-x-auto pb-1 pt-1 text-xs font-medium no-scrollbar">
+            {[
+              { id: "all", label: "Overview Hub", icon: Sparkles },
+              { id: "career", label: "Career & Bangalore Jobs", icon: Briefcase },
+              { id: "gmat", label: "GMAT 715+ Sprint", icon: Target },
+              { id: "farm", label: "VKP Agribusiness", icon: Sprout },
+              { id: "books", label: "Strategic Bookshelf", icon: Library },
+              { id: "bible", label: "Bible & Scripture", icon: BookOpen },
+              { id: "habits", label: "Habit Tracker", icon: Flame },
+              { id: "projects", label: "Projects Tracker", icon: FolderKanban },
+              { id: "music", label: "Music & Sanctuary", icon: Music },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap text-xs ${
+                    active
+                      ? "bg-amber-500 text-neutral-950 font-bold shadow-lg shadow-amber-500/20 scale-[1.02]"
+                      : "glass-pill text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
-        {/* Welcome Greeting Banner */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-neutral-900 via-neutral-900/80 to-neutral-950 border border-neutral-800 shadow-xl">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              {greeting}, Jaison.
-            </h1>
-            <p className="text-sm text-neutral-400 mt-1">
-              "Commit your actions to the LORD, and your plans will succeed." — Proverbs 16:3
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-xs text-neutral-400">Daily Habits</div>
-              <div className="text-sm font-bold text-amber-400 font-mono">
-                {completedHabitsCount} / {habits.length} Done
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-8">
+        {/* EXECUTIVE BENTO SANCTUARY DECK (Uncluttered, High-Signal, Aesthetic) */}
+        {activeTab === "all" && overviewMode === "bento" && (
+          <ExecutiveBentoDeck
+            onSelectTab={(tabId) => setActiveTab(tabId)}
+            completedHabitsCount={completedHabitsCount}
+            habits={habits}
+            onToggleHabit={toggleHabit}
+            currentTime={currentTime}
+            currentDate={currentDate}
+            greeting={greeting}
+            verseBookmarked={verseBookmarked}
+            onToggleBookmarkVerse={() => setVerseBookmarked(!verseBookmarked)}
+          />
+        )}
+
+        {/* Welcome Greeting Banner (Shown in Full Stream or when on individual non-all tabs) */}
+        {showInStream && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-3xl glass-card border border-white/[0.08] shadow-xl">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                {greeting}, Jaison.
+              </h1>
+              <p className="text-sm text-neutral-400 mt-1">
+                "Commit your actions to the LORD, and your plans will succeed." — Proverbs 16:3
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-xs text-neutral-400">Daily Habits</div>
+                <div className="text-sm font-bold text-amber-400 font-mono">
+                  {completedHabitsCount} / {habits.length} Done
+                </div>
+              </div>
+              <div className="h-10 w-10 rounded-full border border-amber-500/30 bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-xs">
+                {Math.round((completedHabitsCount / habits.length) * 100)}%
               </div>
             </div>
-            <div className="h-10 w-10 rounded-full border border-amber-500/30 bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-xs">
-              {Math.round((completedHabitsCount / habits.length) * 100)}%
-            </div>
           </div>
-        </div>
+        )}
 
         {/* CAREER BRANDING & BANGALORE JOB RADAR */}
-        {(activeTab === "all" || activeTab === "career") && (
+        {(showInStream || activeTab === "career") && (
           <CareerBrandHub />
         )}
 
         {/* 1. DAILY BIBLE QUOTE MODULE */}
-        {(activeTab === "all" || activeTab === "bible") && (
+        {(showInStream || activeTab === "bible") && (
           <section className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/20 via-neutral-900 to-neutral-950 p-6 sm:p-8 shadow-2xl">
             <div className="flex items-center justify-between gap-4 mb-4">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400">
@@ -1411,7 +1465,7 @@ export default function LifeHub() {
         )}
 
         {/* GMAT FOCUS EDITION DECEMBER SPRINT MODULE */}
-        {(activeTab === "all" || activeTab === "gmat") && (
+        {(showInStream || activeTab === "gmat") && (
           <section className="p-6 sm:p-8 rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/25 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -2159,9 +2213,9 @@ export default function LifeHub() {
         )}
 
         {/* 2-COLUMN GRID: HABITS & BIBLE ORGANISER */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className={`grid grid-cols-1 gap-8 ${showInStream ? "lg:grid-cols-2" : ""}`}>
           {/* HABIT TRACKER */}
-          {(activeTab === "all" || activeTab === "habits") && (
+          {(showInStream || activeTab === "habits") && (
             <section className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -2217,7 +2271,7 @@ export default function LifeHub() {
           )}
 
           {/* BIBLE ORGANISER & YOUVERSION INTEGRATION */}
-          {(activeTab === "all" || activeTab === "bible") && (
+          {(showInStream || activeTab === "bible") && (
             <section className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
@@ -2406,7 +2460,7 @@ export default function LifeHub() {
         </div>
 
         {/* 3. PROJECTS TRACKER MODULE */}
-        {(activeTab === "all" || activeTab === "projects") && (
+        {(showInStream || activeTab === "projects") && (
           <section className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2">
@@ -2499,7 +2553,7 @@ export default function LifeHub() {
         )}
 
         {/* VEERAKERALAPUDUR 0.25-ACRE AGRIBUSINESS MODELER */}
-        {(activeTab === "all" || activeTab === "farm") && (
+        {(showInStream || activeTab === "farm") && (
           <section className="p-6 sm:p-8 rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-emerald-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
             {/* Top Header & Overview */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
@@ -2922,7 +2976,7 @@ export default function LifeHub() {
         )}
 
         {/* KOBO E-READER BOOKSHELF & INTELLECTUAL DIGEST */}
-        {(activeTab === "all" || activeTab === "books") && (
+        {(showInStream || activeTab === "books") && (
           <section className="p-6 sm:p-8 rounded-3xl border border-indigo-500/25 bg-gradient-to-br from-indigo-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-8">
             {/* Top Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
@@ -3145,7 +3199,7 @@ export default function LifeHub() {
         )}
 
         {/* 4. YOUTUBE MUSIC & WORSHIP SANCTUARY */}
-        {(activeTab === "all" || activeTab === "music") && (
+        {(showInStream || activeTab === "music") && (
           <section className="p-6 sm:p-8 rounded-3xl border border-rose-500/20 bg-gradient-to-br from-rose-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
             {/* Top Header & Account Sync Controls */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
