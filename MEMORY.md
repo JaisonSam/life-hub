@@ -15,9 +15,12 @@ A personal life operating system and daily sanctuary combining:
 4. **Projects Tracker**: Goal progress bars, status badges, and project creation.
 5. **Bible Study Organiser**: Book of Romans study guide, YouVersion Android deep-linking, chapter check-offs, and study notes.
 6. **Music & Worship Sanctuary**: Curated YouTube Music playlists, OAuth 2.0 personal playlist sync, Android Live Playback Mirror (via Last.fm / Pano Scrobbler) with real-time sound equalizer & floating now-playing dock, and aesthetic categorized album deck (Worship Sanctuary, GMAT Sprint Flow, High-Energy Gym).
+7. **Veerakeralapudur 0.25-Acre Agribusiness Modeler**: Financial projections, capital outlay tracker (CapEx expenditure vs ₹1.5L budget), multi-crop yield & revenue comparison (High-Density Guava, Perennial Moringa, Free-Range Country Chicken, Syntropic Agroforestry), and live interactive ROI simulator (Gross revenue, Net profit, monthly velocity, payback period, and CapEx ROI).
+8. **Strategic Bookshelf & Commonplace Notebook**: Executive leadership & strategic thinking library (*Chip War*, *Thinking in Systems*, *Principles for Navigating Big Debt Crises*, *High Output Management*, *Atomic Habits*) with core mental models ribbon, quote callouts, reading progress tracker, and commonplace note logger.
 
 ## 🛠️ Tech Stack & Locations
 * **Location**: `/Users/jaisappi/Developer/life-hub`
 * **Framework**: Next.js 16 (App Router), React 19, Tailwind CSS v4, Lucide React, Bun.
 * **GitHub Repository**: `JaisonSam/life-hub`
 * **Vercel Production**: `https://life-hub-lemon-five.vercel.app`
+
