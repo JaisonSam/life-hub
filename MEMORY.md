@@ -16,12 +16,16 @@ A personal life operating system and daily sanctuary combining:
 5. **Bible Study Organiser**: Book of Romans study guide, YouVersion Android deep-linking, chapter check-offs, and study notes.
 6. **Music & Worship Sanctuary**: Curated YouTube Music playlists, OAuth 2.0 personal playlist sync, Android Live Playback Mirror (via Last.fm / Pano Scrobbler) with real-time sound equalizer & floating now-playing dock, and aesthetic categorized album deck (Worship Sanctuary, GMAT Sprint Flow, High-Energy Gym).
 7. **Veerakeralapudur 0.25-Acre Agribusiness Modeler**: Financial projections, capital outlay tracker (CapEx expenditure vs ₹1.5L budget), multi-crop yield & revenue comparison (High-Density Guava, Perennial Moringa, Free-Range Country Chicken, Syntropic Agroforestry), and live interactive ROI simulator (Gross revenue, Net profit, monthly velocity, payback period, and CapEx ROI).
-8. **Strategic Bookshelf & Commonplace Notebook**: Executive leadership & strategic thinking library (*Chip War*, *Thinking in Systems*, *Principles for Navigating Big Debt Crises*, *High Output Management*, *Atomic Habits*) with core mental models ribbon, quote callouts, reading progress tracker, and commonplace note logger.
-9. **Kobo eReader & Google Drive Cloud Shelf**:
-   - Google Drive OAuth 2.0 integration syncing EPUB files from the `Kobo eReader` folder.
-   - Built-in distraction-free In-Browser EPUB Reader (`JSZip`) with typography controls, 3 reading themes (Obsidian Dark, Warm Sepia, Paper Light), table of contents, and floating text selection "💡 Save to Commonplace".
+8. **Kobo E-Reader & Google Drive Dynamic Bookshelf**:
+   - The entire bookshelf collection revolves around the user's actual EPUB files synced from the Google Drive `Kobo eReader` folder.
+   - Dynamic book cards with file sizes, reading progress bars, status badges, and 1-click in-browser reading.
+   - Built-in In-Browser EPUB Reader (`JSZip`) with high-contrast typography in all 3 themes (Paper Light `#111827`, Warm Sepia `#3D2E1E`, Obsidian Dark `#F3F4F6`), chapter navigation, and live text selection "💡 Save to Commonplace".
+   - "Send to Kobo" 1-click EPUB dropzone directly pushing into Google Drive for automatic Wi-Fi sync down to the Kobo device.
    - Kobo Highlights & Annotations Importer parsing `.txt`, `.md`, `.csv`, `.json` notes into the Strategic Commonplace Notebook.
-   - "Send to Kobo" 1-click EPUB uploader directly pushing into Google Drive for automatic Wi-Fi sync down to the Kobo device.
+9. **Daily Intellectual Digest & Aeon Essay Spotlight**:
+   - **Daily Strategic Read**: Rotates daily featuring high-signal essays from top intellectual publications (Farnam Street, Paul Graham, Stratechery, Morgan Housel/Collaborative Fund, Julian Shapiro, First Round Review, Ribbonfarm) with core mental models and quotes.
+   - **Daily Aeon Essay Spotlight**: Rotates daily featuring deep philosophical essays from *Aeon* (`aeon.co`) exploring philosophy of mind, systems dynamics, cognitive cybernetics, and long-term thinking with core inquiries and 1-click reading.
+   - Direct "Capture to Notes" integration appending insights into the Strategic Commonplace Notebook.
 
 ## 🛠️ Tech Stack & Locations
 * **Location**: `/Users/jaisappi/Developer/life-hub`

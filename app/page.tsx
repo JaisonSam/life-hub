@@ -11,6 +11,7 @@ import {
   Music,
   Plus,
   Bookmark,
+  BookmarkPlus,
   Share2,
   Sparkles,
   Clock,
@@ -54,7 +55,8 @@ import {
 } from "lucide-react";
 import EpubReaderModal from "@/components/EpubReaderModal";
 import KoboHighlightsModal, { ExtractedHighlight } from "@/components/KoboHighlightsModal";
-import KoboDriveDeck from "@/components/KoboDriveDeck";
+import DailyRecommendationsDeck from "@/components/DailyRecommendationsDeck";
+import GoogleDriveBookshelf from "@/components/GoogleDriveBookshelf";
 
 interface Project {
   id: string;
@@ -1086,6 +1088,31 @@ export default function LifeHub() {
     }
 
     saveBookshelf(updatedBookshelf);
+  };
+
+  const handleSaveDailyTakeaway = (
+    title: string,
+    author: string,
+    category: string,
+    mentalModel: string,
+    quote: string,
+    takeaway: string
+  ) => {
+    const newNote: StrategicBook = {
+      id: `digest-${Date.now()}`,
+      title,
+      author,
+      category: (category as any) || "Systems Thinking",
+      coverUrl: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=600&q=80",
+      status: "Completed",
+      progress: 100,
+      rating: 5,
+      keyMentalModel: mentalModel,
+      keyQuote: quote,
+      takeaway,
+      pagesOrTime: "Daily Strategic Digest",
+    };
+    saveBookshelf([newNote, ...bookshelf]);
   };
 
   // Save changes to localStorage
@@ -2886,37 +2913,37 @@ export default function LifeHub() {
           </section>
         )}
 
-        {/* STRATEGIC BOOKSHELF & COMMONPLACE NOTEBOOK */}
+        {/* KOBO E-READER BOOKSHELF & INTELLECTUAL DIGEST */}
         {(activeTab === "all" || activeTab === "books") && (
-          <section className="p-6 sm:p-8 rounded-3xl border border-indigo-500/25 bg-gradient-to-br from-indigo-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
+          <section className="p-6 sm:p-8 rounded-3xl border border-indigo-500/25 bg-gradient-to-br from-indigo-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-8">
             {/* Top Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
+                <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 text-white shadow-lg shadow-amber-500/25">
                   <Library className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="font-extrabold text-lg text-white tracking-tight">
-                      Strategic Bookshelf & Commonplace
+                      Kobo E-Reader & Intellectual Hub
                     </h2>
-                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-semibold font-mono">
-                      {booksCompleted} Completed • {booksReading} Active
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-semibold font-mono">
+                      Google Drive Synced • Daily Digest
                     </span>
                   </div>
                   <p className="text-xs text-neutral-400">
-                    High-leverage mental models: Semiconductor supply chains, Systems dynamics & Macroeconomics
+                    Revolves around your Google Drive EPUBs, with daily strategic reads and Aeon philosophical essays
                   </p>
                 </div>
               </div>
 
-              {/* Filter Pills & Add Book */}
+              {/* Action Buttons: Kobo Notes Importer & Log Manual Note */}
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center gap-1 bg-neutral-950/80 border border-neutral-800 p-1 rounded-xl text-xs">
                   {[
-                    { id: "all", label: `All (${bookshelf.length})` },
-                    { id: "reading", label: `Reading (${booksReading})` },
-                    { id: "completed", label: `Completed (${booksCompleted})` },
+                    { id: "all", label: "All Ebooks" },
+                    { id: "reading", label: "Reading" },
+                    { id: "completed", label: "Completed" },
                   ].map((btn) => (
                     <button
                       key={btn.id}
@@ -2933,18 +2960,6 @@ export default function LifeHub() {
                 </div>
 
                 <button
-                  onClick={() => setShowKoboDeck(!showKoboDeck)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
-                    showKoboDeck
-                      ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
-                      : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
-                  }`}
-                >
-                  <FolderSync className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Kobo & Drive</span>
-                </button>
-
-                <button
                   onClick={() => setShowKoboHighlightsModal(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30 text-xs font-semibold transition-all"
                 >
@@ -2957,12 +2972,12 @@ export default function LifeHub() {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-md shadow-indigo-600/20 transition-all text-xs"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  {showAddBook ? "Close" : "Log Book"}
+                  {showAddBook ? "Close" : "Log Note"}
                 </button>
               </div>
             </div>
 
-            {/* ADD BOOK FORM DRAWER */}
+            {/* ADD NOTE DRAWER */}
             {showAddBook && (
               <form
                 onSubmit={handleAddBook}
@@ -2971,9 +2986,9 @@ export default function LifeHub() {
                 <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
                   <span className="text-xs font-bold text-white flex items-center gap-1.5">
                     <BookMarked className="w-4 h-4 text-indigo-400" />
-                    Log Strategic Work & Mental Model
+                    Log Strategic Takeaway to Commonplace
                   </span>
-                  <span className="text-[10px] text-neutral-400">Synthesize deep takeaways</span>
+                  <span className="text-[10px] text-neutral-400">Synthesize deep insights</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
@@ -2981,7 +2996,7 @@ export default function LifeHub() {
                     <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">Title</label>
                     <input
                       type="text"
-                      placeholder="e.g. Zero to One..."
+                      placeholder="e.g. Chip War or Essay title..."
                       value={newBookTitle}
                       onChange={(e) => setNewBookTitle(e.target.value)}
                       className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-indigo-500"
@@ -2992,7 +3007,7 @@ export default function LifeHub() {
                     <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">Author</label>
                     <input
                       type="text"
-                      placeholder="e.g. Peter Thiel..."
+                      placeholder="e.g. Chris Miller / Paul Graham..."
                       value={newBookAuthor}
                       onChange={(e) => setNewBookAuthor(e.target.value)}
                       className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-indigo-500"
@@ -3014,24 +3029,12 @@ export default function LifeHub() {
                     </select>
                   </div>
 
-                  <div className="sm:col-span-1 space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">Progress %</label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      value={newBookProgress}
-                      onChange={(e) => setNewBookProgress(Number(e.target.value))}
-                      className="w-full px-2 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono text-center"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-1 flex items-end">
+                  <div className="sm:col-span-2 flex items-end">
                     <button
                       type="submit"
                       className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/25 transition-colors"
                     >
-                      Save
+                      Save Note
                     </button>
                   </div>
                 </div>
@@ -3039,14 +3042,14 @@ export default function LifeHub() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <input
                     type="text"
-                    placeholder="Core Mental Model (e.g. Monopoly Moats vs Perfect Competition)..."
+                    placeholder="Core Mental Model (e.g. Chokepoint Moats, Second-Order Thinking)..."
                     value={newBookModel}
                     onChange={(e) => setNewBookModel(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
                   />
                   <input
                     type="text"
-                    placeholder="Actionable strategic takeaway for your operations..."
+                    placeholder="Actionable strategic takeaway for operations..."
                     value={newBookTakeaway}
                     onChange={(e) => setNewBookTakeaway(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
@@ -3055,131 +3058,81 @@ export default function LifeHub() {
               </form>
             )}
 
-            {/* KOBO EREADER & GOOGLE DRIVE CLOUD SHELF */}
-            {showKoboDeck && (
-              <KoboDriveDeck
-                onOpenReader={handleOpenReader}
-                onOpenHighlightsModal={() => setShowKoboHighlightsModal(true)}
-              />
-            )}
+            {/* 1. DAILY INTELLECTUAL DIGEST: WEBSITE RECOMMENDATION + AEON ESSAY */}
+            <DailyRecommendationsDeck onSaveToCommonplace={handleSaveDailyTakeaway} />
 
-            {/* MENTAL MODEL MATRIX RIBBON */}
-            <div className="p-3.5 rounded-2xl bg-neutral-950/80 border border-neutral-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <span className="font-bold text-neutral-300 flex items-center gap-1.5">
-                <Brain className="w-4 h-4 text-purple-400" />
-                Active Strategic Mental Models
-              </span>
-              <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
-                  ⚡ Chokepoint Moats
-                </span>
-                <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
-                  🔄 Feedback Loop Delays
-                </span>
-                <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
-                  🎯 Limiting Bottleneck
-                </span>
-                <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
-                  📈 Productive Equity
-                </span>
-                <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
-                  🔁 1% Compounding
-                </span>
-              </div>
-            </div>
+            {/* 2. THE CORE BOOKSHELF: REVOLVED AROUND GOOGLE DRIVE EPUBS */}
+            <GoogleDriveBookshelf
+              onOpenReader={handleOpenReader}
+              onOpenHighlightsModal={() => setShowKoboHighlightsModal(true)}
+              filter={bookFilter as any}
+              searchQuery=""
+            />
 
-            {/* STRATEGIC BOOK CARDS GRID */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredBooks.map((book) => (
-                <div
-                  key={book.id}
-                  className="p-5 rounded-2xl border border-neutral-800/80 bg-neutral-900/60 hover:border-indigo-500/40 backdrop-blur-sm transition-all duration-300 flex flex-col justify-between space-y-4 group hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-950/20"
-                >
-                  <div className="space-y-3">
-                    {/* Header Row */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                          {book.category}
-                        </span>
-                        <h3 className="font-extrabold text-base text-white group-hover:text-indigo-300 transition-colors leading-snug">
-                          {book.title}
-                        </h3>
-                        <p className="text-xs text-neutral-400">by {book.author}</p>
-                      </div>
-
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0 ${
-                          book.status === "Completed"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                        }`}
-                      >
-                        {book.status}
-                      </span>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[11px] text-neutral-400">
-                        <span>Reading Progress</span>
-                        <span className="font-mono text-white font-semibold">{book.progress}%</span>
-                      </div>
-                      <div className="w-full bg-neutral-800 h-1.5 rounded-full overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full transition-all duration-500"
-                          style={{ width: `${book.progress}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Core Mental Model Card */}
-                    <div className="p-3 rounded-xl bg-neutral-950/70 border border-neutral-800/80 space-y-1 text-xs">
-                      <div className="text-[10px] font-bold text-indigo-300 flex items-center gap-1 uppercase tracking-wider">
-                        <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-                        Mental Model
-                      </div>
-                      <div className="font-bold text-white text-xs">{book.keyMentalModel}</div>
-                    </div>
-
-                    {/* Key Quote */}
-                    <blockquote className="text-[11px] text-neutral-300 italic border-l-2 border-indigo-500/50 pl-3 leading-relaxed">
-                      "{book.keyQuote}"
-                    </blockquote>
+            {/* 3. STRATEGIC COMMONPLACE NOTEBOOK (SAVED NOTES & QUOTES) */}
+            {bookshelf.length > 0 && (
+              <div className="p-6 rounded-3xl bg-neutral-950/80 border border-neutral-800 space-y-4">
+                <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    <BookmarkPlus className="w-4 h-4 text-indigo-400" />
+                    <h3 className="font-extrabold text-sm text-white">
+                      Strategic Commonplace Notebook ({bookshelf.length} Synthesized Notes)
+                    </h3>
                   </div>
+                  <span className="text-[10px] text-neutral-400">
+                    Captured from Kobo EPUBs, Aeon essays, and daily strategic reads
+                  </span>
+                </div>
 
-                  {/* Strategic Takeaway & Footer */}
-                  <div className="pt-3 border-t border-neutral-800/80 space-y-2 text-xs">
-                    <p className="text-[11px] text-neutral-400 leading-relaxed">
-                      <strong className="text-neutral-300 font-semibold">Strategic Takeaway:</strong> {book.takeaway}
-                    </p>
-
-                    <div className="flex justify-between items-center text-[10px] text-neutral-500 pt-1">
-                      <span>{book.pagesOrTime}</span>
-                      <div className="flex items-center gap-2.5">
-                        <button
-                          onClick={() => handleOpenReader("/sample-strategy-brief.epub", book.title)}
-                          className="flex items-center gap-1 text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
-                          title={`Read ${book.title} in LifeHub EPUB reader`}
-                        >
-                          <BookOpen className="w-3 h-3" />
-                          <span>Read</span>
-                        </button>
-                        <span className="text-amber-400">★★★★★</span>
-                        {bookshelf.length > 1 && (
-                          <button
-                            onClick={() => deleteBook(book.id)}
-                            className="text-neutral-500 hover:text-rose-400 transition-colors"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {bookshelf.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 hover:border-indigo-500/40 transition-all space-y-2.5 flex flex-col justify-between"
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-bold uppercase">
+                            {item.category}
+                          </span>
+                          <span className="text-neutral-500 font-mono">{item.pagesOrTime}</span>
+                        </div>
+                        <h4 className="font-bold text-xs text-white leading-snug">{item.title}</h4>
+                        {item.author && (
+                          <p className="text-[10px] text-neutral-400">by {item.author}</p>
+                        )}
+                        {item.keyMentalModel && (
+                          <div className="text-[10px] text-amber-300 font-semibold flex items-center gap-1">
+                            <Lightbulb className="w-3 h-3 text-amber-400" />
+                            {item.keyMentalModel}
+                          </div>
+                        )}
+                        {item.keyQuote && (
+                          <blockquote className="text-[11px] text-neutral-300 italic border-l-2 border-indigo-500/50 pl-2.5 leading-relaxed line-clamp-3">
+                            "{item.keyQuote}"
+                          </blockquote>
+                        )}
+                        {item.takeaway && (
+                          <p className="text-[10px] text-neutral-400 leading-relaxed bg-neutral-950/60 p-2 rounded-xl border border-neutral-800">
+                            {item.takeaway}
+                          </p>
                         )}
                       </div>
+
+                      <div className="pt-2 border-t border-neutral-800/80 flex items-center justify-end">
+                        <button
+                          onClick={() => deleteBook(item.id)}
+                          className="text-neutral-500 hover:text-rose-400 transition-colors"
+                          title="Delete note"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </section>
         )}
 
