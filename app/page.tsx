@@ -851,6 +851,67 @@ export default function LifeHub() {
     return () => clearInterval(interval);
   }, [gmatTimerRunning, gmatTimerSeconds, habits]);
 
+  // Handle tab selection for desktop and smooth scrolling on mobile
+  const handleSelectTab = (tabId: "all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music") => {
+    setActiveTab(tabId);
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      if (tabId === "all") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        const el = document.getElementById(`module-${tabId}`);
+        if (el) {
+          const targetY = el.getBoundingClientRect().top + window.pageYOffset - 95;
+          window.scrollTo({ top: targetY, behavior: "smooth" });
+        }
+      }
+    }
+  };
+
+  // Helper for responsive module visibility:
+  // On desktop (md:), only show if activeTab === tabId
+  // On mobile (< md:), always show in the continuous animated scroll feed!
+  const getModuleVisibilityClass = (tabId: string) => {
+    return activeTab === tabId ? "block" : "block md:hidden";
+  };
+
+  // Mobile Scroll-Spy: update activeTab indicator in header as user scrolls down continuous feed
+  useEffect(() => {
+    const handleScroll = () => {
+      // Only run scroll-spy on mobile screens (< 768px)
+      if (typeof window === "undefined" || window.innerWidth >= 768) return;
+
+      const sectionIds: Array<{ id: "all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music"; elId: string }> = [
+        { id: "all", elId: "module-all" },
+        { id: "career", elId: "module-career" },
+        { id: "gmat", elId: "module-gmat" },
+        { id: "farm", elId: "module-farm" },
+        { id: "books", elId: "module-books" },
+        { id: "bible", elId: "module-bible" },
+        { id: "habits", elId: "module-habits" },
+        { id: "projects", elId: "module-projects" },
+        { id: "music", elId: "module-music" },
+      ];
+
+      const scrollPos = window.scrollY + 140;
+      let currentTab: "all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music" = "all";
+
+      for (const item of sectionIds) {
+        const el = document.getElementById(item.elId);
+        if (el) {
+          const top = el.offsetTop;
+          if (scrollPos >= top) {
+            currentTab = item.id;
+          }
+        }
+      }
+
+      setActiveTab((prev) => (prev !== currentTab ? currentTab : prev));
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const addGmatError = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newErrorQ.trim() || !newErrorTakeaway.trim()) return;
@@ -1336,7 +1397,12 @@ export default function LifeHub() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={(e) => {
+                      handleSelectTab(tab.id as any);
+                      if (typeof window !== "undefined" && window.innerWidth < 768) {
+                        e.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+                      }
+                    }}
                     className={`relative flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap text-xs group ${
                       active
                         ? "bg-amber-500 text-neutral-950 font-bold shadow-lg shadow-amber-500/20 scale-[1.02]"
@@ -1360,11 +1426,11 @@ export default function LifeHub() {
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-8 sm:space-y-10">
         {/* EXECUTIVE BENTO SANCTUARY DECK (Uncluttered, High-Signal, Aesthetic) */}
-        {activeTab === "all" && (
+        <div id="module-all" className={activeTab === "all" ? "block" : "block md:hidden"}>
           <ExecutiveBentoDeck
-            onSelectTab={(tabId) => setActiveTab(tabId)}
+            onSelectTab={handleSelectTab}
             completedHabitsCount={completedHabitsCount}
             habits={habits}
             onToggleHabit={toggleHabit}
@@ -1374,72 +1440,27 @@ export default function LifeHub() {
             verseBookmarked={verseBookmarked}
             onToggleBookmarkVerse={() => setVerseBookmarked(!verseBookmarked)}
           />
-        )}
+        </div>
 
         {/* CAREER BRANDING & BANGALORE JOB RADAR */}
-        {activeTab === "career" && (
-          <div data-aos="fade-up" data-aos-duration="600">
-            <CareerBrandHub />
-          </div>
-        )}
-
-        {/* 1. DAILY BIBLE QUOTE MODULE */}
-        {activeTab === "bible" && (
-          <section className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/20 via-neutral-900 to-neutral-950 p-6 sm:p-8 shadow-2xl">
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400">
-                <BookOpen className="w-4 h-4" />
-                Daily Verse & Scripture Inspiration
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setVerseBookmarked(!verseBookmarked)}
-                  className={`p-2 rounded-lg border text-xs transition-colors ${
-                    verseBookmarked
-                      ? "bg-amber-500 text-neutral-950 border-amber-500 font-semibold"
-                      : "border-neutral-800 text-neutral-400 hover:text-white"
-                  }`}
-                  title="Bookmark Verse"
-                >
-                  <Bookmark className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(`"${dailyVerse.text}" - ${dailyVerse.reference}`);
-                    setVerseCopied(true);
-                    setTimeout(() => setVerseCopied(false), 2000);
-                  }}
-                  className="p-2 rounded-lg border border-neutral-800 text-neutral-400 hover:text-white text-xs transition-colors flex items-center gap-1"
-                  title="Copy Verse"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  {verseCopied ? "Copied!" : ""}
-                </button>
-              </div>
-            </div>
-
-            <blockquote className="text-xl sm:text-2xl font-serif leading-relaxed text-neutral-100 my-4 italic">
-              "{dailyVerse.text}"
-            </blockquote>
-
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-neutral-800/80">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-amber-300 text-base">{dailyVerse.reference}</span>
-                <span className="text-xs px-2 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
-                  {dailyVerse.translation}
-                </span>
-                <span className="text-xs text-neutral-400">• {dailyVerse.theme}</span>
-              </div>
-              <p className="text-xs text-neutral-400 max-w-md italic">
-                💡 Reflection: {dailyVerse.reflection}
-              </p>
-            </div>
-          </section>
-        )}
-
+        <div
+          id="module-career"
+          className={getModuleVisibilityClass("career")}
+          data-aos="fade-up"
+          data-aos-duration="700"
+          data-aos-offset="80"
+        >
+          <CareerBrandHub />
+        </div>
         {/* GMAT FOCUS EDITION DECEMBER SPRINT MODULE */}
-        {activeTab === "gmat" && (
-          <section data-aos="fade-up" data-aos-duration="600" className="p-6 sm:p-8 rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/25 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
+        <div
+          id="module-gmat"
+          className={getModuleVisibilityClass("gmat")}
+          data-aos="fade-up"
+          data-aos-duration="700"
+          data-aos-offset="80"
+        >
+          <section className="p-6 sm:p-8 rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/25 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-md">
@@ -2183,347 +2204,16 @@ export default function LifeHub() {
               </div>
             </div>
           </section>
-        )}
-
-        {/* HABIT TRACKER */}
-        {activeTab === "habits" && (
-          <section data-aos="fade-up" data-aos-duration="600" className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                    <Flame className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h2 className="font-bold text-base text-white">Daily Habit Tracker</h2>
-                    <p className="text-xs text-neutral-400">Consistency builds destiny</p>
-                  </div>
-                </div>
-                <div className="text-xs text-neutral-400">
-                  {completedHabitsCount} of {habits.length} Completed
-                </div>
-              </div>
-
-              {/* Habit List */}
-              <div className="space-y-2.5">
-                {habits.map((h) => (
-                  <div
-                    key={h.id}
-                    onClick={() => toggleHabit(h.id)}
-                    className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${
-                      h.completedToday
-                        ? "bg-amber-500/10 border-amber-500/40 text-white"
-                        : "bg-neutral-900/60 border-neutral-800 hover:border-neutral-700 text-neutral-300"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {h.completedToday ? (
-                        <CheckCircle2 className="w-5 h-5 text-amber-400 flex-shrink-0" />
-                      ) : (
-                        <Circle className="w-5 h-5 text-neutral-500 flex-shrink-0" />
-                      )}
-                      <div>
-                        <div className={`text-sm font-medium ${h.completedToday ? "line-through text-neutral-400" : ""}`}>
-                          {h.name}
-                        </div>
-                        <span className="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">
-                          {h.category}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-800/80 border border-neutral-700/50 text-xs font-mono text-orange-400">
-                      <Flame className="w-3.5 h-3.5 fill-orange-500 text-orange-500" />
-                      {h.streak}d
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* BIBLE ORGANISER & YOUVERSION INTEGRATION */}
-          {activeTab === "bible" && (
-            <section data-aos="fade-up" data-aos-duration="600" className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <BookOpen className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h2 className="font-bold text-base text-white flex items-center gap-2">
-                      Bible Study Organiser
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-                        YouVersion Companion
-                      </span>
-                    </h2>
-                    <p className="text-xs text-neutral-400">Book of Romans • Android YouVersion App Integration</p>
-                  </div>
-                </div>
-
-                {/* Translation Switcher */}
-                <div className="flex items-center gap-1 bg-neutral-900 border border-neutral-800 p-1 rounded-xl text-xs">
-                  {(["NIV", "ESV", "NLT", "KJV"] as const).map((ver) => (
-                    <button
-                      key={ver}
-                      onClick={() => setBibleTranslation(ver)}
-                      className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
-                        bibleTranslation === ver
-                          ? "bg-emerald-500 text-neutral-950 shadow-sm"
-                          : "text-neutral-400 hover:text-white"
-                      }`}
-                    >
-                      {ver}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Book of Romans - Chapter Quick Navigator */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs text-neutral-400">
-                  <span className="font-medium text-neutral-300">Book of Romans (16 Chapters)</span>
-                  <span>Chapter {readingPlan.currentChapter} of 16</span>
-                </div>
-                <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-16">
-                  {Array.from({ length: 16 }, (_, i) => i + 1).map((ch) => {
-                    const isCurrent = readingPlan.currentChapter === ch;
-                    const isDone = ch < readingPlan.currentChapter;
-                    return (
-                      <button
-                        key={ch}
-                        onClick={() =>
-                          setReadingPlan((p) => ({
-                            ...p,
-                            currentChapter: ch,
-                          }))
-                        }
-                        className={`py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
-                          isCurrent
-                            ? "bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/30 scale-105"
-                            : isDone
-                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                            : "bg-neutral-900 hover:bg-neutral-800 text-neutral-400 border border-neutral-800"
-                        }`}
-                      >
-                        {ch}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Active Chapter Card & YouVersion Launchers */}
-              <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <div className="text-xs text-amber-400 font-semibold uppercase tracking-wider">
-                      Today's Reading Target
-                    </div>
-                    <div className="text-base font-bold text-white mt-0.5">
-                      Romans Chapter {readingPlan.currentChapter} ({bibleTranslation})
-                    </div>
-                    <p className="text-xs text-neutral-400 mt-1">
-                      {readingPlan.currentChapter === 8
-                        ? "Life in the Spirit & God's Everlasting Love (No condemnation in Christ)"
-                        : readingPlan.currentChapter === 12
-                        ? "Living Sacrifices & Transformed Minds"
-                        : "Walk in faithful obedience and deep scripture meditation"}
-                    </p>
-                  </div>
-
-                  {/* YouVersion Version IDs for Android: NIV=111, ESV=59, NLT=116, KJV=1 */}
-                  {(() => {
-                    const versionIds: Record<string, number> = { NIV: 111, ESV: 59, NLT: 116, KJV: 1 };
-                    const vId = versionIds[bibleTranslation] || 111;
-                    const youversionUrl = `https://www.bible.com/bible/${vId}/ROM.${readingPlan.currentChapter}.${bibleTranslation}`;
-
-                    return (
-                      <a
-                        href={youversionUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-xs font-bold shadow-lg shadow-red-600/25 transition-all text-center flex-shrink-0"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        Open in YouVersion App
-                      </a>
-                    );
-                  })()}
-                </div>
-
-                {/* Mark Chapter Read + Streak Advance */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-neutral-800 text-xs">
-                  <div className="flex items-center gap-2 text-neutral-400">
-                    <span>Reading Progress:</span>
-                    <span className="font-mono text-emerald-400 font-bold">
-                      {Math.round((readingPlan.currentChapter / 16) * 100)}% Complete
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      // Advance chapter
-                      const nextCh = Math.min(16, readingPlan.currentChapter + 1);
-                      setReadingPlan((p) => ({ ...p, currentChapter: nextCh }));
-
-                      // Also mark the daily habit 'Read 1 Chapter' as completed!
-                      const updatedHabits = habits.map((h) => {
-                        if (h.name.includes("Read 1 Chapter")) {
-                          return {
-                            ...h,
-                            completedToday: true,
-                            streak: h.completedToday ? h.streak : h.streak + 1,
-                          };
-                        }
-                        return h;
-                      });
-                      saveHabits(updatedHabits);
-                    }}
-                    className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Mark Chapter Done & Sync Habit
-                  </button>
-                </div>
-              </div>
-
-              {/* Study Notes Form */}
-              <form onSubmit={addNote} className="space-y-2">
-                <div className="text-xs font-semibold text-neutral-300">Takeaway & Study Journal</div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder={`Romans ${readingPlan.currentChapter}:...`}
-                    value={newNoteRef}
-                    onChange={(e) => setNewNoteRef(e.target.value)}
-                    className="w-1/3 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Write a personal reflection or sermon note..."
-                    value={newNoteText}
-                    onChange={(e) => setNewNoteText(e.target.value)}
-                    className="w-2/3 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500"
-                  />
-                  <button
-                    type="submit"
-                    className="px-3.5 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-xs font-semibold transition-colors"
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-
-              {/* Recent Saved Notes */}
-              <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
-                {notes.map((n) => (
-                  <div key={n.id} className="p-3 rounded-lg border border-neutral-800/80 bg-neutral-950/60 text-xs">
-                    <div className="flex justify-between items-center text-neutral-400 text-[10px] mb-1">
-                      <span className="font-bold text-amber-300">{n.reference}</span>
-                      <span>{n.date}</span>
-                    </div>
-                    <p className="text-neutral-300 leading-relaxed">{n.note}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-        {/* 3. PROJECTS TRACKER MODULE */}
-        {activeTab === "projects" && (
-          <section data-aos="fade-up" data-aos-duration="600" className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  <FolderKanban className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="font-bold text-base text-white">Active Projects Tracker</h2>
-                  <p className="text-xs text-neutral-400">Goals, deliverables, and progress</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowNewProject(!showNewProject)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all shadow-md shadow-blue-600/20"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                New Project
-              </button>
-            </div>
-
-            {/* New Project Form Modal */}
-            {showNewProject && (
-              <form onSubmit={addProject} className="p-4 rounded-xl border border-blue-500/30 bg-blue-950/20 space-y-3">
-                <div className="text-xs font-semibold text-blue-300">Add New Project</div>
-                <div className="flex flex-wrap gap-2">
-                  <input
-                    type="text"
-                    placeholder="Project Name..."
-                    value={newProjName}
-                    onChange={(e) => setNewProjName(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Category (e.g. Life, Tech, Spiritual)..."
-                    value={newProjCategory}
-                    onChange={(e) => setNewProjCategory(e.target.value)}
-                    className="w-48 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition-colors"
-                  >
-                    Create
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Project Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {projects.map((proj) => (
-                <div
-                  key={proj.id}
-                  className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-neutral-700 transition-all flex flex-col justify-between space-y-4"
-                >
-                  <div>
-                    <div className="flex items-center justify-between text-[11px] mb-2">
-                      <span className="text-neutral-400 font-medium">{proj.category}</span>
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                          proj.status === "Completed"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                        }`}
-                      >
-                        {proj.status}
-                      </span>
-                    </div>
-                    <h3 className="font-bold text-sm text-white">{proj.name}</h3>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs text-neutral-400">
-                      <span>Progress</span>
-                      <span className="font-mono text-white">{proj.progress}%</span>
-                    </div>
-                    <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all"
-                        style={{ width: `${proj.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        </div>
 
         {/* VEERAKERALAPUDUR 0.25-ACRE AGRIBUSINESS MODELER */}
-        {activeTab === "farm" && (
+        <div
+          id="module-farm"
+          className={getModuleVisibilityClass("farm")}
+          data-aos="fade-up"
+          data-aos-duration="700"
+          data-aos-offset="80"
+        >
           <section data-aos="fade-up" data-aos-duration="600" className="p-6 sm:p-8 rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-emerald-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
             {/* Top Header & Overview */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
@@ -2943,10 +2633,16 @@ export default function LifeHub() {
               </div>
             </div>
           </section>
-        )}
+        </div>
 
         {/* KOBO E-READER BOOKSHELF & INTELLECTUAL DIGEST */}
-        {activeTab === "books" && (
+        <div
+          id="module-books"
+          className={getModuleVisibilityClass("books")}
+          data-aos="fade-up"
+          data-aos-duration="700"
+          data-aos-offset="80"
+        >
           <section data-aos="fade-up" data-aos-duration="600" className="p-6 sm:p-8 rounded-3xl border border-indigo-500/25 bg-gradient-to-br from-indigo-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-8">
             {/* Top Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
@@ -3166,10 +2862,421 @@ export default function LifeHub() {
               </div>
             )}
           </section>
-        )}
+        </div>
 
-        {/* 4. YOUTUBE MUSIC & WORSHIP SANCTUARY */}
-        {activeTab === "music" && (
+        {/* BIBLE & SCRIPTURE SANCTUARY (Daily Verse + YouVersion Organiser) */}
+        <div
+          id="module-bible"
+          className={`${getModuleVisibilityClass("bible")} space-y-6`}
+          data-aos="fade-up"
+          data-aos-duration="700"
+          data-aos-offset="80"
+        >
+          {/* 1. DAILY BIBLE QUOTE MODULE */}
+          <section className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/20 via-neutral-900 to-neutral-950 p-6 sm:p-8 shadow-2xl">
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400">
+                <BookOpen className="w-4 h-4" />
+                Daily Verse & Scripture Inspiration
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setVerseBookmarked(!verseBookmarked)}
+                  className={`p-2 rounded-lg border text-xs transition-colors ${
+                    verseBookmarked
+                      ? "bg-amber-500 text-neutral-950 border-amber-500 font-semibold"
+                      : "border-neutral-800 text-neutral-400 hover:text-white"
+                  }`}
+                  title="Bookmark Verse"
+                >
+                  <Bookmark className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`"${dailyVerse.text}" - ${dailyVerse.reference}`);
+                    setVerseCopied(true);
+                    setTimeout(() => setVerseCopied(false), 2000);
+                  }}
+                  className="p-2 rounded-lg border border-neutral-800 text-neutral-400 hover:text-white text-xs transition-colors flex items-center gap-1"
+                  title="Copy Verse"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  {verseCopied ? "Copied!" : ""}
+                </button>
+              </div>
+            </div>
+
+            <blockquote className="text-xl sm:text-2xl font-serif leading-relaxed text-neutral-100 my-4 italic">
+              "{dailyVerse.text}"
+            </blockquote>
+
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-neutral-800/80">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-amber-300 text-base">{dailyVerse.reference}</span>
+                <span className="text-xs px-2 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
+                  {dailyVerse.translation}
+                </span>
+                <span className="text-xs text-neutral-400">• {dailyVerse.theme}</span>
+              </div>
+              <p className="text-xs text-neutral-400 max-w-md italic">
+                💡 Reflection: {dailyVerse.reflection}
+              </p>
+            </div>
+          </section>
+
+            <section data-aos="fade-up" data-aos-duration="600" className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-base text-white flex items-center gap-2">
+                      Bible Study Organiser
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+                        YouVersion Companion
+                      </span>
+                    </h2>
+                    <p className="text-xs text-neutral-400">Book of Romans • Android YouVersion App Integration</p>
+                  </div>
+                </div>
+
+                {/* Translation Switcher */}
+                <div className="flex items-center gap-1 bg-neutral-900 border border-neutral-800 p-1 rounded-xl text-xs">
+                  {(["NIV", "ESV", "NLT", "KJV"] as const).map((ver) => (
+                    <button
+                      key={ver}
+                      onClick={() => setBibleTranslation(ver)}
+                      className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                        bibleTranslation === ver
+                          ? "bg-emerald-500 text-neutral-950 shadow-sm"
+                          : "text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      {ver}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Book of Romans - Chapter Quick Navigator */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs text-neutral-400">
+                  <span className="font-medium text-neutral-300">Book of Romans (16 Chapters)</span>
+                  <span>Chapter {readingPlan.currentChapter} of 16</span>
+                </div>
+                <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-16">
+                  {Array.from({ length: 16 }, (_, i) => i + 1).map((ch) => {
+                    const isCurrent = readingPlan.currentChapter === ch;
+                    const isDone = ch < readingPlan.currentChapter;
+                    return (
+                      <button
+                        key={ch}
+                        onClick={() =>
+                          setReadingPlan((p) => ({
+                            ...p,
+                            currentChapter: ch,
+                          }))
+                        }
+                        className={`py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
+                          isCurrent
+                            ? "bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/30 scale-105"
+                            : isDone
+                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                            : "bg-neutral-900 hover:bg-neutral-800 text-neutral-400 border border-neutral-800"
+                        }`}
+                      >
+                        {ch}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Active Chapter Card & YouVersion Launchers */}
+              <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="text-xs text-amber-400 font-semibold uppercase tracking-wider">
+                      Today's Reading Target
+                    </div>
+                    <div className="text-base font-bold text-white mt-0.5">
+                      Romans Chapter {readingPlan.currentChapter} ({bibleTranslation})
+                    </div>
+                    <p className="text-xs text-neutral-400 mt-1">
+                      {readingPlan.currentChapter === 8
+                        ? "Life in the Spirit & God's Everlasting Love (No condemnation in Christ)"
+                        : readingPlan.currentChapter === 12
+                        ? "Living Sacrifices & Transformed Minds"
+                        : "Walk in faithful obedience and deep scripture meditation"}
+                    </p>
+                  </div>
+
+                  {/* YouVersion Version IDs for Android: NIV=111, ESV=59, NLT=116, KJV=1 */}
+                  {(() => {
+                    const versionIds: Record<string, number> = { NIV: 111, ESV: 59, NLT: 116, KJV: 1 };
+                    const vId = versionIds[bibleTranslation] || 111;
+                    const youversionUrl = `https://www.bible.com/bible/${vId}/ROM.${readingPlan.currentChapter}.${bibleTranslation}`;
+
+                    return (
+                      <a
+                        href={youversionUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-xs font-bold shadow-lg shadow-red-600/25 transition-all text-center flex-shrink-0"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Open in YouVersion App
+                      </a>
+                    );
+                  })()}
+                </div>
+
+                {/* Mark Chapter Read + Streak Advance */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-neutral-800 text-xs">
+                  <div className="flex items-center gap-2 text-neutral-400">
+                    <span>Reading Progress:</span>
+                    <span className="font-mono text-emerald-400 font-bold">
+                      {Math.round((readingPlan.currentChapter / 16) * 100)}% Complete
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      // Advance chapter
+                      const nextCh = Math.min(16, readingPlan.currentChapter + 1);
+                      setReadingPlan((p) => ({ ...p, currentChapter: nextCh }));
+
+                      // Also mark the daily habit 'Read 1 Chapter' as completed!
+                      const updatedHabits = habits.map((h) => {
+                        if (h.name.includes("Read 1 Chapter")) {
+                          return {
+                            ...h,
+                            completedToday: true,
+                            streak: h.completedToday ? h.streak : h.streak + 1,
+                          };
+                        }
+                        return h;
+                      });
+                      saveHabits(updatedHabits);
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Mark Chapter Done & Sync Habit
+                  </button>
+                </div>
+              </div>
+
+              {/* Study Notes Form */}
+              <form onSubmit={addNote} className="space-y-2">
+                <div className="text-xs font-semibold text-neutral-300">Takeaway & Study Journal</div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder={`Romans ${readingPlan.currentChapter}:...`}
+                    value={newNoteRef}
+                    onChange={(e) => setNewNoteRef(e.target.value)}
+                    className="w-1/3 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Write a personal reflection or sermon note..."
+                    value={newNoteText}
+                    onChange={(e) => setNewNoteText(e.target.value)}
+                    className="w-2/3 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3.5 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-xs font-semibold transition-colors"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+
+              {/* Recent Saved Notes */}
+              <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                {notes.map((n) => (
+                  <div key={n.id} className="p-3 rounded-lg border border-neutral-800/80 bg-neutral-950/60 text-xs">
+                    <div className="flex justify-between items-center text-neutral-400 text-[10px] mb-1">
+                      <span className="font-bold text-amber-300">{n.reference}</span>
+                      <span>{n.date}</span>
+                    </div>
+                    <p className="text-neutral-300 leading-relaxed">{n.note}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+        </div>
+
+        {/* HABIT TRACKER */}
+        <div
+          id="module-habits"
+          className={getModuleVisibilityClass("habits")}
+          data-aos="fade-up"
+          data-aos-duration="700"
+          data-aos-offset="80"
+        >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                    <Flame className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-base text-white">Daily Habit Tracker</h2>
+                    <p className="text-xs text-neutral-400">Consistency builds destiny</p>
+                  </div>
+                </div>
+                <div className="text-xs text-neutral-400">
+                  {completedHabitsCount} of {habits.length} Completed
+                </div>
+              </div>
+
+              {/* Habit List */}
+              <div className="space-y-2.5">
+                {habits.map((h) => (
+                  <div
+                    key={h.id}
+                    onClick={() => toggleHabit(h.id)}
+                    className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${
+                      h.completedToday
+                        ? "bg-amber-500/10 border-amber-500/40 text-white"
+                        : "bg-neutral-900/60 border-neutral-800 hover:border-neutral-700 text-neutral-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {h.completedToday ? (
+                        <CheckCircle2 className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                      ) : (
+                        <Circle className="w-5 h-5 text-neutral-500 flex-shrink-0" />
+                      )}
+                      <div>
+                        <div className={`text-sm font-medium ${h.completedToday ? "line-through text-neutral-400" : ""}`}>
+                          {h.name}
+                        </div>
+                        <span className="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">
+                          {h.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-800/80 border border-neutral-700/50 text-xs font-mono text-orange-400">
+                      <Flame className="w-3.5 h-3.5 fill-orange-500 text-orange-500" />
+                      {h.streak}d
+                    </div>
+                  </div>
+                ))}
+              </div>
+        </div>
+
+        {/* ACTIVE PROJECTS TRACKER */}
+        <div
+          id="module-projects"
+          className={getModuleVisibilityClass("projects")}
+          data-aos="fade-up"
+          data-aos-duration="700"
+          data-aos-offset="80"
+        >
+          <section data-aos="fade-up" data-aos-duration="600" className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-sm space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  <FolderKanban className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-base text-white">Active Projects Tracker</h2>
+                  <p className="text-xs text-neutral-400">Goals, deliverables, and progress</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowNewProject(!showNewProject)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all shadow-md shadow-blue-600/20"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                New Project
+              </button>
+            </div>
+
+            {/* New Project Form Modal */}
+            {showNewProject && (
+              <form onSubmit={addProject} className="p-4 rounded-xl border border-blue-500/30 bg-blue-950/20 space-y-3">
+                <div className="text-xs font-semibold text-blue-300">Add New Project</div>
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    type="text"
+                    placeholder="Project Name..."
+                    value={newProjName}
+                    onChange={(e) => setNewProjName(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Category (e.g. Life, Tech, Spiritual)..."
+                    value={newProjCategory}
+                    onChange={(e) => setNewProjCategory(e.target.value)}
+                    className="w-48 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition-colors"
+                  >
+                    Create
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Project Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {projects.map((proj) => (
+                <div
+                  key={proj.id}
+                  className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-neutral-700 transition-all flex flex-col justify-between space-y-4"
+                >
+                  <div>
+                    <div className="flex items-center justify-between text-[11px] mb-2">
+                      <span className="text-neutral-400 font-medium">{proj.category}</span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                          proj.status === "Completed"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                        }`}
+                      >
+                        {proj.status}
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-sm text-white">{proj.name}</h3>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs text-neutral-400">
+                      <span>Progress</span>
+                      <span className="font-mono text-white">{proj.progress}%</span>
+                    </div>
+                    <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all"
+                        style={{ width: `${proj.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* YOUTUBE MUSIC & WORSHIP SANCTUARY */}
+        <div
+          id="module-music"
+          className={getModuleVisibilityClass("music")}
+          data-aos="fade-up"
+          data-aos-duration="700"
+          data-aos-offset="80"
+        >
           <section data-aos="fade-up" data-aos-duration="600" className="p-6 sm:p-8 rounded-3xl border border-rose-500/20 bg-gradient-to-br from-rose-950/20 via-neutral-900 to-neutral-950 shadow-2xl space-y-6">
             {/* Top Header & Account Sync Controls */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
@@ -3690,7 +3797,7 @@ export default function LifeHub() {
               </div>
             </div>
           </section>
-        )}
+        </div>
       </main>
 
       {/* Footer */}

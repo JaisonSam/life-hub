@@ -227,8 +227,8 @@ export default function ExecutiveBentoDeck({
         </div>
       </div>
 
-      {/* 2. EXECUTIVE BENTO GRID WITH EKIZR BACKLIT HALO CARDS & SCROLL ANIMATIONS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* 2. EXECUTIVE BENTO GRID WITH EKIZR BACKLIT HALO CARDS (Desktop only, mobile scrolls full modules) */}
+      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {/* CARD 1: CAREER BRANDING & BANGALORE RADAR */}
         <div
           onClick={() => onSelectTab("career")}
