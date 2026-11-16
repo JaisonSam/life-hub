@@ -485,6 +485,7 @@ const initialStrategicBooks: StrategicBook[] = [
 export default function LifeHub() {
   // Intro & Homescreen visibility (Tron background integration)
   const [homescreenVisible, setHomescreenVisible] = useState<boolean>(false);
+  const [isTronSectionMode, setIsTronSectionMode] = useState<boolean>(true);
 
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
@@ -1356,7 +1357,10 @@ export default function LifeHub() {
   return (
     <div className="min-h-screen text-neutral-100 font-sans selection:bg-amber-500/30 selection:text-amber-200 relative pb-16">
       {/* Tron Motorcycle Ambient Video (0:09 - 1:35) */}
-      <TronBackgroundVideo isHomescreenVisible={homescreenVisible} />
+      <TronBackgroundVideo
+        isHomescreenVisible={homescreenVisible}
+        onSectionModeChange={setIsTronSectionMode}
+      />
 
       {/* Intro Sequence: Black Greeting -> 5s Video Solo -> Homescreen Reveal */}
       <WelcomeIntro onRevealHomescreen={() => setHomescreenVisible(true)} />
@@ -1439,6 +1443,16 @@ export default function LifeHub() {
           </div>
         </div>
       </header>
+
+      {/* SEPARATE TRON VIDEO SHOWCASE SECTION PLACEHOLDER (Below Main Top Tab, Over Homescreen Content) */}
+      <div
+        className={`max-w-7xl mx-auto px-2 sm:px-4 transition-all duration-600 ease-out pointer-events-none ${
+          isTronSectionMode
+            ? "h-[320px] sm:h-[420px] md:h-[480px] mb-6 opacity-100"
+            : "h-0 mb-0 opacity-0 overflow-hidden"
+        }`}
+        aria-hidden="true"
+      />
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-7 sm:space-y-8">
