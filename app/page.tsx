@@ -516,7 +516,8 @@ export default function LifeHub() {
     const ensurePlayingAndSynced = () => {
       const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
       if (bg && !isNaN(bg.currentTime) && bg.currentTime > 0) {
-        if (Math.abs(video.currentTime - bg.currentTime) > 0.3) {
+        const diff = Math.abs(video.currentTime - bg.currentTime);
+        if (diff > 0.6) {
           video.currentTime = bg.currentTime;
         }
       }
