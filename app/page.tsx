@@ -490,54 +490,101 @@ export default function LifeHub() {
   const sectionVideoRef = useRef<HTMLVideoElement>(null);
 
   const handleToggleSound = useCallback(() => {
-    setIsMuted((prev) => {
-      const next = !prev;
-      if (sectionVideoRef.current) {
-        sectionVideoRef.current.muted = next;
-        sectionVideoRef.current.volume = 0.85;
-        if (!next) {
-          sectionVideoRef.current.play().catch(() => {});
-        }
-      }
-      return next;
-    });
+    setIsMuted((prev) => !prev);
   }, []);
 
   const handleUnlockAudio = useCallback(() => {
     setIsMuted(false);
-    if (sectionVideoRef.current) {
-      sectionVideoRef.current.muted = false;
-      sectionVideoRef.current.volume = 0.85;
-      sectionVideoRef.current.play().catch(() => {});
+    const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
+    if (bg) {
+      bg.muted = false;
+      bg.volume = 0.85;
+      bg.play().catch(() => {});
     }
   }, []);
 
-  // Ensure section video plays instantly with zero delay
+  // Section Video Manager:
+  // - Keeps section video actively playing at all times (never freezes when scrolling down or up)
+  // - Syncs timestamp continuously with the background video
+  // - Visual-only (always muted) so browsers never restrict or block it
   useEffect(() => {
     const video = sectionVideoRef.current;
     if (!video) return;
 
-    video.volume = 0.85;
-    video.muted = isMuted;
+    video.muted = true; // Visual only, background player handles master soundtrack
 
-    const startPlay = () => {
-      video.muted = isMuted;
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          video.muted = true;
-          video.play().catch(() => {});
-        });
+    const ensurePlayingAndSynced = () => {
+      const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
+      if (bg && !isNaN(bg.currentTime) && bg.currentTime > 0) {
+        if (Math.abs(video.currentTime - bg.currentTime) > 0.3) {
+          video.currentTime = bg.currentTime;
+        }
+      }
+      if (video.paused) {
+        video.play().catch(() => {});
       }
     };
 
-    if (video.readyState >= 1) {
-      startPlay();
-    } else {
-      video.addEventListener("loadedmetadata", startPlay, { once: true });
-      video.addEventListener("canplay", startPlay, { once: true });
+    // 1. Initial play attempt
+    ensurePlayingAndSynced();
+    video.addEventListener("loadedmetadata", ensurePlayingAndSynced);
+    video.addEventListener("canplay", ensurePlayingAndSynced);
+
+    // 2. Anti-pause safeguard: if browser tries to pause offscreen, immediately resume
+    const handlePause = () => {
+      if (!document.hidden) {
+        requestAnimationFrame(() => {
+          ensurePlayingAndSynced();
+        });
+      }
+    };
+    video.addEventListener("pause", handlePause);
+
+    // 3. Scroll listener: whenever user scrolls down or back up, ensure playing & synced
+    const handleScroll = () => {
+      ensurePlayingAndSynced();
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    // 4. IntersectionObserver: whenever section is near or in viewport, ensure playing
+    let observer: IntersectionObserver | null = null;
+    if ("IntersectionObserver" in window) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              ensurePlayingAndSynced();
+            }
+          });
+        },
+        { rootMargin: "400px 0px" }
+      );
+      observer.observe(video);
     }
-  }, [isMuted]);
+
+    // 5. Visibility change (when switching tabs)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        ensurePlayingAndSynced();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // 6. Periodic sync (every 1s) to keep showcase in lockstep with background video
+    const syncInterval = setInterval(() => {
+      ensurePlayingAndSynced();
+    }, 1000);
+
+    return () => {
+      video.removeEventListener("loadedmetadata", ensurePlayingAndSynced);
+      video.removeEventListener("canplay", ensurePlayingAndSynced);
+      video.removeEventListener("pause", handlePause);
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (observer) observer.disconnect();
+      clearInterval(syncInterval);
+    };
+  }, [homescreenVisible]);
 
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
@@ -1509,7 +1556,7 @@ export default function LifeHub() {
             src="/videos/tron-intro.mp4"
             autoPlay
             loop
-            muted={isMuted}
+            muted
             playsInline
             preload="auto"
             className="w-full h-full object-cover"

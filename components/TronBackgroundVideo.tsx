@@ -30,24 +30,28 @@ export default function TronBackgroundVideo({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Update audio volume & muted state on bgVideoRef
+  // MASTER AUDIO CONTROLLER: Sync audio volume & muted state with isMuted prop
+  // bgVideoRef handles audio across the entire site (both intro and homescreen)
   useEffect(() => {
     const video = bgVideoRef.current;
     if (!video) return;
 
-    // During intro (!isHomescreenVisible), bgVideoRef is the main solo player and plays music
-    // Once homescreen is visible, sectionVideo in page.tsx handles foreground audio so bgVideo is muted
-    const shouldMute = isHomescreenVisible ? true : isMuted;
-    video.muted = shouldMute;
+    video.muted = isMuted;
     video.volume = 0.85;
 
-    if (!shouldMute) {
-      video.play().catch(() => {
-        video.muted = true;
-        video.play().catch(() => {});
-      });
+    if (!isMuted) {
+      video.play().catch(() => {});
     }
-  }, [isMuted, isHomescreenVisible]);
+  }, [isMuted]);
+
+  // Handle explicit audio unlock trigger from parent
+  useEffect(() => {
+    if (triggerUnlockAudio && bgVideoRef.current && !isMuted) {
+      bgVideoRef.current.muted = false;
+      bgVideoRef.current.volume = 0.85;
+      bgVideoRef.current.play().catch(() => {});
+    }
+  }, [triggerUnlockAudio, isMuted]);
 
   // Robust instant start playback with zero stalling
   const startVideoInstant = useCallback(() => {
@@ -64,7 +68,7 @@ export default function TronBackgroundVideo({
           if (onVideoReady) onVideoReady();
         })
         .catch(() => {
-          // If browser restricts unmuted autoplay, immediately fall back to muted so video starts playing with 0 delay!
+          // If browser restricts unmuted autoplay initially, start muted so video displays without any delay
           video.muted = true;
           video.play().catch(() => {});
           if (onVideoReady) onVideoReady();
@@ -83,45 +87,57 @@ export default function TronBackgroundVideo({
       video.addEventListener("canplay", startVideoInstant, { once: true });
     }
 
-    // Keep background video playing smoothly on loop
+    // Keep background video playing smoothly on continuous loop
     const handleEnded = () => {
       video.currentTime = 0;
       video.play().catch(() => {});
     };
     video.addEventListener("ended", handleEnded);
 
-    // Unmute on first user gesture
-    const handleUserGesture = () => {
-      if (bgVideoRef.current && !isHomescreenVisible) {
-        bgVideoRef.current.muted = false;
-        bgVideoRef.current.volume = 0.85;
-        bgVideoRef.current.play().catch(() => {});
+    // Audio Unlocker: On the very first user interaction anywhere on the window or document
+    const unlockMasterAudio = () => {
+      if (video && !isMuted) {
+        video.muted = false;
+        video.volume = 0.85;
+        video.play().catch(() => {});
       }
     };
-    window.addEventListener("pointerdown", handleUserGesture, { passive: true });
-    window.addEventListener("click", handleUserGesture, { passive: true });
-    window.addEventListener("touchstart", handleUserGesture, { passive: true });
-    window.addEventListener("keydown", handleUserGesture, { passive: true });
+
+    const interactionEvents = [
+      "pointerdown",
+      "touchstart",
+      "click",
+      "keydown",
+      "wheel",
+      "scroll",
+      "mousedown",
+    ];
+
+    interactionEvents.forEach((evt) => {
+      window.addEventListener(evt, unlockMasterAudio, { passive: true });
+      document.addEventListener(evt, unlockMasterAudio, { passive: true });
+    });
 
     return () => {
       video.removeEventListener("ended", handleEnded);
       video.removeEventListener("loadedmetadata", startVideoInstant);
       video.removeEventListener("canplay", startVideoInstant);
-      window.removeEventListener("pointerdown", handleUserGesture);
-      window.removeEventListener("click", handleUserGesture);
-      window.removeEventListener("touchstart", handleUserGesture);
-      window.removeEventListener("keydown", handleUserGesture);
+      interactionEvents.forEach((evt) => {
+        window.removeEventListener(evt, unlockMasterAudio);
+        document.removeEventListener(evt, unlockMasterAudio);
+      });
     };
-  }, [startVideoInstant, isHomescreenVisible]);
+  }, [startVideoInstant, isMuted]);
 
   return (
     <>
       {/* 
         AMBIENT BACKGROUND VIDEO LAYER
-        - Starts playing immediately with faststart 1-second keyframes
+        - Permanent master video and soundtrack provider (id="tron-bg-video")
         - During Intro (!isHomescreenVisible): Full-screen solo video view
         - On Homescreen: Fades in behind dashboard contents as the user scrolls down (scrollY > 120)
-        - When at the top (scrollY <= 120): Hidden (opacity-0) so video only shows inside the showcase section box!
+        - When at the top of homescreen (scrollY <= 120): Hidden (opacity-0) so video displays in showcase section
+        - Audio plays through smoothly with zero handoffs or pauses!
       */}
       <div
         className={`fixed inset-0 w-full h-full z-0 overflow-hidden bg-black pointer-events-none select-none transition-opacity duration-1000 ease-out ${
@@ -135,10 +151,11 @@ export default function TronBackgroundVideo({
       >
         <video
           ref={bgVideoRef}
+          id="tron-bg-video"
           src="/videos/tron-intro.mp4"
           autoPlay
           loop
-          muted={!isHomescreenVisible ? isMuted : true}
+          muted={isMuted}
           playsInline
           preload="auto"
           className="w-full h-full object-cover"
