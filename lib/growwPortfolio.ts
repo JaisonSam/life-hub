@@ -578,3 +578,38 @@ export function saveStoredGrowwHoldings(holdings: GrowwHolding[]) {
     localStorage.setItem("lifehub_groww_portfolio", JSON.stringify(holdings));
   } catch {}
 }
+
+/**
+ * Updates stock holdings with dynamic real-time market prices & day change percentages
+ */
+export function updateHoldingsWithLiveQuotes(
+  holdings: GrowwHolding[],
+  quotes: Record<string, { price: number; changePct: number; change?: number }>
+): GrowwHolding[] {
+  if (!Array.isArray(holdings) || !quotes) return holdings;
+
+  return holdings.map((h) => {
+    const symKey = (h.symbol || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    const quote = quotes[symKey] || quotes[h.symbol];
+
+    if (!quote || typeof quote.price !== "number" || quote.price <= 0) {
+      return h;
+    }
+
+    const currentPrice = quote.price;
+    const dayChangePct = typeof quote.changePct === "number" ? quote.changePct : h.dayChangePct;
+    const totalVal = (h.shares || 0) * currentPrice;
+    const totalCost = (h.shares || 0) * (h.avgPrice || 0);
+    const unrealisedPnl = totalVal - totalCost;
+    const unrealisedPnlPct = totalCost > 0 ? (unrealisedPnl / totalCost) * 100 : 0;
+
+    return {
+      ...h,
+      currentPrice: Math.round(currentPrice * 100) / 100,
+      dayChangePct: Math.round(dayChangePct * 100) / 100,
+      unrealisedPnl: Math.round(unrealisedPnl * 100) / 100,
+      unrealisedPnlPct: Math.round(unrealisedPnlPct * 100) / 100,
+    };
+  });
+}
+

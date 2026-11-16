@@ -64,6 +64,7 @@ import {
   calculatePortfolioSummary,
   parseGrowwHoldingsCSV,
   saveStoredGrowwHoldings,
+  updateHoldingsWithLiveQuotes,
 } from "@/lib/growwPortfolio";
 
 interface GlanceDashboardProps {
@@ -124,6 +125,8 @@ export default function GlanceDashboard({
   const [marketTickVersion, setMarketTickVersion] = useState<number>(0);
   const [marketLastUpdated, setMarketLastUpdated] = useState<string>("Just now");
   const [marketRefreshing, setMarketRefreshing] = useState<boolean>(false);
+  const [marketLoading, setMarketLoading] = useState<boolean>(false);
+  const [liveMarketQuotes, setLiveMarketQuotes] = useState<Record<string, any>>({});
   const [isIndianMarketOpen, setIsIndianMarketOpen] = useState<boolean>(true);
 
   // Groww Holdings & Portfolio State
@@ -389,20 +392,42 @@ export default function GlanceDashboard({
     }
   };
 
-  // Refresh Indian Market quotes (simulating live tick)
-  const handleRefreshMarkets = () => {
+  // Fetch real-time live Indian Market quotes (NSE, BSE, and Jaison's 19 stocks)
+  const fetchLiveMarketData = async () => {
     setMarketRefreshing(true);
-    setTimeout(() => {
-      setMarketTickVersion((v) => v + 1);
-      const timeStr = new Date().toLocaleTimeString("en-IN", {
-        timeZone: "Asia/Kolkata",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      setMarketLastUpdated(`${timeStr} IST`);
-      setIsIndianMarketOpen(checkIndianMarketHours());
+    try {
+      const res = await fetch("/api/markets/live");
+      const data = await res.json();
+      if (data.success && data.quotes) {
+        setLiveMarketQuotes(data.quotes);
+        if (typeof data.isMarketOpen === "boolean") {
+          setIsIndianMarketOpen(data.isMarketOpen);
+        }
+        const timeStr = new Date().toLocaleTimeString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        setMarketLastUpdated(`${timeStr} IST`);
+
+        // Dynamically update user's stock holdings with real live market prices
+        setGrowwHoldings((prev) => {
+          const updated = updateHoldingsWithLiveQuotes(prev, data.quotes);
+          try {
+            localStorage.setItem("lifehub_groww_portfolio", JSON.stringify(updated));
+          } catch {}
+          return updated;
+        });
+      }
+    } catch (e: any) {
+      console.warn("Live market fetch notice:", e.message);
+    } finally {
       setMarketRefreshing(false);
-    }, 400);
+    }
+  };
+
+  const handleRefreshMarkets = () => {
+    fetchLiveMarketData();
   };
 
   // Groww Portfolio Handlers & Summary
@@ -487,16 +512,27 @@ export default function GlanceDashboard({
     setTimeout(() => setPortfolioImportStatus(""), 4000);
   };
 
-  // Indian Market Instruments on Groww
+  // Indian Market Instruments on Groww (dynamically populated from real market quotes)
   const indianMarketData = useMemo(() => {
+    const nifty = liveMarketQuotes["NIFTY_50"];
+    const sensex = liveMarketQuotes["SENSEX"];
+    const bankNifty = liveMarketQuotes["BANK_NIFTY"];
+    const usdinr = liveMarketQuotes["USD_INR"];
+    const schneider = liveMarketQuotes["SCHNEIDER"];
+    const tatamotors = liveMarketQuotes["TMPV"];
+    const reliance = liveMarketQuotes["RELIANCE"];
+    const hdfc = liveMarketQuotes["HDFCBANK"];
+
     return [
       {
         symbol: "NIFTY 50",
         name: "NSE Benchmark Index",
         type: "indices" as const,
-        price: "₹24,148.20",
-        change: "+101.40 (+0.42%)",
-        isPositive: true,
+        price: nifty?.price ? formatINR(nifty.price) : "₹25,291.10",
+        change: nifty
+          ? `${nifty.change >= 0 ? "+" : ""}${nifty.change.toFixed(2)} (${nifty.changePct >= 0 ? "+" : ""}${nifty.changePct.toFixed(2)}%)`
+          : "+146.80 (+0.58%)",
+        isPositive: nifty ? nifty.isPositive : true,
         growwUrl: "https://groww.in/indices/nifty-50",
         sparkline: "M2 14 L12 12 L22 15 L32 9 L42 11 L52 5 L62 3",
         tag: "National Index",
@@ -505,9 +541,11 @@ export default function GlanceDashboard({
         symbol: "SENSEX",
         name: "BSE Benchmark Index",
         type: "indices" as const,
-        price: "₹79,485.60",
-        change: "+302.20 (+0.38%)",
-        isPositive: true,
+        price: sensex?.price ? formatINR(sensex.price) : "₹82,104.79",
+        change: sensex
+          ? `${sensex.change >= 0 ? "+" : ""}${sensex.change.toFixed(2)} (${sensex.changePct >= 0 ? "+" : ""}${sensex.changePct.toFixed(2)}%)`
+          : "+512.34 (+0.63%)",
+        isPositive: sensex ? sensex.isPositive : true,
         growwUrl: "https://groww.in/indices/bse-sensex",
         sparkline: "M2 13 L12 14 L22 10 L32 11 L42 7 L52 8 L62 4",
         tag: "Bombay 30",
@@ -516,9 +554,11 @@ export default function GlanceDashboard({
         symbol: "BANK NIFTY",
         name: "NSE Banking Index",
         type: "indices" as const,
-        price: "₹51,820.10",
-        change: "+334.80 (+0.65%)",
-        isPositive: true,
+        price: bankNifty?.price ? formatINR(bankNifty.price) : "₹61,575.90",
+        change: bankNifty
+          ? `${bankNifty.change >= 0 ? "+" : ""}${bankNifty.change.toFixed(2)} (${bankNifty.changePct >= 0 ? "+" : ""}${bankNifty.changePct.toFixed(2)}%)`
+          : "+541.80 (+0.89%)",
+        isPositive: bankNifty ? bankNifty.isPositive : true,
         growwUrl: "https://groww.in/indices/nifty-bank",
         sparkline: "M2 15 L12 11 L22 13 L32 8 L42 9 L52 4 L62 2",
         tag: "Banking",
@@ -527,9 +567,11 @@ export default function GlanceDashboard({
         symbol: "SCHNEIDER",
         name: "Schneider Electric Infra Ltd",
         type: "stocks" as const,
-        price: "₹842.50",
-        change: "+₹19.35 (+2.35%)",
-        isPositive: true,
+        price: schneider?.price ? formatINR(schneider.price) : "₹1,024.90",
+        change: schneider
+          ? `${schneider.change >= 0 ? "+" : ""}${formatINR(schneider.change)} (${schneider.changePct >= 0 ? "+" : ""}${schneider.changePct.toFixed(2)}%)`
+          : "-₹36.10 (-3.40%)",
+        isPositive: schneider ? schneider.isPositive : false,
         growwUrl: "https://groww.in/stocks/schneider-electric-infrastructure-ltd",
         sparkline: "M2 16 L12 14 L22 12 L32 10 L42 6 L52 5 L62 2",
         tag: "Jaison's Company",
@@ -537,11 +579,13 @@ export default function GlanceDashboard({
       },
       {
         symbol: "TATAMOTORS",
-        name: "Tata Motors Ltd",
+        name: "Tata Motors Passenger Ltd",
         type: "stocks" as const,
-        price: "₹784.90",
-        change: "+₹8.90 (+1.15%)",
-        isPositive: true,
+        price: tatamotors?.price ? formatINR(tatamotors.price) : "₹262.40",
+        change: tatamotors
+          ? `${tatamotors.change >= 0 ? "+" : ""}${formatINR(tatamotors.change)} (${tatamotors.changePct >= 0 ? "+" : ""}${tatamotors.changePct.toFixed(2)}%)`
+          : "+₹2.95 (+1.15%)",
+        isPositive: tatamotors ? tatamotors.isPositive : true,
         growwUrl: "https://groww.in/stocks/tata-motors-ltd",
         sparkline: "M2 14 L12 13 L22 11 L32 12 L42 8 L52 7 L62 4",
         tag: "Auto / EV",
@@ -550,9 +594,11 @@ export default function GlanceDashboard({
         symbol: "RELIANCE",
         name: "Reliance Industries Ltd",
         type: "stocks" as const,
-        price: "₹1,268.40",
-        change: "-₹3.55 (-0.28%)",
-        isPositive: false,
+        price: reliance?.price ? formatINR(reliance.price) : "₹1,344.80",
+        change: reliance
+          ? `${reliance.change >= 0 ? "+" : ""}${formatINR(reliance.change)} (${reliance.changePct >= 0 ? "+" : ""}${reliance.changePct.toFixed(2)}%)`
+          : "+₹5.10 (+0.38%)",
+        isPositive: reliance ? reliance.isPositive : true,
         growwUrl: "https://groww.in/stocks/reliance-industries-ltd",
         sparkline: "M2 5 L14 6 L26 8 L38 12 L50 13 L62 16",
         tag: "Energy & Retail",
@@ -561,9 +607,11 @@ export default function GlanceDashboard({
         symbol: "HDFCBANK",
         name: "HDFC Bank Ltd",
         type: "stocks" as const,
-        price: "₹1,742.00",
-        change: "+₹14.15 (+0.82%)",
-        isPositive: true,
+        price: hdfc?.price ? formatINR(hdfc.price) : "₹816.50",
+        change: hdfc
+          ? `${hdfc.change >= 0 ? "+" : ""}${formatINR(hdfc.change)} (${hdfc.changePct >= 0 ? "+" : ""}${hdfc.changePct.toFixed(2)}%)`
+          : "+₹12.45 (+1.55%)",
+        isPositive: hdfc ? hdfc.isPositive : true,
         growwUrl: "https://groww.in/stocks/hdfc-bank-ltd",
         sparkline: "M2 12 L12 14 L22 10 L32 9 L42 7 L52 8 L62 5",
         tag: "Private Bank",
@@ -572,15 +620,17 @@ export default function GlanceDashboard({
         symbol: "USD/INR",
         name: "Indian Rupee Forex Spot",
         type: "indices" as const,
-        price: "₹84.42",
-        change: "+0.04%",
-        isPositive: null,
+        price: usdinr?.price ? `₹${usdinr.price.toFixed(2)}` : "₹84.42",
+        change: usdinr
+          ? `${usdinr.changePct >= 0 ? "+" : ""}${usdinr.changePct.toFixed(2)}%`
+          : "+0.04%",
+        isPositive: usdinr ? usdinr.isPositive : null,
         growwUrl: "https://groww.in/us-stocks",
         sparkline: "M2 10 L14 11 L26 9 L38 10 L50 9 L62 10",
         tag: "Forex",
       },
     ];
-  }, [marketTickVersion]);
+  }, [liveMarketQuotes, marketTickVersion]);
 
   const filteredMarketData = useMemo(() => {
     if (marketFilter === "indices") {
@@ -650,6 +700,9 @@ export default function GlanceDashboard({
         } catch {}
       }
 
+      // Auto-fetch real-time live Indian Market & Portfolio quotes immediately
+      fetchLiveMarketData();
+
       // Auto-sync device GPS location on mount
       if (typeof window !== "undefined" && "geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
@@ -689,6 +742,13 @@ export default function GlanceDashboard({
         fetchWeatherForCoords(12.9716, 77.5946, false);
       }
     } catch {}
+
+    // Auto-refresh real-time market quotes every 30 seconds
+    const marketInterval = setInterval(() => {
+      fetchLiveMarketData();
+    }, 30000);
+
+    return () => clearInterval(marketInterval);
   }, [scriptureOffset]);
 
   const handleToggleActivity = (id: string) => {
