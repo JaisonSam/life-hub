@@ -11,6 +11,9 @@ interface TronBackgroundVideoProps {
   triggerUnlockAudio?: boolean;
 }
 
+const TARGET_VOLUME = 0.85;
+const FADE_IN_DURATION = 4.0; // 4 seconds smooth volume fade-in
+
 export default function TronBackgroundVideo({
   isHomescreenVisible,
   isMuted,
@@ -30,6 +33,23 @@ export default function TronBackgroundVideo({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Compute smooth volume fade-in based on video currentTime (from 0.0 to 4.0s)
+  const applyFadeInVolume = useCallback((video: HTMLVideoElement) => {
+    if (isMuted) {
+      video.muted = true;
+      return;
+    }
+    const t = video.currentTime;
+    if (t < FADE_IN_DURATION) {
+      const progress = Math.max(0, Math.min(t / FADE_IN_DURATION, 1.0));
+      // Smooth ease-out quad curve: progress * (2 - progress)
+      const currentVol = TARGET_VOLUME * (progress * (2 - progress));
+      video.volume = Math.max(0.01, Math.min(TARGET_VOLUME, Number(currentVol.toFixed(3))));
+    } else {
+      video.volume = TARGET_VOLUME;
+    }
+  }, [isMuted]);
+
   // MASTER AUDIO CONTROLLER: Sync audio volume & muted state with isMuted prop
   // bgVideoRef handles audio across the entire site (both intro and homescreen)
   useEffect(() => {
@@ -37,28 +57,28 @@ export default function TronBackgroundVideo({
     if (!video) return;
 
     video.muted = isMuted;
-    video.volume = 0.85;
-
     if (!isMuted) {
+      applyFadeInVolume(video);
       video.play().catch(() => {});
     }
-  }, [isMuted]);
+  }, [isMuted, applyFadeInVolume]);
 
   // Handle explicit audio unlock trigger from parent
   useEffect(() => {
     if (triggerUnlockAudio && bgVideoRef.current && !isMuted) {
       bgVideoRef.current.muted = false;
-      bgVideoRef.current.volume = 0.85;
+      applyFadeInVolume(bgVideoRef.current);
       bgVideoRef.current.play().catch(() => {});
     }
-  }, [triggerUnlockAudio, isMuted]);
+  }, [triggerUnlockAudio, isMuted, applyFadeInVolume]);
 
-  // Robust instant start playback with zero stalling
+  // Robust instant start playback with zero stalling and 4-second volume fade-in
   const startVideoInstant = useCallback(() => {
     const video = bgVideoRef.current;
     if (!video) return;
 
-    video.volume = 0.85;
+    // Start with low initial volume so it ramps up smoothly over 4s
+    video.volume = 0.01;
     video.muted = isMuted;
 
     const playPromise = video.play();
@@ -94,16 +114,36 @@ export default function TronBackgroundVideo({
     };
     video.addEventListener("ended", handleEnded);
 
+    // Smooth volume fade-in animation frame loop for the first 4.2 seconds
+    let animId: number;
+    const rampVolume = () => {
+      if (video && !video.paused && video.currentTime < 4.2) {
+        applyFadeInVolume(video);
+        animId = requestAnimationFrame(rampVolume);
+      } else if (video && !video.paused && !isMuted) {
+        video.volume = TARGET_VOLUME;
+      }
+    };
+    animId = requestAnimationFrame(rampVolume);
+
+    const handleTimeUpdate = () => {
+      applyFadeInVolume(video);
+    };
+    video.addEventListener("timeupdate", handleTimeUpdate);
+
     // Audio Unlocker: On the very first user interaction anywhere on the window or document
+    // Listens to mousemove, pointermove, focus, wheel, scroll, touch, and click
     const unlockMasterAudio = () => {
       if (video && !isMuted) {
         video.muted = false;
-        video.volume = 0.85;
+        applyFadeInVolume(video);
         video.play().catch(() => {});
       }
     };
 
     const interactionEvents = [
+      "pointermove",
+      "mousemove",
       "pointerdown",
       "touchstart",
       "click",
@@ -111,6 +151,7 @@ export default function TronBackgroundVideo({
       "wheel",
       "scroll",
       "mousedown",
+      "focus",
     ];
 
     interactionEvents.forEach((evt) => {
@@ -122,12 +163,14 @@ export default function TronBackgroundVideo({
       video.removeEventListener("ended", handleEnded);
       video.removeEventListener("loadedmetadata", startVideoInstant);
       video.removeEventListener("canplay", startVideoInstant);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      cancelAnimationFrame(animId);
       interactionEvents.forEach((evt) => {
         window.removeEventListener(evt, unlockMasterAudio);
         document.removeEventListener(evt, unlockMasterAudio);
       });
     };
-  }, [startVideoInstant, isMuted]);
+  }, [startVideoInstant, isMuted, applyFadeInVolume]);
 
   return (
     <>

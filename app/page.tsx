@@ -507,9 +507,7 @@ export default function LifeHub() {
     setIsMuted(false);
     const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
     if (bg) {
-      bg.currentTime = 0;
       bg.muted = false;
-      bg.volume = 0.85;
       const playPromise = bg.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {
