@@ -60,9 +60,23 @@ A personal life operating system and daily sanctuary combining:
     - Automatically requests and syncs with the browser device's GPS geolocation (`navigator.geolocation.getCurrentPosition`) on initial site open.
     - Dynamically fetches local temperature, weather condition, and city name via `/api/weather/live`, defaulting to Bengaluru if permissions are denied.
 
-14. **Unified Cross-Tab Design System & High-Contrast Visuals**:
-    - Seamless aesthetic consistency across all tabs (Glance/Home, Agribusiness, Commonplace, Career, Calendar, GMAT Sprint, Bible Study).
-    - Consistent high-contrast cards, typography, translucent glassmorphic surfaces, and unified control buttons.
+14. **Clean 3-Column Architecture & Top Bar Simplification**:
+    - Top Bar: Removed leftmost "G" monogram; removed horizontal tab scrollbar to occupy the bar naturally with all 9 tabs (`Home`, `Career`, `GMAT`, `Farm`, `Books`, `Bible`, `Habits`, `Projects`, `Music`).
+    - Home Deck Switcher: Removed Coverflow/Bento switcher row; the 3-column layout is the dedicated design shown directly, with all internal references to the name "Glance" removed.
+    - Center Column Spotlight:
+      - **Daily Scripture & Devotional** is promoted to the top of Column 2 as the primary centerpiece of the homescreen (with golden glow, Day navigation, Scripture quote, theme, reading plan, reflection, prayer drawer, and Romans study shortcut).
+      - **Career Radar & Executive Intel** (BLR ERP openings, GMAT quant traps, Tech intel, Farm ops).
+      - **YouTube Music Catalog**: Replaced generic Videos & Sanctuary with 6 curated albums/playlists with direct links to `music.youtube.com`.
+    - Clutter Cleanings:
+      - Removed middle duplicate bookmarks pill bar (`Google Calendar`, `Schneider Portal`, etc.).
+      - Removed Twitch channels card.
+      - Removed Community / Reddit pages feeds (`/r/erp_consulting`, `/r/agritech_india`, `/r/gmat_focus`).
+      - Removed Repository card.
+      - Removed Executive scratchpad and background pomodoro timer.
+    - Clean 3-Column Balance:
+      - Column 1: Calendar, Planned Activities (GCal Synced), Daily Habits.
+      - Column 2: Daily Scripture (Primary Centerpiece), Career Radar, YouTube Music Catalog.
+      - Column 3: GPS Weather, Indian Markets & Groww Portfolio (19 Stocks).
 
 ## 🛠️ Tech Stack & Locations
 * **Location**: `/Users/jaisappi/Developer/life-hub`
