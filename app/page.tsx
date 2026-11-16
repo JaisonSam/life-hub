@@ -65,6 +65,7 @@ import ExecutiveViewCarousel from "@/components/ExecutiveViewCarousel";
 import GlanceDashboard from "@/components/GlanceDashboard";
 import GlanceErrorBoundary from "@/components/GlanceErrorBoundary";
 import AOSInit from "@/components/AOSInit";
+import WelcomeIntro from "@/components/WelcomeIntro";
 import { getDailyScripture } from "@/lib/dailyScripture";
 import { loadDailyHabits, toggleDailyHabitStorage, getDateKey } from "@/lib/dailyHabits";
 
@@ -1350,6 +1351,9 @@ export default function LifeHub() {
 
   return (
     <div className="min-h-screen bg-[#0c0d11] text-neutral-100 font-sans selection:bg-amber-500/30 selection:text-amber-200 relative pb-16">
+      {/* 2-Second Cinematic Black Welcome Intro */}
+      <WelcomeIntro />
+
       {/* AOS Scroll Animation Engine for Mobile & Desktop */}
       <AOSInit />
 
