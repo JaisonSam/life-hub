@@ -27,6 +27,9 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
     >
+      <head>
+        <link rel="preload" href="/videos/tron-intro.mp4" as="video" type="video/mp4" />
+      </head>
       <body className="min-h-full flex flex-col bg-[#0c0d11] text-[#f4f4f6] selection:bg-amber-500/30 selection:text-amber-200 relative">
         {children}
       </body>

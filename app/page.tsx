@@ -512,6 +512,33 @@ export default function LifeHub() {
     }
   }, []);
 
+  // Ensure section video plays instantly with zero delay
+  useEffect(() => {
+    const video = sectionVideoRef.current;
+    if (!video) return;
+
+    video.volume = 0.85;
+    video.muted = isMuted;
+
+    const startPlay = () => {
+      video.muted = isMuted;
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          video.muted = true;
+          video.play().catch(() => {});
+        });
+      }
+    };
+
+    if (video.readyState >= 1) {
+      startPlay();
+    } else {
+      video.addEventListener("loadedmetadata", startPlay, { once: true });
+      video.addEventListener("canplay", startPlay, { once: true });
+    }
+  }, [isMuted]);
+
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
   const [homeViewMode, setHomeViewMode] = useState<"glance" | "carousel" | "bento">("glance");

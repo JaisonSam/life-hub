@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
 interface TronBackgroundVideoProps {
@@ -35,53 +35,91 @@ export default function TronBackgroundVideo({
     const video = bgVideoRef.current;
     if (!video) return;
 
-    // During intro (!isHomescreenVisible), bgVideoRef is the main solo player and must play music!
-    // Once homescreen is visible, sectionVideo in page.tsx takes over audio so bgVideo is muted to prevent echo.
+    // During intro (!isHomescreenVisible), bgVideoRef is the main solo player and plays music
+    // Once homescreen is visible, sectionVideo in page.tsx handles foreground audio so bgVideo is muted
     const shouldMute = isHomescreenVisible ? true : isMuted;
     video.muted = shouldMute;
     video.volume = 0.85;
 
     if (!shouldMute) {
-      video.play().catch(() => {});
+      video.play().catch(() => {
+        video.muted = true;
+        video.play().catch(() => {});
+      });
     }
   }, [isMuted, isHomescreenVisible]);
+
+  // Robust instant start playback with zero stalling
+  const startVideoInstant = useCallback(() => {
+    const video = bgVideoRef.current;
+    if (!video) return;
+
+    video.volume = 0.85;
+    video.muted = isMuted;
+
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          if (onVideoReady) onVideoReady();
+        })
+        .catch(() => {
+          // If browser restricts unmuted autoplay, immediately fall back to muted so video starts playing with 0 delay!
+          video.muted = true;
+          video.play().catch(() => {});
+          if (onVideoReady) onVideoReady();
+        });
+    }
+  }, [isMuted, onVideoReady]);
 
   useEffect(() => {
     const video = bgVideoRef.current;
     if (!video) return;
 
-    video.volume = 0.85;
-    // Initially unmuted so music plays right as video loads
-    video.muted = isMuted;
-
-    const startPlay = () => {
-      video.muted = isMuted;
-      video.play().catch(() => {});
-      if (onVideoReady) onVideoReady();
-    };
-
-    if (video.readyState >= 2) {
-      startPlay();
+    if (video.readyState >= 1) {
+      startVideoInstant();
     } else {
-      video.addEventListener("loadeddata", startPlay, { once: true });
+      video.addEventListener("loadedmetadata", startVideoInstant, { once: true });
+      video.addEventListener("canplay", startVideoInstant, { once: true });
     }
 
+    // Keep background video playing smoothly on loop
     const handleEnded = () => {
       video.currentTime = 0;
       video.play().catch(() => {});
     };
     video.addEventListener("ended", handleEnded);
 
+    // Unmute on first user gesture
+    const handleUserGesture = () => {
+      if (bgVideoRef.current && !isHomescreenVisible) {
+        bgVideoRef.current.muted = false;
+        bgVideoRef.current.volume = 0.85;
+        bgVideoRef.current.play().catch(() => {});
+      }
+    };
+    window.addEventListener("pointerdown", handleUserGesture, { passive: true });
+    window.addEventListener("click", handleUserGesture, { passive: true });
+    window.addEventListener("touchstart", handleUserGesture, { passive: true });
+    window.addEventListener("keydown", handleUserGesture, { passive: true });
+
     return () => {
       video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("loadedmetadata", startVideoInstant);
+      video.removeEventListener("canplay", startVideoInstant);
+      window.removeEventListener("pointerdown", handleUserGesture);
+      window.removeEventListener("click", handleUserGesture);
+      window.removeEventListener("touchstart", handleUserGesture);
+      window.removeEventListener("keydown", handleUserGesture);
     };
-  }, [isMuted, onVideoReady]);
+  }, [startVideoInstant, isHomescreenVisible]);
 
   return (
     <>
       {/* 
         AMBIENT BACKGROUND VIDEO LAYER
-        - During Intro (!isHomescreenVisible): Full-screen solo video view playing WITH MUSIC!
+        - Starts playing immediately with faststart 1-second keyframes
+        - During Intro (!isHomescreenVisible): Full-screen solo video view
         - On Homescreen: Fades in behind dashboard contents as the user scrolls down (scrollY > 120)
         - When at the top (scrollY <= 120): Hidden (opacity-0) so video only shows inside the showcase section box!
       */}
