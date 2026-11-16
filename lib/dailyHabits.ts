@@ -10,14 +10,6 @@ export interface DynamicHabit {
 
 export const DEFAULT_HABITS: DynamicHabit[] = [
   {
-    id: "h-scripture",
-    name: "Morning Scripture & Prayer",
-    category: "Spiritual",
-    streak: 14,
-    completedToday: false,
-    description: "Daily liturgical Scripture reading and contemplative prayer.",
-  },
-  {
     id: "h-gmat",
     name: "GMAT 705+ Focus Sprint (45m)",
     category: "Growth",

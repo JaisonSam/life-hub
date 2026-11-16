@@ -32,7 +32,6 @@ export type ViewTabId =
   | "gmat"
   | "farm"
   | "books"
-  | "bible"
   | "habits"
   | "projects"
   | "music";
@@ -178,32 +177,12 @@ export default function ExecutiveViewCarousel({
       actionLabel: "Launch Kobo E-Reader & Bookshelf",
     },
     {
-      id: "bible",
-      title: "Bible Study Organiser & Devotional",
-      category: "Spiritual Pillar",
-      badge: "Book of Romans Companion",
-      roleSubtitle: "Android YouVersion Sync • Daily Scripture Anchor",
-      description: "Comprehensive spiritual sanctuary featuring daily inspired verses with personal reflections, translation switchers (NIV/ESV/NLT), and chapter-by-chapter study notes.",
-      icon: BookOpen,
-      glowColor: "from-amber-400 via-orange-500 to-yellow-600",
-      haloColor: "rgba(245, 158, 11, 0.3)",
-      accentBorder: "group-hover:border-amber-400/50",
-      badgeBg: "bg-amber-500/10 border-amber-500/20",
-      badgeText: "text-amber-300",
-      metrics: [
-        { label: "Daily Scripture", value: "Verse & Reflection" },
-        { label: "Study Text", value: "Book of Romans" },
-        { label: "App Link", value: "YouVersion Android" },
-      ],
-      actionLabel: "Enter Bible Sanctuary & Study Desk",
-    },
-    {
       id: "habits",
       title: "Daily Habit Compounding Engine",
       category: "Discipline & Health",
       badge: `${completedHabitsCount} of ${totalHabitsCount} Completed`,
-      roleSubtitle: "Spiritual, Physical & Intellectual Streaks",
-      description: "Track the atomic disciplines that compound into greatness. Real-time checklist and streak tracking for morning prayer, GMAT prep, gym workouts, and clean diet.",
+      roleSubtitle: "Physical & Intellectual Streaks",
+      description: "Track the atomic disciplines that compound into greatness. Real-time checklist and streak tracking for GMAT prep, gym workouts, and clean diet.",
       icon: Flame,
       glowColor: "from-orange-500 via-amber-500 to-red-500",
       haloColor: "rgba(249, 115, 22, 0.25)",

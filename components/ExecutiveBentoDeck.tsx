@@ -33,7 +33,7 @@ interface Habit {
 }
 
 interface ExecutiveBentoDeckProps {
-  onSelectTab: (tabId: "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music") => void;
+  onSelectTab: (tabId: "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music") => void;
   completedHabitsCount: number;
   habits: Habit[];
   onToggleHabit: (id: string) => void;

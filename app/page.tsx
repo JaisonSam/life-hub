@@ -69,7 +69,6 @@ import AOSInit from "@/components/AOSInit";
 import WelcomeIntro from "@/components/WelcomeIntro";
 import TronBackgroundVideo from "@/components/TronBackgroundVideo";
 import YouVersionVerse from "@/components/YouVersionVerse";
-import { getDailyScripture } from "@/lib/dailyScripture";
 import { loadDailyHabits, toggleDailyHabitStorage, getDateKey } from "@/lib/dailyHabits";
 
 interface Project {
@@ -87,13 +86,6 @@ interface Habit {
   category: "Spiritual" | "Health" | "Growth";
   streak: number;
   completedToday: boolean;
-}
-
-interface StudyNote {
-  id: string;
-  reference: string;
-  note: string;
-  date: string;
 }
 
 interface GmatErrorLog {
@@ -606,7 +598,7 @@ export default function LifeHub() {
   }, [homescreenVisible]);
 
   // Navigation tabs
-  const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music">("all");
   const [homeViewMode, setHomeViewMode] = useState<"glance" | "carousel" | "bento">("glance");
 
   // Veerakeralapudur Agribusiness State
@@ -752,41 +744,9 @@ export default function LifeHub() {
   const [newErrorTrap, setNewErrorTrap] = useState<"Math Trap" | "RC Scope Shift" | "Careless / Arithmetic" | "Timing Pressure">("Math Trap");
   const [newErrorTakeaway, setNewErrorTakeaway] = useState("");
 
-  // Bible Verse State
-  const [dailyVerse, setDailyVerse] = useState({
-    reference: "Proverbs 3:5-6",
-    text: "Trust in the LORD with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.",
-    translation: "NIV",
-    theme: "Trust & Guidance",
-    reflection: "Surrender worries today and focus on taking each faithful step forward with confidence.",
-  });
-  const [verseCopied, setVerseCopied] = useState(false);
-  const [verseBookmarked, setVerseBookmarked] = useState(false);
-
-  // Bible Reading Plan State
-  const [bibleTranslation, setBibleTranslation] = useState<"NIV" | "ESV" | "NLT" | "KJV">("NIV");
-  const [readingPlan, setReadingPlan] = useState({
-    name: "Romans Deep Study",
-    currentChapter: 8,
-    totalChapters: 16,
-  });
-
-  // Notes state
-  const [notes, setNotes] = useState<StudyNote[]>([
-    {
-      id: "1",
-      reference: "Romans 8:1",
-      note: "There is now no condemnation for those who are in Christ Jesus. True freedom starts in the mind.",
-      date: "Nov 8, 2026",
-    },
-  ]);
-  const [newNoteRef, setNewNoteRef] = useState("");
-  const [newNoteText, setNewNoteText] = useState("");
-
-  // Calibrated Habits State (Reflecting Jaison's 4 Core Pillars)
+  // Calibrated Habits State (Reflecting Jaison's Core Pillars)
   const [habits, setHabits] = useState<Habit[]>([
     { id: "1", name: "GMAT 60-min Focus Session", category: "Growth", streak: 5, completedToday: false },
-    { id: "2", name: "Morning Scripture (Romans) & Prayer", category: "Spiritual", streak: 7, completedToday: true },
     { id: "3", name: "30-min Physical Training / Workout", category: "Health", streak: 4, completedToday: false },
     { id: "4", name: "AI & Tech Strategy Synthesis", category: "Growth", streak: 3, completedToday: true },
   ]);
@@ -881,26 +841,6 @@ export default function LifeHub() {
     updateTime();
     const timer = setInterval(updateTime, 1000);
 
-    // Load dynamic daily scripture immediately for today
-    try {
-      const todayScripture = getDailyScripture(new Date());
-      setDailyVerse({
-        reference: todayScripture.reference,
-        text: todayScripture.text,
-        translation: todayScripture.translation,
-        theme: todayScripture.theme,
-        reflection: todayScripture.reflection,
-      });
-    } catch {}
-
-    // Fetch daily verse from backend API
-    fetch("/api/bible/daily")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.verse) setDailyVerse(data.verse);
-      })
-      .catch(() => {});
-
     // Check YouTube Music connection & fetch real playlists
     fetch("/api/youtube/playlists")
       .then((res) => res.json())
@@ -926,9 +866,6 @@ export default function LifeHub() {
 
       const savedProjects = localStorage.getItem("lifehub_projects");
       if (savedProjects) setProjects(JSON.parse(savedProjects));
-
-      const savedNotes = localStorage.getItem("lifehub_notes");
-      if (savedNotes) setNotes(JSON.parse(savedNotes));
 
       const savedMocks = localStorage.getItem("lifehub_gmat_mocks");
       if (savedMocks) setMockScores(JSON.parse(savedMocks));
@@ -1000,7 +937,7 @@ export default function LifeHub() {
   }, [gmatTimerRunning, gmatTimerSeconds, habits]);
 
   // Handle tab selection for desktop and smooth scrolling on mobile
-  const handleSelectTab = (tabId: "all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music") => {
+  const handleSelectTab = (tabId: "all" | "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music") => {
     setActiveTab(tabId);
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       if (tabId === "all") {
@@ -1028,20 +965,19 @@ export default function LifeHub() {
       // Only run scroll-spy on mobile screens (< 768px)
       if (typeof window === "undefined" || window.innerWidth >= 768) return;
 
-      const sectionIds: Array<{ id: "all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music"; elId: string }> = [
+      const sectionIds: Array<{ id: "all" | "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music"; elId: string }> = [
         { id: "all", elId: "module-all" },
         { id: "career", elId: "module-career" },
         { id: "gmat", elId: "module-gmat" },
         { id: "farm", elId: "module-farm" },
         { id: "books", elId: "module-books" },
-        { id: "bible", elId: "module-bible" },
         { id: "habits", elId: "module-habits" },
         { id: "projects", elId: "module-projects" },
         { id: "music", elId: "module-music" },
       ];
 
       const scrollPos = window.scrollY + 140;
-      let currentTab: "all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music" = "all";
+      let currentTab: "all" | "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music" = "all";
 
       for (const item of sectionIds) {
         const el = document.getElementById(item.elId);
@@ -1379,24 +1315,6 @@ export default function LifeHub() {
     setShowNewProject(false);
   };
 
-  const addNote = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newNoteText.trim()) return;
-    const note: StudyNote = {
-      id: Date.now().toString(),
-      reference: newNoteRef.trim() || "Reflection",
-      note: newNoteText,
-      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    };
-    const updated = [note, ...notes];
-    setNotes(updated);
-    try {
-      localStorage.setItem("lifehub_notes", JSON.stringify(updated));
-    } catch {}
-    setNewNoteRef("");
-    setNewNoteText("");
-  };
-
   // Dynamic metrics from official mocks
   const latestMock = mockScores[mockScores.length - 1] || {
     id: "default",
@@ -1511,7 +1429,6 @@ export default function LifeHub() {
                 { id: "gmat", label: "GMAT" },
                 { id: "farm", label: "Farm" },
                 { id: "books", label: "Books" },
-                { id: "bible", label: "Bible" },
                 { id: "habits", label: "Habits" },
                 { id: "projects", label: "Projects" },
                 { id: "music", label: "Music" },
@@ -1585,38 +1502,20 @@ export default function LifeHub() {
                 onEnded={() => setHasVideoEnded(true)}
                 className="w-full h-full object-cover"
               />
-              {/* Subtle button to switch to scripture verse directly */}
+              {/* Subtle button to switch to scripture passage directly */}
               <div className="absolute top-3 right-3 z-10">
                 <button
                   onClick={() => setHasVideoEnded(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/75 hover:bg-black/95 text-neutral-300 hover:text-white border border-white/10 text-xs font-sans backdrop-blur-md transition-all shadow-lg"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Scripture Verse</span>
+                  <span>Scripture Passage</span>
                 </button>
               </div>
             </>
           ) : (
             <div className="w-full h-full relative">
               <YouVersionVerse variant="showcase" />
-              {/* Subtle replay video control */}
-              <div className="absolute top-3 right-3 z-10">
-                <button
-                  onClick={() => {
-                    setHasVideoEnded(false);
-                    const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
-                    if (bg) {
-                      bg.currentTime = 0;
-                      bg.play().catch(() => {});
-                    }
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/85 text-neutral-400 hover:text-white border border-white/10 text-xs font-sans backdrop-blur-md transition-all"
-                  title="Replay Video"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
-                  <span className="hidden sm:inline">Replay Video</span>
-                </button>
-              </div>
             </div>
           )}
         </div>
@@ -3074,253 +2973,6 @@ export default function LifeHub() {
                 </div>
               </div>
             )}
-          </section>
-        </div>
-
-        {/* BIBLE & SCRIPTURE SANCTUARY (Daily Verse + YouVersion Organiser) */}
-        <div
-          id="module-bible"
-          className={`${getModuleVisibilityClass("bible")} space-y-6`}
-          data-aos="fade-up"
-          data-aos-duration="700"
-          data-aos-offset="80"
-        >
-          {/* 1. DAILY BIBLE QUOTE MODULE */}
-          <section className="relative overflow-hidden rounded-2xl bg-[#14151b] border border-[#232530] p-6 sm:p-8 shadow-lg space-y-4">
-            <div className="flex items-center justify-between gap-4 mb-2">
-              <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-amber-400">
-                <BookOpen className="w-4 h-4 text-amber-400" />
-                Daily Verse & Scripture Inspiration
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setVerseBookmarked(!verseBookmarked)}
-                  className={`p-2 rounded-lg border text-xs transition-colors ${
-                    verseBookmarked
-                      ? "bg-amber-500 text-neutral-950 border-amber-500 font-semibold"
-                      : "bg-[#181920] border-[#262834] text-neutral-400 hover:text-white"
-                  }`}
-                  title="Bookmark Verse"
-                >
-                  <Bookmark className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(`"${dailyVerse.text}" - ${dailyVerse.reference}`);
-                    setVerseCopied(true);
-                    setTimeout(() => setVerseCopied(false), 2000);
-                  }}
-                  className="p-2 rounded-lg border border-[#262834] bg-[#181920] text-neutral-300 hover:text-white text-xs transition-colors flex items-center gap-1 font-mono"
-                  title="Copy Verse"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  {verseCopied ? "Copied!" : ""}
-                </button>
-              </div>
-            </div>
-
-            <blockquote className="text-xl sm:text-2xl font-serif leading-relaxed text-neutral-100 my-4 italic">
-              "{dailyVerse.text}"
-            </blockquote>
-
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-[#262834]">
-              <div className="flex items-center gap-2 font-mono">
-                <span className="font-bold text-[#e5c07b] text-base">{dailyVerse.reference}</span>
-                <span className="text-xs px-2 py-0.5 rounded bg-[#181920] text-[#8b91a0] border border-[#262834]">
-                  {dailyVerse.translation}
-                </span>
-                <span className="text-xs text-[#8b91a0]">• {dailyVerse.theme}</span>
-              </div>
-              <p className="text-xs text-neutral-400 max-w-md italic">
-                💡 Reflection: {dailyVerse.reflection}
-              </p>
-            </div>
-          </section>
-
-          {/* 2. BIBLE STUDY ORGANISER */}
-          <section className="p-6 sm:p-8 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-[#262834]">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-[#181920] text-amber-400 border border-[#262834] shadow-sm">
-                  <BookOpen className="w-5 h-5 text-amber-400" />
-                </div>
-                <div>
-                  <h2 className="font-extrabold text-base text-white flex items-center gap-2">
-                    Bible Study Organiser
-                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 font-semibold font-mono">
-                      YouVersion Companion
-                    </span>
-                  </h2>
-                  <p className="text-xs text-neutral-400">Book of Romans • Android YouVersion App Integration</p>
-                </div>
-              </div>
-
-              {/* Translation Switcher */}
-              <div className="flex items-center gap-1 bg-[#181920] border border-[#262834] p-1 rounded-xl text-xs font-mono">
-                {(["NIV", "ESV", "NLT", "KJV"] as const).map((ver) => (
-                  <button
-                    key={ver}
-                    onClick={() => setBibleTranslation(ver)}
-                    className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
-                      bibleTranslation === ver
-                        ? "bg-amber-500 text-neutral-950 font-bold shadow-sm"
-                        : "text-neutral-400 hover:text-white"
-                    }`}
-                  >
-                    {ver}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Book of Romans - Chapter Quick Navigator */}
-            <div className="space-y-2 font-mono">
-              <div className="flex justify-between items-center text-xs text-neutral-400">
-                <span className="font-medium text-neutral-300">Book of Romans (16 Chapters)</span>
-                <span className="text-[#8b91a0]">Chapter {readingPlan.currentChapter} of 16</span>
-              </div>
-              <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-16">
-                {Array.from({ length: 16 }, (_, i) => i + 1).map((ch) => {
-                  const isCurrent = readingPlan.currentChapter === ch;
-                  const isDone = ch < readingPlan.currentChapter;
-                  return (
-                    <button
-                      key={ch}
-                      onClick={() =>
-                        setReadingPlan((p) => ({
-                          ...p,
-                          currentChapter: ch,
-                        }))
-                      }
-                      className={`py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
-                        isCurrent
-                          ? "bg-amber-500 text-neutral-950 shadow-md scale-105"
-                          : isDone
-                          ? "bg-[#181920] text-[#e5c07b] border border-amber-400/40"
-                          : "bg-[#101116] hover:bg-[#181920] text-neutral-400 border border-[#282a38]"
-                      }`}
-                    >
-                      {ch}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Active Chapter Card & YouVersion Launchers */}
-            <div className="p-5 rounded-xl border border-[#262834] bg-[#181920] space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <div className="text-xs text-amber-400 font-semibold uppercase tracking-wider font-mono">
-                    Today's Reading Target
-                  </div>
-                  <div className="text-base font-bold text-white mt-0.5">
-                    Romans Chapter {readingPlan.currentChapter} ({bibleTranslation})
-                  </div>
-                  <p className="text-xs text-neutral-400 mt-1">
-                    {readingPlan.currentChapter === 8
-                      ? "Life in the Spirit & God's Everlasting Love (No condemnation in Christ)"
-                      : readingPlan.currentChapter === 12
-                      ? "Living Sacrifices & Transformed Minds"
-                      : "Walk in faithful obedience and deep scripture meditation"}
-                  </p>
-                </div>
-
-                {/* YouVersion Version IDs for Android: NIV=111, ESV=59, NLT=116, KJV=1 */}
-                {(() => {
-                  const versionIds: Record<string, number> = { NIV: 111, ESV: 59, NLT: 116, KJV: 1 };
-                  const vId = versionIds[bibleTranslation] || 111;
-                  const youversionUrl = `https://www.bible.com/bible/${vId}/ROM.${readingPlan.currentChapter}.${bibleTranslation}`;
-
-                  return (
-                    <a
-                      href={youversionUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold shadow-md transition-all text-center flex-shrink-0"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Open in YouVersion App
-                    </a>
-                  );
-                })()}
-              </div>
-
-              {/* Mark Chapter Read + Streak Advance */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#262834] text-xs font-mono">
-                <div className="flex items-center gap-2 text-neutral-400">
-                  <span>Reading Progress:</span>
-                  <span className="font-mono text-emerald-400 font-bold">
-                    {Math.round((readingPlan.currentChapter / 16) * 100)}% Complete
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => {
-                    // Advance chapter
-                    const nextCh = Math.min(16, readingPlan.currentChapter + 1);
-                    setReadingPlan((p) => ({ ...p, currentChapter: nextCh }));
-
-                    // Also mark the daily habit 'Read 1 Chapter' as completed!
-                    const updatedHabits = habits.map((h) => {
-                      if (h.name.includes("Read 1 Chapter")) {
-                        return {
-                          ...h,
-                          completedToday: true,
-                          streak: h.completedToday ? h.streak : h.streak + 1,
-                        };
-                      }
-                      return h;
-                    });
-                    saveHabits(updatedHabits);
-                  }}
-                  className="px-3.5 py-1.5 rounded-lg bg-[#14151b] hover:bg-[#20222a] text-neutral-200 hover:text-white border border-[#262834] font-bold transition-all shadow-sm flex items-center gap-1.5"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
-                  Mark Chapter Done & Sync Habit
-                </button>
-              </div>
-            </div>
-
-            {/* Study Notes Form */}
-            <form onSubmit={addNote} className="space-y-2">
-              <div className="text-xs font-semibold text-neutral-300 font-mono">Takeaway & Study Journal</div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder={`Romans ${readingPlan.currentChapter}:...`}
-                  value={newNoteRef}
-                  onChange={(e) => setNewNoteRef(e.target.value)}
-                  className="w-1/3 px-3 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
-                />
-                <input
-                  type="text"
-                  placeholder="Write a personal reflection or sermon note..."
-                  value={newNoteText}
-                  onChange={(e) => setNewNoteText(e.target.value)}
-                  className="w-2/3 px-3 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
-                />
-                <button
-                  type="submit"
-                  className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold rounded-lg text-xs transition-colors font-mono"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-
-            {/* Recent Saved Notes */}
-            <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
-              {notes.map((n) => (
-                <div key={n.id} className="p-3.5 rounded-xl border border-[#262834] bg-[#181920] text-xs space-y-1">
-                  <div className="flex justify-between items-center text-neutral-400 text-[10px] mb-1 font-mono">
-                    <span className="font-bold text-[#e5c07b]">{n.reference}</span>
-                    <span className="text-[#8b91a0]">{n.date}</span>
-                  </div>
-                  <p className="text-neutral-300 leading-relaxed">{n.note}</p>
-                </div>
-              ))}
-            </div>
           </section>
         </div>
 

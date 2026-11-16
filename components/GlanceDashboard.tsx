@@ -46,7 +46,6 @@ import {
   MapPin,
   Navigation,
 } from "lucide-react";
-import { getDailyScripture, ScriptureDay } from "@/lib/dailyScripture";
 import { DynamicHabit, DEFAULT_HABITS, loadDailyHabits, toggleDailyHabitStorage, getDateKey } from "@/lib/dailyHabits";
 import {
   PlannedActivity,
@@ -68,7 +67,7 @@ import {
 } from "@/lib/growwPortfolio";
 
 interface GlanceDashboardProps {
-  onSelectTab: (tabId: "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music") => void;
+  onSelectTab: (tabId: "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music") => void;
   currentTime?: string;
   currentDate?: string;
 }
@@ -82,13 +81,6 @@ export default function GlanceDashboard({
   const defaultDate = useMemo(() => new Date(2026, 10, 16), []);
   const [calendarDate, setCalendarDate] = useState<Date>(defaultDate);
   const [todayDate, setTodayDate] = useState<Date>(defaultDate);
-
-  // 2. Daily Scripture State (Dynamic everyday)
-  const [scriptureOffset, setScriptureOffset] = useState(0);
-  const [scriptureDay, setScriptureDay] = useState<ScriptureDay>(() => getDailyScripture(defaultDate, 0));
-  const [scriptureCompleted, setScriptureCompleted] = useState(false);
-  const [scriptureSaved, setScriptureSaved] = useState(false);
-  const [showScriptureMore, setShowScriptureMore] = useState(false);
 
   // 3. Daily Habits State (Dynamic everyday)
   const [todayKey, setTodayKey] = useState<string>("2026-11-16");
@@ -632,7 +624,6 @@ export default function GlanceDashboard({
     setSelectedDay(liveNow.getDate());
     const liveKey = getDateKey(liveNow);
     setTodayKey(liveKey);
-    setScriptureDay(getDailyScripture(liveNow, scriptureOffset));
     setDailyHabits(loadDailyHabits(liveKey));
     setIsIndianMarketOpen(checkIndianMarketHours());
 
@@ -728,7 +719,7 @@ export default function GlanceDashboard({
     }, 30000);
 
     return () => clearInterval(marketInterval);
-  }, [scriptureOffset]);
+  }, []);
 
   const handleToggleActivity = (id: string) => {
     const nextVal = !completedActivityIds?.[id];
@@ -1514,140 +1505,6 @@ export default function GlanceDashboard({
         {/* COLUMN 2: CENTER (Daily Scripture Primary, Career, YT Music) */}
         {/* ========================================================= */}
         <div className="lg:col-span-6 space-y-5">
-          {/* 2.0 DAILY SCRIPTURE & DEVOTIONAL (Primary Centerpiece) */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-[#14151b] border border-amber-500/35 shadow-2xl space-y-4 relative overflow-hidden">
-            {/* Subtle devotional golden ambient glow */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="flex items-center justify-between text-xs font-mono">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                  <BookOpen className="w-4 h-4" />
-                </div>
-                <div>
-                  <span className="text-white font-bold tracking-wider uppercase text-xs sm:text-sm">
-                    DAILY SCRIPTURE & DEVOTION
-                  </span>
-                  <span className="hidden sm:inline-block ml-2 text-[10px] font-mono text-amber-400/90 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                    Book of Romans Plan
-                  </span>
-                </div>
-              </div>
-
-              {/* Day Selector Navigation */}
-              <div className="flex items-center gap-1.5 text-neutral-300 font-mono text-xs bg-[#1a1b24] px-2.5 py-1 rounded-lg border border-[#262834]">
-                <button
-                  onClick={() => setScriptureOffset((prev) => prev - 1)}
-                  className="hover:text-amber-300 p-0.5 transition-colors"
-                  title="Previous Day"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <span className="text-white font-bold">Day {scriptureDay.dayOfYear}</span>
-                <button
-                  onClick={() => setScriptureOffset((prev) => prev + 1)}
-                  className="hover:text-amber-300 p-0.5 transition-colors"
-                  title="Next Day"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Scripture Quote */}
-            <div className="space-y-3 pt-1">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <button
-                  onClick={() => onSelectTab("bible")}
-                  className="text-amber-400 hover:text-amber-300 font-extrabold text-base sm:text-lg flex items-center gap-1.5 group transition-colors"
-                >
-                  <span>{scriptureDay.reference}</span>
-                  <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-amber-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-                </button>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold">
-                    {scriptureDay.theme}
-                  </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">
-                    {scriptureDay.translation}
-                  </span>
-                </div>
-              </div>
-
-              <blockquote className="text-sm sm:text-base text-neutral-100 italic leading-relaxed pl-4 border-l-2 border-amber-400 font-serif">
-                &ldquo;{scriptureDay.text}&rdquo;
-              </blockquote>
-
-              <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
-                <span>{scriptureDay.readingPlan}</span>
-                <button
-                  onClick={() => onSelectTab("bible")}
-                  className="text-amber-400 hover:text-amber-300 underline font-semibold flex items-center gap-1"
-                >
-                  <span>Open Romans Study Deck</span>
-                  <span>↗</span>
-                </button>
-              </div>
-
-              {/* Devotional Reflection Box */}
-              <div className="p-3.5 rounded-xl bg-[#191a23] border border-[#272937] text-xs sm:text-sm text-neutral-200 leading-relaxed font-sans space-y-1.5">
-                <span className="text-amber-400 font-mono text-[10px] uppercase tracking-wider block font-bold">
-                  Daily Focus • {scriptureDay.theme}
-                </span>
-                <p>{scriptureDay.reflection}</p>
-
-                {/* Collapsible Morning Prayer */}
-                {showScriptureMore && (
-                  <div className="pt-2.5 mt-2.5 border-t border-neutral-800 space-y-1">
-                    <span className="text-amber-300 font-mono text-[10px] uppercase tracking-wider block font-bold">
-                      Morning Prayer
-                    </span>
-                    <p className="text-neutral-300 italic text-xs leading-relaxed">
-                      {scriptureDay.prayer}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons: Mark Read, Bookmark, Prayer Toggle */}
-              <div className="flex items-center justify-between text-xs font-mono text-neutral-400 pt-1">
-                <button
-                  onClick={() => setScriptureCompleted(!scriptureCompleted)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
-                    scriptureCompleted
-                      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 font-bold"
-                      : "bg-[#181920] border-[#262834] hover:border-neutral-600 text-neutral-300 hover:text-white"
-                  }`}
-                >
-                  <CheckCircle2 className={`w-4 h-4 ${scriptureCompleted ? "text-emerald-400" : "text-neutral-500"}`} />
-                  <span>{scriptureCompleted ? "Reading Completed" : "Mark as Read"}</span>
-                </button>
-
-                <div className="flex items-center gap-2.5">
-                  <button
-                    onClick={() => setScriptureSaved(!scriptureSaved)}
-                    className={`p-1.5 rounded-lg border transition-colors ${
-                      scriptureSaved
-                        ? "bg-amber-500/20 border-amber-500/40 text-amber-400"
-                        : "bg-[#181920] border-[#262834] text-neutral-400 hover:text-white"
-                    }`}
-                    title="Bookmark Verse"
-                  >
-                    <Bookmark className={`w-4 h-4 ${scriptureSaved ? "fill-amber-400 text-amber-400" : ""}`} />
-                  </button>
-
-                  <button
-                    onClick={() => setShowScriptureMore(!showScriptureMore)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#181920] border border-[#262834] hover:border-neutral-600 text-neutral-300 hover:text-white transition-colors text-xs font-semibold"
-                  >
-                    <span>{showScriptureMore ? "Hide Prayer" : "Morning Prayer"}</span>
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showScriptureMore ? "rotate-180" : ""}`} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* 2.1 SUB-TABS (Glance style: HACKER NEWS | LOBSTERS / CAREER | GMAT | TECH | FARM) */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-4">
             <div className="flex items-center gap-5 border-b border-[#232530] pb-2 text-xs font-mono tracking-wider uppercase font-bold">
