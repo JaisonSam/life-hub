@@ -172,21 +172,21 @@ export default function KoboHighlightsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-3xl rounded-3xl bg-neutral-950 border border-indigo-500/30 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-3xl rounded-2xl bg-[#14151b] border border-[#232530] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 bg-neutral-900/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#262834] bg-[#181920]">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
-              <Sparkles className="w-5 h-5 text-indigo-400" />
+            <div className="p-2.5 rounded-xl bg-[#14151b] border border-[#262834] text-amber-400">
+              <Sparkles className="w-5 h-5 text-amber-400" />
             </div>
             <div>
               <h2 className="font-extrabold text-base text-white tracking-tight flex items-center gap-2">
                 Kobo Highlights & Notes Importer
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono font-normal">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono font-normal">
                   Kobo eReader & Drive
                 </span>
               </h2>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-[#8b91a0]">
                 Transform eReader underlines into actionable mental models on your Strategic Bookshelf
               </p>
             </div>
@@ -194,34 +194,34 @@ export default function KoboHighlightsModal({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl border border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
+            className="p-2 rounded-xl border border-[#262834] text-[#8b91a0] hover:text-white hover:bg-[#14151b] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 px-6 pt-3 border-b border-neutral-800/80 bg-neutral-950 text-xs">
+        <div className="flex items-center gap-2 px-6 pt-3 border-b border-[#262834] bg-[#14151b] text-xs font-mono">
           <button
             onClick={() => setActiveTab("import")}
             className={`pb-2.5 px-3 font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
               activeTab === "import"
-                ? "border-indigo-500 text-white"
-                : "border-transparent text-neutral-400 hover:text-white"
+                ? "border-amber-400 text-white font-bold"
+                : "border-transparent text-[#8b91a0] hover:text-white"
             }`}
           >
-            <FileText className="w-3.5 h-3.5" />
+            <FileText className="w-3.5 h-3.5 text-amber-400" />
             Import Highlights
           </button>
           <button
             onClick={() => setActiveTab("guide")}
             className={`pb-2.5 px-3 font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
               activeTab === "guide"
-                ? "border-indigo-500 text-white"
-                : "border-transparent text-neutral-400 hover:text-white"
+                ? "border-amber-400 text-white font-bold"
+                : "border-transparent text-[#8b91a0] hover:text-white"
             }`}
           >
-            <HelpCircle className="w-3.5 h-3.5" />
+            <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
             How to Export from Kobo
           </button>
         </div>
@@ -470,8 +470,8 @@ Note: Always look for feedback delays before altering system parameters.`;
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-neutral-800 bg-neutral-900/60">
-          <div className="text-xs text-neutral-400">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[#262834] bg-[#181920] font-mono">
+          <div className="text-xs text-[#8b91a0]">
             {importedCount !== null ? (
               <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
                 <Check className="w-4 h-4" />
@@ -487,14 +487,14 @@ Note: Always look for feedback delays before altering system parameters.`;
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-neutral-800 text-xs font-semibold text-neutral-300 hover:text-white hover:bg-neutral-900 transition-colors"
+              className="px-4 py-2 rounded-xl border border-[#262834] text-xs font-semibold text-neutral-300 hover:text-white hover:bg-[#14151b] transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleImportSubmit}
               disabled={parsedItems.filter((i) => i.selected).length === 0}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-neutral-950 text-xs font-bold shadow-sm transition-all"
             >
               <BookmarkPlus className="w-4 h-4" />
               Import to Bookshelf
