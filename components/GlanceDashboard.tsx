@@ -41,6 +41,8 @@ import {
   Radio,
   Upload,
   RefreshCw,
+  Wallet,
+  PieChart,
 } from "lucide-react";
 import { getDailyScripture, ScriptureDay } from "@/lib/dailyScripture";
 import { DynamicHabit, DEFAULT_HABITS, loadDailyHabits, toggleDailyHabitStorage, getDateKey } from "@/lib/dailyHabits";
@@ -50,6 +52,13 @@ import {
   getGoogleCalendarAddUrl,
   parseICSContent,
 } from "@/lib/calendarActivities";
+import {
+  GrowwHolding,
+  DEFAULT_GROWW_HOLDINGS,
+  calculatePortfolioSummary,
+  parseGrowwHoldingsCSV,
+  saveStoredGrowwHoldings,
+} from "@/lib/growwPortfolio";
 
 interface GlanceDashboardProps {
   onSelectTab: (tabId: "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music") => void;
@@ -102,12 +111,23 @@ export default function GlanceDashboard({
   const [pomodoroSeconds, setPomodoroSeconds] = useState<number>(25 * 60);
   const [pomodoroRunning, setPomodoroRunning] = useState<boolean>(false);
 
-  // 6. Indian Market Trends (Groww App) State
+  // 6. Indian Market Trends & Groww Portfolio Tracker State
+  const [growwViewMode, setGrowwViewMode] = useState<"markets" | "portfolio">("markets");
   const [marketFilter, setMarketFilter] = useState<"all" | "indices" | "stocks">("all");
   const [marketTickVersion, setMarketTickVersion] = useState<number>(0);
   const [marketLastUpdated, setMarketLastUpdated] = useState<string>("Just now");
   const [marketRefreshing, setMarketRefreshing] = useState<boolean>(false);
   const [isIndianMarketOpen, setIsIndianMarketOpen] = useState<boolean>(true);
+
+  // Groww Holdings & Portfolio State
+  const [growwHoldings, setGrowwHoldings] = useState<GrowwHolding[]>(DEFAULT_GROWW_HOLDINGS);
+  const [showAddHoldingForm, setShowAddHoldingForm] = useState<boolean>(false);
+  const [newHoldingSymbol, setNewHoldingSymbol] = useState<string>("");
+  const [newHoldingName, setNewHoldingName] = useState<string>("");
+  const [newHoldingShares, setNewHoldingShares] = useState<string>("10");
+  const [newHoldingAvgPrice, setNewHoldingAvgPrice] = useState<string>("500");
+  const [newHoldingCurrentPrice, setNewHoldingCurrentPrice] = useState<string>("520");
+  const [portfolioImportStatus, setPortfolioImportStatus] = useState<string>("");
 
   useEffect(() => {
     let t: any = null;
@@ -262,6 +282,80 @@ export default function GlanceDashboard({
     }, 400);
   };
 
+  // Groww Portfolio Handlers & Summary
+  const formatINR = (val: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 2,
+    }).format(val);
+  };
+
+  const portfolioSummary = useMemo(() => {
+    return calculatePortfolioSummary(growwHoldings);
+  }, [growwHoldings]);
+
+  const handleAddHolding = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newHoldingSymbol.trim()) return;
+    const sharesNum = parseFloat(newHoldingShares) || 1;
+    const avgPriceNum = parseFloat(newHoldingAvgPrice) || 0;
+    const currPriceNum = parseFloat(newHoldingCurrentPrice) || avgPriceNum;
+    const sym = newHoldingSymbol.trim().toUpperCase();
+    const nm = newHoldingName.trim() || sym;
+    const slug = nm.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+    const newH: GrowwHolding = {
+      id: `groww-h-${Date.now()}`,
+      symbol: sym,
+      name: nm,
+      shares: sharesNum,
+      avgPrice: avgPriceNum,
+      currentPrice: currPriceNum,
+      dayChangePct: currPriceNum >= avgPriceNum ? 1.25 : -0.85,
+      growwUrl: `https://groww.in/stocks/${slug}`,
+      category: "Large Cap",
+    };
+
+    const updated = [newH, ...growwHoldings];
+    setGrowwHoldings(updated);
+    saveStoredGrowwHoldings(updated);
+    setNewHoldingSymbol("");
+    setNewHoldingName("");
+    setShowAddHoldingForm(false);
+  };
+
+  const handleDeleteHolding = (id: string) => {
+    const updated = growwHoldings.filter((h) => h.id !== id);
+    setGrowwHoldings(updated);
+    saveStoredGrowwHoldings(updated);
+  };
+
+  const handleGrowwCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const parsed = parseGrowwHoldingsCSV(text);
+        if (parsed.length > 0) {
+          setGrowwHoldings(parsed);
+          saveStoredGrowwHoldings(parsed);
+          setPortfolioImportStatus(`✓ Imported ${parsed.length} holdings from ${file.name}!`);
+          setTimeout(() => setPortfolioImportStatus(""), 4000);
+        } else {
+          setPortfolioImportStatus("Could not find valid holdings in CSV.");
+          setTimeout(() => setPortfolioImportStatus(""), 4000);
+        }
+      } catch (err: any) {
+        setPortfolioImportStatus(`Import failed: ${err.message}`);
+        setTimeout(() => setPortfolioImportStatus(""), 4000);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   // Indian Market Instruments on Groww
   const indianMarketData = useMemo(() => {
     return [
@@ -409,6 +503,16 @@ export default function GlanceDashboard({
 
       const savedPad = localStorage.getItem("lifehub_scratchpad");
       if (savedPad && typeof savedPad === "string") setScratchpadNote(savedPad);
+
+      const savedHoldings = localStorage.getItem("lifehub_groww_portfolio");
+      if (savedHoldings) {
+        try {
+          const parsed = JSON.parse(savedHoldings);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setGrowwHoldings(parsed);
+          }
+        } catch {}
+      }
     } catch {}
   }, [scriptureOffset]);
 
@@ -2141,8 +2245,9 @@ export default function GlanceDashboard({
             )}
           </div>
 
-          {/* 3.3 INDIAN MARKETS WIDGET CARD (Groww App Integration) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3">
+          {/* 3.3 INDIAN MARKETS & GROWW PORTFOLIO WIDGET CARD */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3.5">
+            {/* Header: Title + Groww Badge + Market Status */}
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-[#8b91a0] uppercase font-bold">
               <div className="flex items-center gap-1.5 text-white">
                 <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
@@ -2174,134 +2279,448 @@ export default function GlanceDashboard({
               </div>
             </div>
 
-            {/* Filter Sub-Tabs */}
-            <div className="flex items-center justify-between text-[10px] font-mono border-b border-[#232530] pb-2">
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setMarketFilter("all")}
-                  className={`px-2 py-0.5 rounded transition-colors font-medium ${
-                    marketFilter === "all"
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
-                      : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  All ({indianMarketData.length})
-                </button>
-                <button
-                  onClick={() => setMarketFilter("indices")}
-                  className={`px-2 py-0.5 rounded transition-colors font-medium ${
-                    marketFilter === "indices"
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
-                      : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  Indices
-                </button>
-                <button
-                  onClick={() => setMarketFilter("stocks")}
-                  className={`px-2 py-0.5 rounded transition-colors font-medium ${
-                    marketFilter === "stocks"
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
-                      : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  Groww Stocks
-                </button>
-              </div>
-              <span className="text-[9px] text-neutral-500 font-mono hidden sm:inline">
-                {marketLastUpdated}
-              </span>
+            {/* Primary Toggle: Live Markets vs My Groww Portfolio */}
+            <div className="grid grid-cols-2 gap-1 p-1 bg-[#101116] rounded-xl border border-[#232530] text-xs font-mono">
+              <button
+                onClick={() => setGrowwViewMode("markets")}
+                className={`py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1.5 font-semibold ${
+                  growwViewMode === "markets"
+                    ? "bg-[#181920] text-white shadow-sm border border-[#282a37]"
+                    : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                <TrendingUp className="w-3 h-3 text-amber-400" />
+                <span>Live Watchlist</span>
+              </button>
+              <button
+                onClick={() => setGrowwViewMode("portfolio")}
+                className={`py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1.5 font-semibold ${
+                  growwViewMode === "portfolio"
+                    ? "bg-[#181920] text-[#00d09c] shadow-sm border border-[#00d09c]/30 font-bold"
+                    : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                <Wallet className="w-3 h-3 text-[#00d09c]" />
+                <span>My Groww ({growwHoldings.length})</span>
+              </button>
             </div>
 
-            {/* Market Tickers List */}
-            <div className="space-y-2.5">
-              {filteredMarketData.map((item) => {
-                const isPos = item.isPositive === true;
-                const isNeg = item.isPositive === false;
+            {/* ========================================================= */}
+            {/* VIEW A: LIVE MARKETS WATCHLIST                            */}
+            {/* ========================================================= */}
+            {growwViewMode === "markets" && (
+              <div className="space-y-3 animate-in fade-in duration-200">
+                {/* Filter Sub-Tabs */}
+                <div className="flex items-center justify-between text-[10px] font-mono border-b border-[#232530] pb-2">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setMarketFilter("all")}
+                      className={`px-2 py-0.5 rounded transition-colors font-medium ${
+                        marketFilter === "all"
+                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
+                          : "text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      All ({indianMarketData.length})
+                    </button>
+                    <button
+                      onClick={() => setMarketFilter("indices")}
+                      className={`px-2 py-0.5 rounded transition-colors font-medium ${
+                        marketFilter === "indices"
+                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
+                          : "text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      Indices
+                    </button>
+                    <button
+                      onClick={() => setMarketFilter("stocks")}
+                      className={`px-2 py-0.5 rounded transition-colors font-medium ${
+                        marketFilter === "stocks"
+                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
+                          : "text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      Groww Stocks
+                    </button>
+                  </div>
+                  <span className="text-[9px] text-neutral-500 font-mono hidden sm:inline">
+                    {marketLastUpdated}
+                  </span>
+                </div>
 
-                return (
-                  <a
-                    key={item.symbol}
-                    href={item.growwUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`flex items-center justify-between p-2 rounded-lg border transition-all group select-none ${
-                      (item as any).highlight
-                        ? "bg-[#181922] border-amber-500/40 hover:border-amber-400 hover:bg-[#1f212d]"
-                        : "bg-[#181920]/60 hover:bg-[#1f2029] border-[#262834] hover:border-neutral-600"
-                    }`}
-                  >
-                    <div className="min-w-0 pr-2">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-white font-mono text-xs group-hover:text-emerald-400 transition-colors">
-                          {item.symbol}
-                        </span>
-                        {item.tag && (
-                          <span
-                            className={`text-[9px] font-mono px-1 py-0.2 rounded font-semibold ${
-                              (item as any).highlight
-                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                                : "bg-neutral-800 text-neutral-400"
-                            }`}
-                          >
-                            {item.tag}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-[10px] text-[#8b91a0] font-mono truncate">
-                        {item.name}
-                      </div>
-                    </div>
+                {/* Market Tickers List */}
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1 no-scrollbar">
+                  {filteredMarketData.map((item) => {
+                    const isPos = item.isPositive === true;
+                    const isNeg = item.isPositive === false;
 
-                    {/* SVG Sparkline */}
-                    <div className="shrink-0 px-1">
-                      <svg className="w-14 h-4.5" viewBox="0 0 64 20" fill="none">
-                        <path
-                          d={item.sparkline}
-                          stroke={isPos ? "#00d09c" : isNeg ? "#f87171" : "#94a3b8"}
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </div>
-
-                    {/* Price and Delta */}
-                    <div className="text-right font-mono shrink-0 pl-1">
-                      <div
-                        className={`text-xs font-bold ${
-                          isPos
-                            ? "text-[#00d09c]"
-                            : isNeg
-                            ? "text-rose-400"
-                            : "text-neutral-300"
+                    return (
+                      <a
+                        key={item.symbol}
+                        href={item.growwUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`flex items-center justify-between p-2 rounded-lg border transition-all group select-none ${
+                          (item as any).highlight
+                            ? "bg-[#181922] border-amber-500/40 hover:border-amber-400 hover:bg-[#1f212d]"
+                            : "bg-[#181920]/60 hover:bg-[#1f2029] border-[#262834] hover:border-neutral-600"
                         }`}
                       >
-                        {item.change}
-                      </div>
-                      <div className="text-neutral-200 text-[11px] font-semibold flex items-center justify-end gap-1">
-                        <span>{item.price}</span>
-                        <ArrowUpRight className="w-2.5 h-2.5 text-neutral-500 group-hover:text-emerald-400 transition-colors" />
+                        <div className="min-w-0 pr-2">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-white font-mono text-xs group-hover:text-emerald-400 transition-colors">
+                              {item.symbol}
+                            </span>
+                            {item.tag && (
+                              <span
+                                className={`text-[9px] font-mono px-1 py-0.2 rounded font-semibold ${
+                                  (item as any).highlight
+                                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                    : "bg-neutral-800 text-neutral-400"
+                                }`}
+                              >
+                                {item.tag}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-[#8b91a0] font-mono truncate">
+                            {item.name}
+                          </div>
+                        </div>
+
+                        {/* SVG Sparkline */}
+                        <div className="shrink-0 px-1">
+                          <svg className="w-14 h-4.5" viewBox="0 0 64 20" fill="none">
+                            <path
+                              d={item.sparkline}
+                              stroke={isPos ? "#00d09c" : isNeg ? "#f87171" : "#94a3b8"}
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </div>
+
+                        {/* Price and Delta */}
+                        <div className="text-right font-mono shrink-0 pl-1">
+                          <div
+                            className={`text-xs font-bold ${
+                              isPos
+                                ? "text-[#00d09c]"
+                                : isNeg
+                                ? "text-rose-400"
+                                : "text-neutral-300"
+                            }`}
+                          >
+                            {item.change}
+                          </div>
+                          <div className="text-neutral-200 text-[11px] font-semibold flex items-center justify-end gap-1">
+                            <span>{item.price}</span>
+                            <ArrowUpRight className="w-2.5 h-2.5 text-neutral-500 group-hover:text-emerald-400 transition-colors" />
+                          </div>
+                        </div>
+                      </a>
+                    );
+                  })}
+                </div>
+
+                {/* Groww Quick Action Footer */}
+                <div className="pt-2 border-t border-[#232530] flex items-center justify-between text-[11px] font-mono">
+                  <span className="text-neutral-400">Trade on Groww</span>
+                  <a
+                    href="https://groww.in/dashboard/explore/stocks"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1 text-[#00d09c] hover:text-[#2ae2b1] font-semibold transition-colors"
+                  >
+                    <span>Open Groww App</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================= */}
+            {/* VIEW B: PERSONAL GROWW PORTFOLIO & HOLDINGS TRACKER      */}
+            {/* ========================================================= */}
+            {growwViewMode === "portfolio" && (
+              <div className="space-y-3.5 animate-in fade-in duration-200">
+                {/* Portfolio Summary Performance Card */}
+                <div className="p-3.5 rounded-xl bg-[#181920] border border-[#282a37] space-y-2.5">
+                  <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-neutral-400">
+                    <span>Portfolio Value</span>
+                    <span>1-Day Return</span>
+                  </div>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-xl font-bold font-mono text-white">
+                      {formatINR(portfolioSummary.currentValue)}
+                    </div>
+                    <div
+                      className={`text-xs font-mono font-bold ${
+                        portfolioSummary.dayReturns >= 0 ? "text-[#00d09c]" : "text-rose-400"
+                      }`}
+                    >
+                      {portfolioSummary.dayReturns >= 0 ? "+" : ""}
+                      {formatINR(portfolioSummary.dayReturns)} ({portfolioSummary.dayReturnsPct >= 0 ? "+" : ""}
+                      {portfolioSummary.dayReturnsPct.toFixed(2)}%)
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#232530] text-[11px] font-mono">
+                    <div>
+                      <div className="text-neutral-400 text-[10px]">Total Invested</div>
+                      <div className="text-neutral-200 font-semibold">
+                        {formatINR(portfolioSummary.totalInvested)}
                       </div>
                     </div>
-                  </a>
-                );
-              })}
-            </div>
+                    <div className="text-right">
+                      <div className="text-neutral-400 text-[10px]">Total Profit / Loss</div>
+                      <div
+                        className={`font-bold ${
+                          portfolioSummary.totalReturns >= 0 ? "text-[#00d09c]" : "text-rose-400"
+                        }`}
+                      >
+                        {portfolioSummary.totalReturns >= 0 ? "+" : ""}
+                        {formatINR(portfolioSummary.totalReturns)} ({portfolioSummary.totalReturnsPct >= 0 ? "+" : ""}
+                        {portfolioSummary.totalReturnsPct.toFixed(2)}%)
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Groww Quick Action Footer */}
-            <div className="pt-2 border-t border-[#232530] flex items-center justify-between text-[11px] font-mono">
-              <span className="text-neutral-400">Trade on Groww</span>
-              <a
-                href="https://groww.in/dashboard/explore/stocks"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1 text-[#00d09c] hover:text-[#2ae2b1] font-semibold transition-colors"
-              >
-                <span>Open Groww App</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
+                {/* Import Status Alert */}
+                {portfolioImportStatus && (
+                  <div className="p-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono text-[11px]">
+                    {portfolioImportStatus}
+                  </div>
+                )}
+
+                {/* Action Bar: Add Holding + Import CSV */}
+                <div className="flex items-center justify-between text-[11px] font-mono">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setShowAddHoldingForm(!showAddHoldingForm)}
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-[#00d09c] border border-emerald-500/30 transition-colors font-semibold"
+                    >
+                      <Plus className="w-3 h-3 text-[#00d09c]" />
+                      <span>Add Stock</span>
+                    </button>
+
+                    <label className="flex items-center gap-1 px-2 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 cursor-pointer transition-colors font-medium">
+                      <Upload className="w-3 h-3 text-neutral-400" />
+                      <span>Import CSV</span>
+                      <input
+                        type="file"
+                        accept=".csv"
+                        onChange={handleGrowwCSVUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  <a
+                    href="https://groww.in/dashboard/stocks/user-holdings"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1 text-neutral-400 hover:text-white transition-colors"
+                    title="Open your holdings in Groww app"
+                  >
+                    <span>Groww Holdings</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+
+                {/* Inline Add Stock Form */}
+                {showAddHoldingForm && (
+                  <form
+                    onSubmit={handleAddHolding}
+                    className="p-3 rounded-xl bg-[#161720] border border-[#2a2c3a] space-y-2.5 animate-in fade-in duration-200"
+                  >
+                    <div className="text-xs font-mono font-bold text-white flex items-center justify-between">
+                      <span>Add Stock to Groww Portfolio</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddHoldingForm(false)}
+                        className="text-neutral-400 hover:text-white"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <label className="text-[10px] font-mono text-neutral-400 block mb-0.5">Symbol</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. SCHNEIDER"
+                          value={newHoldingSymbol}
+                          onChange={(e) => setNewHoldingSymbol(e.target.value)}
+                          className="w-full text-xs font-mono px-2.5 py-1.5 rounded-lg bg-[#101116] border border-neutral-800 text-white placeholder-neutral-600 focus:outline-none focus:border-[#00d09c]"
+                          autoFocus
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-mono text-neutral-400 block mb-0.5">Company Name</label>
+                        <input
+                          type="text"
+                          placeholder="Schneider Electric Infra"
+                          value={newHoldingName}
+                          onChange={(e) => setNewHoldingName(e.target.value)}
+                          className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-[#101116] border border-neutral-800 text-white placeholder-neutral-600 focus:outline-none focus:border-[#00d09c]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 text-xs font-mono">
+                      <div>
+                        <label className="text-[10px] text-neutral-400 block mb-0.5">Quantity</label>
+                        <input
+                          type="number"
+                          placeholder="100"
+                          value={newHoldingShares}
+                          onChange={(e) => setNewHoldingShares(e.target.value)}
+                          className="w-full text-xs px-2 py-1.5 rounded-lg bg-[#101116] border border-neutral-800 text-white"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-neutral-400 block mb-0.5">Avg Buy (₹)</label>
+                        <input
+                          type="number"
+                          step="any"
+                          placeholder="710"
+                          value={newHoldingAvgPrice}
+                          onChange={(e) => setNewHoldingAvgPrice(e.target.value)}
+                          className="w-full text-xs px-2 py-1.5 rounded-lg bg-[#101116] border border-neutral-800 text-white"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-neutral-400 block mb-0.5">Current (₹)</label>
+                        <input
+                          type="number"
+                          step="any"
+                          placeholder="842.5"
+                          value={newHoldingCurrentPrice}
+                          onChange={(e) => setNewHoldingCurrentPrice(e.target.value)}
+                          className="w-full text-xs px-2 py-1.5 rounded-lg bg-[#101116] border border-neutral-800 text-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-1 font-mono text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddHoldingForm(false)}
+                        className="px-2.5 py-1 text-neutral-400 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-3 py-1 rounded-lg bg-[#00d09c] text-neutral-950 font-bold hover:bg-[#2ae2b1] transition-colors"
+                      >
+                        Save Holding
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Holdings Items List */}
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1 no-scrollbar">
+                  {growwHoldings.length === 0 ? (
+                    <div className="p-4 text-center text-xs font-mono text-neutral-400 bg-[#181920]/60 rounded-xl border border-dashed border-[#282a37]">
+                      No holdings added yet. Click "+ Add Stock" or "Import CSV" to start tracking.
+                    </div>
+                  ) : (
+                    growwHoldings.map((h) => {
+                      const totalVal = (h.shares || 0) * (h.currentPrice || 0);
+                      const totalCost = (h.shares || 0) * (h.avgPrice || 0);
+                      const pnl = totalVal - totalCost;
+                      const pnlPct = totalCost > 0 ? (pnl / totalCost) * 100 : 0;
+                      const isProfit = pnl >= 0;
+
+                      return (
+                        <div
+                          key={h.id}
+                          className="p-2.5 rounded-lg bg-[#181920] border border-[#262834] hover:border-neutral-600 transition-all flex items-center justify-between gap-2 group"
+                        >
+                          <div className="min-w-0 pr-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-white font-mono text-xs">
+                                {h.symbol}
+                              </span>
+                              {h.category && (
+                                <span className="text-[9px] font-mono px-1 rounded bg-neutral-800 text-neutral-400">
+                                  {h.category}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-neutral-400 font-mono truncate">
+                              {h.shares} shares · Avg {formatINR(h.avgPrice)}
+                            </div>
+                          </div>
+
+                          {/* Current Price & P&L */}
+                          <div className="text-right font-mono shrink-0 pl-1">
+                            <div className="text-xs font-bold text-white">
+                              {formatINR(totalVal)}
+                            </div>
+                            <div
+                              className={`text-[11px] font-semibold flex items-center justify-end gap-1 ${
+                                isProfit ? "text-[#00d09c]" : "text-rose-400"
+                              }`}
+                            >
+                              <span>
+                                {isProfit ? "+" : ""}
+                                {formatINR(pnl)} ({isProfit ? "+" : ""}
+                                {pnlPct.toFixed(1)}%)
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Action Links */}
+                          <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a
+                              href={h.growwUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-1 text-neutral-400 hover:text-[#00d09c] transition-colors"
+                              title="Open on Groww"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                            <button
+                              onClick={() => handleDeleteHolding(h.id)}
+                              className="p-1 text-neutral-400 hover:text-rose-400 transition-colors"
+                              title="Remove holding"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Footer notes */}
+                <div className="pt-2 border-t border-[#232530] flex items-center justify-between text-[10px] font-mono text-neutral-400">
+                  <span>Tracked in browser localStorage</span>
+                  <a
+                    href="https://groww.in/dashboard/stocks/user-holdings"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[#00d09c] hover:underline flex items-center gap-0.5"
+                  >
+                    <span>Groww Web</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 3.4 EXECUTIVE SCRATCHPAD & TIMER CARD */}
