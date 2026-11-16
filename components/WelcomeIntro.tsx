@@ -49,7 +49,7 @@ export default function WelcomeIntro({
       document.body.style.overflow = "hidden";
     } catch {}
 
-    // 1. "Hi, Jaison" shows up after 1 sec: START AUDIO RIGHT HERE!
+    // 1. "Hi, Jaison" shows up after 1 sec (stays pure black for 1000ms)
     const enterTimer = setTimeout(() => {
       setStage("greeting_enter");
       if (onGreetingAppear) {
@@ -59,22 +59,21 @@ export default function WelcomeIntro({
       }
     }, 1000);
 
-    // 2. Slow animation: let it linger elegantly until 3.2s
+    // 2. Stays for 4 full seconds: 1.0s + 4.0s = 5.0s (5000ms)
     const exitGreetingTimer = setTimeout(() => {
       setStage("greeting_exit");
-    }, 3200);
+    }, 5000);
 
-    // 3. Black veil clears at 4.0s, Tron video plays solo with music!
+    // 3. Black veil clears at 6.0s (6000ms), matching audio reaching full volume!
     const videoSoloTimer = setTimeout(() => {
       setStage("video_solo");
-      // Trigger audio play immediately when video starts
       handleUserInteraction();
-    }, 4000);
+    }, 6000);
 
-    // 4. After 5 seconds of the video playing (4.0s + 5.0s = 9.0s), show minimal "Scroll down" prompt!
+    // 4. After 5 seconds of the solo video playing (6.0s + 5.0s = 11.0s), show minimal "Scroll down" prompt!
     const promptTimer = setTimeout(() => {
       setShowScrollPrompt(true);
-    }, 9000);
+    }, 11000);
 
     return () => {
       clearTimeout(enterTimer);
@@ -153,22 +152,22 @@ export default function WelcomeIntro({
         stage === "greeting_exit") && (
         <div
           onPointerDown={handleUserInteraction}
-          className={`fixed inset-0 z-[99999] bg-black flex items-center justify-center transition-opacity duration-800 ease-out select-none cursor-pointer ${
+          className={`fixed inset-0 z-[99999] bg-black flex items-center justify-center transition-opacity duration-1000 ease-in-out select-none cursor-pointer ${
             stage === "greeting_exit" ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
           style={{ backgroundColor: "#000000" }}
           aria-hidden="true"
         >
-          {/* Subtle warm ambient backlight */}
+          {/* Subtle warm ambient backlight (slower, more luxurious expansion) */}
           <div
-            className={`absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-amber-400/10 blur-3xl pointer-events-none transition-all duration-1400 ease-out ${
+            className={`absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-amber-400/10 blur-3xl pointer-events-none transition-all duration-[2200ms] ease-out ${
               stage === "greeting_enter" ? "opacity-100 scale-100" : "opacity-0 scale-75"
             }`}
           />
 
-          {/* "Hi, Jaison" text moving from bottom to middle (Loads after 1s, slowed animation) */}
+          {/* "Hi, Jaison" text moving from bottom to middle (Loads after 1s, slowed 1800ms animation, stays 4s) */}
           <div
-            className={`relative z-10 flex flex-col items-center justify-center text-center px-4 transition-all duration-1200 ${
+            className={`relative z-10 flex flex-col items-center justify-center text-center px-4 transition-all duration-[1800ms] ${
               stage === "greeting_start"
                 ? "translate-y-28 opacity-0 scale-90"
                 : stage === "greeting_enter"
@@ -185,7 +184,7 @@ export default function WelcomeIntro({
             </h1>
 
             <p
-              className={`mt-4 text-xs sm:text-sm font-mono tracking-widest uppercase text-neutral-400 transition-all duration-1000 delay-200 ${
+              className={`mt-4 text-xs sm:text-sm font-mono tracking-widest uppercase text-neutral-400 transition-all duration-[1600ms] delay-300 ${
                 stage === "greeting_enter" ? "opacity-80 translate-y-0" : "opacity-0 translate-y-3"
               }`}
             >

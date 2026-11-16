@@ -12,7 +12,9 @@ interface TronBackgroundVideoProps {
 }
 
 const TARGET_VOLUME = 0.85;
-const FADE_IN_DURATION = 4.0; // 4 seconds smooth volume fade-in
+const FADE_START = 4.0; // Audio fade-in starts at 4.0s
+const FADE_END = 6.0;   // Audio reaches full volume at 6.0s
+const BASE_VOLUME = 0.05; // Subtle ambient volume before 4.0s
 
 export default function TronBackgroundVideo({
   isHomescreenVisible,
@@ -33,17 +35,21 @@ export default function TronBackgroundVideo({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Compute smooth volume fade-in based on video currentTime (from 0.0 to 4.0s)
+  // Compute smooth volume fade-in from 4.0s to 6.0s
   const applyFadeInVolume = useCallback((video: HTMLVideoElement) => {
     if (isMuted) {
       video.muted = true;
       return;
     }
     const t = video.currentTime;
-    if (t < FADE_IN_DURATION) {
-      const progress = Math.max(0, Math.min(t / FADE_IN_DURATION, 1.0));
-      // Smooth ease-out quad curve: progress * (2 - progress)
-      const currentVol = TARGET_VOLUME * (progress * (2 - progress));
+    if (t < FADE_START) {
+      // Very gentle, subtle ambient sound before 4.0 seconds
+      video.volume = BASE_VOLUME;
+    } else if (t >= FADE_START && t < FADE_END) {
+      // Smooth fade-in between 4.0s and 6.0s
+      const progress = Math.max(0, Math.min((t - FADE_START) / (FADE_END - FADE_START), 1.0));
+      // Smooth ease-out quad curve
+      const currentVol = BASE_VOLUME + (TARGET_VOLUME - BASE_VOLUME) * (progress * (2 - progress));
       video.volume = Math.max(0.01, Math.min(TARGET_VOLUME, Number(currentVol.toFixed(3))));
     } else {
       video.volume = TARGET_VOLUME;
@@ -114,10 +120,10 @@ export default function TronBackgroundVideo({
     };
     video.addEventListener("ended", handleEnded);
 
-    // Smooth volume fade-in animation frame loop for the first 4.2 seconds
+    // Smooth volume fade-in animation frame loop from 4.0s to 6.2s
     let animId: number;
     const rampVolume = () => {
-      if (video && !video.paused && video.currentTime < 4.2) {
+      if (video && !video.paused && video.currentTime < 6.2) {
         applyFadeInVolume(video);
         animId = requestAnimationFrame(rampVolume);
       } else if (video && !video.paused && !isMuted) {
