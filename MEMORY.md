@@ -78,10 +78,13 @@ A personal life operating system and daily sanctuary combining:
       - Column 2: Daily Scripture (Primary Centerpiece), Career Radar, YouTube Music Catalog.
       - Column 3: GPS Weather, Indian Markets & Groww Portfolio (19 Stocks).
 
-15. **Cinematic "Hi, Jaison" Welcome Intro Animation** (`components/WelcomeIntro.tsx`):
-    - Full-screen pitch-black canvas on site launch with scroll-locking.
-    - "Hi, Jaison" pops up smoothly from the bottom to the middle with easing (`cubic-bezier(0.16, 1, 0.3, 1)`), accompanied by a warm amber pulse indicator.
-    - After 2.0 seconds, the black veil smoothly fades out (`opacity-0 duration-700 ease-out`), seamlessly fading in the homescreen.
+15. **Cinematic "Hi, Jaison" Welcome & Tron Ambient Background** (`components/WelcomeIntro.tsx`, `components/TronBackgroundVideo.tsx`):
+    - **Initial Black Greeting (0.0s - 2.0s)**: Full-screen pitch-black canvas with scroll-locking. "Hi, Jaison" pops up smoothly from the bottom to the middle with easing (`cubic-bezier(0.16, 1, 0.3, 1)`) and golden glow.
+    - **Video Introduction (2.0s - 2.6s)**: Greeting dissolves and black veil clears, seamlessly revealing the Tron: Legacy motorcycle scene (`https://www.youtube.com/watch?v=loGNj5jJBTQ`).
+    - **Solo Video Playback (2.6s - 7.6s, 5 Seconds)**: The Tron scene plays full-screen solo for 5 seconds without the homescreen loading.
+    - **Homescreen Fade-In (7.6s)**: The homescreen smoothly fades in with a 1000ms transition overlapping the video.
+    - **Permanent Ambient Background (0:09 - 1:35 Clip Loop)**: The video plays continuously in the background, automatically seeking and looping between 0:09 and 1:35. An ambient dark tint (`bg-[#090a10]/75 backdrop-blur-[1.5px]`) ensures maximum legibility for all dashboard cards and text.
+    - **Ambient Controls**: Floating pill in the bottom-right corner offering Play/Pause and Daft Punk soundtrack Unmute/Mute toggle.
 
 ## 🛠️ Tech Stack & Locations
 * **Location**: `/Users/jaisappi/Developer/life-hub`
