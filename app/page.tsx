@@ -19,6 +19,7 @@ import {
   ExternalLink,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   Heart,
   Volume2,
   Target,
@@ -485,7 +486,7 @@ const initialStrategicBooks: StrategicBook[] = [
 export default function LifeHub() {
   // Intro & Homescreen visibility (Tron background integration)
   const [homescreenVisible, setHomescreenVisible] = useState<boolean>(false);
-  const [isTronSectionMode, setIsTronSectionMode] = useState<boolean>(true);
+  const [unlockAudioTrigger, setUnlockAudioTrigger] = useState<boolean>(false);
 
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
@@ -1359,11 +1360,14 @@ export default function LifeHub() {
       {/* Tron Motorcycle Ambient Video (0:09 - 1:35) */}
       <TronBackgroundVideo
         isHomescreenVisible={homescreenVisible}
-        onSectionModeChange={setIsTronSectionMode}
+        triggerUnlockAudio={unlockAudioTrigger}
       />
 
       {/* Intro Sequence: Black Greeting -> 5s Video Solo -> Homescreen Reveal */}
-      <WelcomeIntro onRevealHomescreen={() => setHomescreenVisible(true)} />
+      <WelcomeIntro
+        onRevealHomescreen={() => setHomescreenVisible(true)}
+        onUserGesture={() => setUnlockAudioTrigger(true)}
+      />
 
       {/* Homescreen Layer: Fades in smoothly overlapping the video */}
       <div
@@ -1444,18 +1448,37 @@ export default function LifeHub() {
         </div>
       </header>
 
-      {/* SEPARATE TRON VIDEO SHOWCASE SECTION PLACEHOLDER (Below Main Top Tab, Over Homescreen Content) */}
-      <div
-        className={`max-w-7xl mx-auto px-2 sm:px-4 transition-all duration-600 ease-out pointer-events-none ${
-          isTronSectionMode
-            ? "h-[320px] sm:h-[420px] md:h-[480px] mb-6 opacity-100"
-            : "h-0 mb-0 opacity-0 overflow-hidden"
-        }`}
-        aria-hidden="true"
-      />
+      {/* SEPARATE TRON VIDEO SHOWCASE SECTION (Below Main Top Tab, Over Homescreen Content) */}
+      <section className="max-w-7xl mx-auto px-2 sm:px-4">
+        <div className="relative rounded-2xl overflow-hidden border border-cyan-500/40 shadow-[0_0_35px_rgba(6,182,212,0.25)] h-[300px] sm:h-[400px] md:h-[460px] bg-transparent flex flex-col justify-end items-center p-6 sm:p-8">
+          {/* Subtle cyan corner tech accents */}
+          <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-cyan-400/50 pointer-events-none" />
+          <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-cyan-400/50 pointer-events-none" />
+          <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-cyan-400/50 pointer-events-none" />
+          <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-cyan-400/50 pointer-events-none" />
+
+          {/* Only the Scroll Down for Dashboard prompt is shown (No fullscreen options or other details) */}
+          <button
+            onClick={() => {
+              const el = document.getElementById("dashboard-contents");
+              if (el) el.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-black/75 hover:bg-black/90 border border-cyan-500/50 hover:border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.4)] backdrop-blur-md transition-all hover:scale-105 active:scale-95 group cursor-pointer"
+          >
+            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 animate-bounce group-hover:text-cyan-300 transition-colors" />
+            <span className="text-xs sm:text-sm font-mono font-bold tracking-widest text-cyan-200 group-hover:text-white uppercase">
+              Scroll Down for Dashboard
+            </span>
+            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 animate-bounce group-hover:text-cyan-300 transition-colors" />
+          </button>
+        </div>
+      </section>
+
+      {/* SMALL GAP (Gap between video and contents for seamless transition into background) */}
+      <div className="h-6 sm:h-8" aria-hidden="true" />
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-7 sm:space-y-8">
+      <main id="dashboard-contents" className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-7 sm:space-y-8">
         {/* Return Breadcrumb banner when viewing a deep-dive module */}
         {activeTab !== "all" && (
           <div className="flex items-center justify-between p-3 px-4 rounded-xl bg-[#111215] border border-neutral-800 text-xs font-mono shadow-md">

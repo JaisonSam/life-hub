@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Volume2 } from "lucide-react";
 
 interface WelcomeIntroProps {
   onRevealHomescreen: () => void;
@@ -24,15 +24,22 @@ export default function WelcomeIntro({
   // Show "Scroll Down" prompt 5 seconds after the video starts playing
   const [showScrollPrompt, setShowScrollPrompt] = useState(false);
 
+  const handleUserInteraction = useCallback(() => {
+    // Notify parent to unlock audio immediately on any click / tap
+    if (onUserGesture) {
+      onUserGesture();
+    }
+  }, [onUserGesture]);
+
   const triggerEnterHomescreen = useCallback(() => {
     if (stage === "done") return;
-    if (onUserGesture) onUserGesture();
+    handleUserInteraction();
     setStage("done");
     onRevealHomescreen();
     try {
       document.body.style.overflow = "";
     } catch {}
-  }, [stage, onRevealHomescreen, onUserGesture]);
+  }, [stage, onRevealHomescreen, handleUserInteraction]);
 
   useEffect(() => {
     // Lock scroll during initial "Hi, Jaison" greeting
@@ -71,14 +78,13 @@ export default function WelcomeIntro({
     };
   }, []);
 
-  // Listen for user scroll down to fade in homescreen (only active during video_solo)
+  // Listen for user scroll down or gestures to fade in homescreen (only active during video_solo)
   useEffect(() => {
     if (stage !== "video_solo") return;
 
     let touchStartY = 0;
 
     const handleWheel = (e: WheelEvent) => {
-      // User scrolls down
       if (e.deltaY > 8) {
         triggerEnterHomescreen();
       }
@@ -88,12 +94,12 @@ export default function WelcomeIntro({
       if (e.touches && e.touches[0]) {
         touchStartY = e.touches[0].clientY;
       }
+      handleUserInteraction();
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches && e.touches[0]) {
         const touchCurrentY = e.touches[0].clientY;
-        // User swipes up (scrolling page down)
         if (touchStartY - touchCurrentY > 20) {
           triggerEnterHomescreen();
         }
@@ -107,6 +113,7 @@ export default function WelcomeIntro({
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      handleUserInteraction();
       if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") {
         triggerEnterHomescreen();
       }
@@ -125,7 +132,7 @@ export default function WelcomeIntro({
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [stage, triggerEnterHomescreen]);
+  }, [stage, triggerEnterHomescreen, handleUserInteraction]);
 
   if (stage === "done") return null;
 
@@ -136,7 +143,8 @@ export default function WelcomeIntro({
         stage === "greeting_enter" ||
         stage === "greeting_exit") && (
         <div
-          className={`fixed inset-0 z-[99999] bg-black flex items-center justify-center transition-opacity duration-600 ease-out select-none ${
+          onPointerDown={handleUserInteraction}
+          className={`fixed inset-0 z-[99999] bg-black flex items-center justify-center transition-opacity duration-600 ease-out select-none cursor-pointer ${
             stage === "greeting_exit" ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
           style={{ backgroundColor: "#000000" }}
@@ -174,20 +182,33 @@ export default function WelcomeIntro({
             >
               Life OS & Sanctuary
             </p>
+
+            {/* Subtle click prompt to unlock audio immediately in all browsers */}
+            <div
+              className={`mt-6 flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-900/90 border border-amber-400/40 text-amber-300 text-xs font-mono shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all duration-700 delay-300 ${
+                stage === "greeting_enter" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+              }`}
+            >
+              <Volume2 className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <span>Tap anywhere to start with Soundtrack</span>
+            </div>
           </div>
         </div>
       )}
 
       {/* Video Solo Phase Overlay (Fullscreen video playing solo with music on) */}
       {stage === "video_solo" && (
-        <div className="fixed inset-0 z-[99990] pointer-events-none flex flex-col justify-between p-4 sm:p-8 animate-in fade-in duration-500">
+        <div
+          onPointerDown={handleUserInteraction}
+          className="fixed inset-0 z-[99990] pointer-events-none flex flex-col justify-between p-4 sm:p-8 animate-in fade-in duration-500"
+        >
           {/* Top Title Tag & Quick Enter Button */}
           <div className="flex items-center justify-between pointer-events-auto">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/65 border border-cyan-500/40 text-cyan-300 font-mono text-xs backdrop-blur-md shadow-lg">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
               <span className="font-semibold tracking-wider">TRON: LEGACY</span>
               <span className="hidden sm:inline text-neutral-500">•</span>
-              <span className="hidden sm:inline text-neutral-300">DUCATI ESCAPE (0:09 - 1:35)</span>
+              <span className="hidden sm:inline text-neutral-300">DUCATI ESCAPE</span>
             </div>
 
             {/* Quick Skip Pill */}
