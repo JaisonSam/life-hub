@@ -111,15 +111,7 @@ export default function GlanceDashboard({
   const [newActCategory, setNewActCategory] = useState<PlannedActivity["category"]>("Career");
   const [newActAlsoGCal, setNewActAlsoGCal] = useState<boolean>(true);
 
-  // 5. Executive Scratchpad & Pomodoro HUD
-  const [scratchpadNote, setScratchpadNote] = useState<string>(
-    "• Review Schneider Electric ERP integration architecture\n• GMAT Quant: complete 20 Work-Rate problems\n• Farm: check soil moisture probe logs"
-  );
-  const [noteCopied, setNoteCopied] = useState<boolean>(false);
-  const [pomodoroSeconds, setPomodoroSeconds] = useState<number>(25 * 60);
-  const [pomodoroRunning, setPomodoroRunning] = useState<boolean>(false);
-
-  // 6. Indian Market Trends & Groww Portfolio Tracker State
+  // 5. Indian Market Trends & Groww Portfolio Tracker State
   const [growwViewMode, setGrowwViewMode] = useState<"markets" | "portfolio">("markets");
   const [marketFilter, setMarketFilter] = useState<"all" | "indices" | "stocks">("all");
   const [marketTickVersion, setMarketTickVersion] = useState<number>(0);
@@ -233,16 +225,6 @@ export default function GlanceDashboard({
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
     );
   };
-
-  useEffect(() => {
-    let t: any = null;
-    if (pomodoroRunning && pomodoroSeconds > 0) {
-      t = setInterval(() => setPomodoroSeconds((s) => s - 1), 1000);
-    } else if (pomodoroSeconds === 0 && pomodoroRunning) {
-      setPomodoroRunning(false);
-    }
-    return () => clearInterval(t);
-  }, [pomodoroRunning, pomodoroSeconds]);
 
   // Sync Google Calendar ICS Feed via API or direct endpoint
   const syncGCal = async (url?: string) => {
@@ -681,9 +663,6 @@ export default function GlanceDashboard({
         } catch {}
       }
 
-      const savedPad = localStorage.getItem("lifehub_scratchpad");
-      if (savedPad && typeof savedPad === "string") setScratchpadNote(savedPad);
-
       const savedHoldings = localStorage.getItem("lifehub_groww_portfolio");
       if (savedHoldings) {
         try {
@@ -791,13 +770,6 @@ export default function GlanceDashboard({
     setShowAddActivityForm(false);
   };
 
-  const handleSaveScratchpad = (text: string) => {
-    setScratchpadNote(text);
-    try {
-      localStorage.setItem("lifehub_scratchpad", text);
-    } catch {}
-  };
-
   const handleToggleHabit = (id: string) => {
     const updated = toggleDailyHabitStorage(id, todayKey);
     setDailyHabits(updated);
@@ -810,12 +782,6 @@ export default function GlanceDashboard({
   // 4. Center Column Sub-Tabs
   const [centerSubTab, setCenterSubTab] = useState<"career" | "gmat" | "tech" | "farm">("career");
   const [showMoreJobs, setShowMoreJobs] = useState(false);
-
-  // 5. Community Feed Sub-Tabs
-  const [communityTab, setCommunityTab] = useState<"erp" | "agri" | "gmat">("erp");
-
-  // 7. Repository Toggle (Glance screenshot parity)
-  const [repoTab, setRepoTab] = useState<"glance" | "lifehub">("glance");
 
   // Calendar calculations
   const { monthName, year, weekNumber, calendarDays, currentDayOfMonth } = useMemo(() => {
@@ -1477,104 +1443,7 @@ export default function GlanceDashboard({
             </div>
           </div>
 
-          {/* 1.2 DAILY SCRIPTURE & DEVOTIONAL (Dynamic everyday) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3.5">
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-neutral-300 uppercase font-bold">
-              <span className="flex items-center gap-1.5 text-white">
-                <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-                DAILY SCRIPTURE
-              </span>
-              <div className="flex items-center gap-1 text-neutral-400 font-mono text-[10px]">
-                <button
-                  onClick={() => setScriptureOffset((prev) => prev - 1)}
-                  className="hover:text-white p-0.5"
-                  title="Previous Day"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                </button>
-                <span className="text-neutral-300 font-semibold">Day {scriptureDay.dayOfYear}</span>
-                <button
-                  onClick={() => setScriptureOffset((prev) => prev + 1)}
-                  className="hover:text-white p-0.5"
-                  title="Next Day"
-                >
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Scripture Item Card */}
-            <div className="space-y-2.5">
-              <div>
-                <button
-                  onClick={() => onSelectTab("bible")}
-                  className="text-amber-400 hover:text-amber-300 font-bold text-sm text-left flex items-center gap-1 group transition-colors"
-                >
-                  <span>{scriptureDay.reference}</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 text-neutral-400 group-hover:text-amber-300 transition-colors" />
-                </button>
-                <p className="text-xs text-neutral-100 leading-relaxed mt-1 font-serif italic">
-                  "{scriptureDay.text}"
-                </p>
-              </div>
-
-              {/* Reading Plan & Theme */}
-              <div className="text-[11px] font-mono text-neutral-300 flex items-center justify-between">
-                <span>{scriptureDay.readingPlan}</span>
-                <span className="text-amber-400 font-semibold">{scriptureDay.translation}</span>
-              </div>
-
-              {/* Devotional Reflection */}
-              <div className="p-2.5 rounded-lg bg-[#1a1b23] border border-[#282a37] text-xs text-neutral-200 leading-relaxed font-sans">
-                <span className="text-amber-400 font-mono text-[10px] uppercase tracking-wider block mb-1 font-bold">
-                  Daily Focus • {scriptureDay.theme}
-                </span>
-                {scriptureDay.reflection}
-              </div>
-
-              {/* Collapsible More / Prayer */}
-              {showScriptureMore && (
-                <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25 text-xs text-amber-100 leading-relaxed font-sans animate-in fade-in duration-300">
-                  <span className="text-amber-300 font-mono text-[10px] uppercase tracking-wider block mb-1 font-bold">
-                    Morning Prayer
-                  </span>
-                  {scriptureDay.prayer}
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex items-center justify-between text-xs font-mono text-neutral-400 pt-1">
-                <button
-                  onClick={() => setScriptureCompleted(!scriptureCompleted)}
-                  className={`flex items-center gap-1.5 transition-colors ${
-                    scriptureCompleted ? "text-emerald-400 font-bold" : "hover:text-white"
-                  }`}
-                >
-                  <CheckCircle2 className={`w-3.5 h-3.5 ${scriptureCompleted ? "text-emerald-400" : "text-neutral-500"}`} />
-                  <span>{scriptureCompleted ? "Reading Completed" : "Mark Read"}</span>
-                </button>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setScriptureSaved(!scriptureSaved)}
-                    className={`hover:text-white transition-colors ${scriptureSaved ? "text-amber-400" : ""}`}
-                    title="Bookmark Verse"
-                  >
-                    <Bookmark className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => setShowScriptureMore(!showScriptureMore)}
-                    className="text-[10px] text-neutral-300 hover:text-white transition-colors uppercase tracking-wider flex items-center gap-0.5 font-semibold"
-                  >
-                    <span>{showScriptureMore ? "Less" : "Prayer"}</span>
-                    <ChevronDown className={`w-3 h-3 transition-transform ${showScriptureMore ? "rotate-180" : ""}`} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 1.3 DAILY HABIT TRACKER (Dynamic everyday, resets daily) */}
+          {/* 1.2 DAILY HABIT TRACKER (Dynamic everyday, resets daily) */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3.5">
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-neutral-300 uppercase font-bold">
               <span className="flex items-center gap-1.5 text-white">
@@ -1639,150 +1508,144 @@ export default function GlanceDashboard({
               <ArrowUpRight className="w-3 h-3" />
             </button>
           </div>
-
-          {/* 1.4 TWITCH CHANNELS & EXECUTIVE STREAMS (Glance Signature Widget) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3.5">
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-[#8b91a0] uppercase font-bold">
-              <span className="flex items-center gap-1.5 text-white">
-                <Radio className="w-3.5 h-3.5 text-amber-400" />
-                TWITCH CHANNELS
-              </span>
-              <span className="text-[10px] text-emerald-400 font-mono font-semibold">2 LIVE</span>
-            </div>
-
-            <div className="space-y-2.5">
-              {/* Channel 1 */}
-              <a
-                href="https://twitch.tv/zackrawrr"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-between p-2 rounded-lg bg-[#181920] border border-[#262834] hover:border-neutral-600 transition-colors group"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="relative w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden shrink-0">
-                    <img
-                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80"
-                      alt="zackrawrr"
-                      className="w-full h-full object-cover"
-                    />
-                    <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 ring-1 ring-neutral-900" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-semibold text-white group-hover:text-[#e5c07b] truncate flex items-center gap-1.5 transition-colors">
-                      <span>zackrawrr</span>
-                      <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold">
-                        LIVE
-                      </span>
-                    </div>
-                    <div className="text-[10px] font-mono text-[#8b91a0] truncate">
-                      Just Chatting · 2h · 64k viewers
-                    </div>
-                  </div>
-                </div>
-              </a>
-
-              {/* Channel 2 */}
-              <a
-                href="https://twitch.tv/ThePrimeagen"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-between p-2 rounded-lg bg-[#181920] border border-[#262834] hover:border-neutral-600 transition-colors group"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="relative w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden shrink-0">
-                    <img
-                      src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&q=80"
-                      alt="ThePrimeagen"
-                      className="w-full h-full object-cover"
-                    />
-                    <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 ring-1 ring-neutral-900" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-semibold text-white group-hover:text-[#e5c07b] truncate flex items-center gap-1.5 transition-colors">
-                      <span>ThePrimeagen</span>
-                      <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold">
-                        LIVE
-                      </span>
-                    </div>
-                    <div className="text-[10px] font-mono text-[#8b91a0] truncate">
-                      Software & Architecture · 26m · 1.6k viewers
-                    </div>
-                  </div>
-                </div>
-              </a>
-
-              {/* Channel 3 */}
-              <div className="flex items-center justify-between p-2 rounded-lg bg-[#181920] border border-[#262834] hover:border-neutral-600 transition-colors opacity-75">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden shrink-0">
-                    <img
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80"
-                      alt="KevinPowellCSS"
-                      className="w-full h-full object-cover grayscale"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-medium text-neutral-300 truncate">
-                      KevinPowellCSS
-                    </div>
-                    <div className="text-[10px] font-mono text-neutral-500 truncate">
-                      Offline
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Channel 4 */}
-              <div className="flex items-center justify-between p-2 rounded-lg bg-[#181920] border border-[#262834] hover:border-neutral-600 transition-colors opacity-75">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden shrink-0">
-                    <img
-                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80"
-                      alt="j_blow"
-                      className="w-full h-full object-cover grayscale"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-medium text-neutral-300 truncate">
-                      j_blow
-                    </div>
-                    <div className="text-[10px] font-mono text-neutral-500 truncate">
-                      Offline
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* ========================================================= */}
-        {/* COLUMN 2: CENTER (Bookmarks Dock, Sub-Tabs, Feeds, Videos) */}
+        {/* COLUMN 2: CENTER (Daily Scripture Primary, Career, YT Music) */}
         {/* ========================================================= */}
         <div className="lg:col-span-6 space-y-5">
-          {/* 2.0 GLANCE QUICK LAUNCH BOOKMARKS STRIP */}
-          <div className="p-3 sm:p-3.5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg flex items-center gap-2 overflow-x-auto no-scrollbar text-xs font-mono">
-            {[
-              { label: "Google Calendar", url: "https://calendar.google.com", icon: "📅" },
-              { label: "Schneider Portal", url: "https://www.se.com", icon: "⚡" },
-              { label: "MBA.com GMAT", url: "https://www.mba.com", icon: "🎯" },
-              { label: "YouVersion Bible", url: "https://www.bible.com", icon: "✝" },
-              { label: "GitHub Repo", url: "https://github.com/JaisonSam/life-hub", icon: "💻" },
-              { label: "YouTube Music", url: "https://music.youtube.com", icon: "🎵" },
-              { label: "Veerakeralapudur Farm", url: "#farm", icon: "🌾", onClick: () => onSelectTab("farm") },
-            ].map((bm, bi) => (
-              <a
-                key={bi}
-                href={bm.url}
-                target={bm.url.startsWith("http") ? "_blank" : undefined}
-                rel="noreferrer"
-                onClick={bm.onClick}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1a1b24] hover:bg-[#222430] text-neutral-200 hover:text-white border border-[#282a38] transition-colors shrink-0 font-medium"
-              >
-                <span>{bm.icon}</span>
-                <span>{bm.label}</span>
-              </a>
-            ))}
+          {/* 2.0 DAILY SCRIPTURE & DEVOTIONAL (Primary Centerpiece) */}
+          <div className="p-5 sm:p-6 rounded-2xl bg-[#14151b] border border-amber-500/35 shadow-2xl space-y-4 relative overflow-hidden">
+            {/* Subtle devotional golden ambient glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="flex items-center justify-between text-xs font-mono">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-white font-bold tracking-wider uppercase text-xs sm:text-sm">
+                    DAILY SCRIPTURE & DEVOTION
+                  </span>
+                  <span className="hidden sm:inline-block ml-2 text-[10px] font-mono text-amber-400/90 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    Book of Romans Plan
+                  </span>
+                </div>
+              </div>
+
+              {/* Day Selector Navigation */}
+              <div className="flex items-center gap-1.5 text-neutral-300 font-mono text-xs bg-[#1a1b24] px-2.5 py-1 rounded-lg border border-[#262834]">
+                <button
+                  onClick={() => setScriptureOffset((prev) => prev - 1)}
+                  className="hover:text-amber-300 p-0.5 transition-colors"
+                  title="Previous Day"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-white font-bold">Day {scriptureDay.dayOfYear}</span>
+                <button
+                  onClick={() => setScriptureOffset((prev) => prev + 1)}
+                  className="hover:text-amber-300 p-0.5 transition-colors"
+                  title="Next Day"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Scripture Quote */}
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <button
+                  onClick={() => onSelectTab("bible")}
+                  className="text-amber-400 hover:text-amber-300 font-extrabold text-base sm:text-lg flex items-center gap-1.5 group transition-colors"
+                >
+                  <span>{scriptureDay.reference}</span>
+                  <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-amber-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold">
+                    {scriptureDay.theme}
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">
+                    {scriptureDay.translation}
+                  </span>
+                </div>
+              </div>
+
+              <blockquote className="text-sm sm:text-base text-neutral-100 italic leading-relaxed pl-4 border-l-2 border-amber-400 font-serif">
+                &ldquo;{scriptureDay.text}&rdquo;
+              </blockquote>
+
+              <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
+                <span>{scriptureDay.readingPlan}</span>
+                <button
+                  onClick={() => onSelectTab("bible")}
+                  className="text-amber-400 hover:text-amber-300 underline font-semibold flex items-center gap-1"
+                >
+                  <span>Open Romans Study Deck</span>
+                  <span>↗</span>
+                </button>
+              </div>
+
+              {/* Devotional Reflection Box */}
+              <div className="p-3.5 rounded-xl bg-[#191a23] border border-[#272937] text-xs sm:text-sm text-neutral-200 leading-relaxed font-sans space-y-1.5">
+                <span className="text-amber-400 font-mono text-[10px] uppercase tracking-wider block font-bold">
+                  Daily Focus • {scriptureDay.theme}
+                </span>
+                <p>{scriptureDay.reflection}</p>
+
+                {/* Collapsible Morning Prayer */}
+                {showScriptureMore && (
+                  <div className="pt-2.5 mt-2.5 border-t border-neutral-800 space-y-1">
+                    <span className="text-amber-300 font-mono text-[10px] uppercase tracking-wider block font-bold">
+                      Morning Prayer
+                    </span>
+                    <p className="text-neutral-300 italic text-xs leading-relaxed">
+                      {scriptureDay.prayer}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons: Mark Read, Bookmark, Prayer Toggle */}
+              <div className="flex items-center justify-between text-xs font-mono text-neutral-400 pt-1">
+                <button
+                  onClick={() => setScriptureCompleted(!scriptureCompleted)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
+                    scriptureCompleted
+                      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 font-bold"
+                      : "bg-[#181920] border-[#262834] hover:border-neutral-600 text-neutral-300 hover:text-white"
+                  }`}
+                >
+                  <CheckCircle2 className={`w-4 h-4 ${scriptureCompleted ? "text-emerald-400" : "text-neutral-500"}`} />
+                  <span>{scriptureCompleted ? "Reading Completed" : "Mark as Read"}</span>
+                </button>
+
+                <div className="flex items-center gap-2.5">
+                  <button
+                    onClick={() => setScriptureSaved(!scriptureSaved)}
+                    className={`p-1.5 rounded-lg border transition-colors ${
+                      scriptureSaved
+                        ? "bg-amber-500/20 border-amber-500/40 text-amber-400"
+                        : "bg-[#181920] border-[#262834] text-neutral-400 hover:text-white"
+                    }`}
+                    title="Bookmark Verse"
+                  >
+                    <Bookmark className={`w-4 h-4 ${scriptureSaved ? "fill-amber-400 text-amber-400" : ""}`} />
+                  </button>
+
+                  <button
+                    onClick={() => setShowScriptureMore(!showScriptureMore)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#181920] border border-[#262834] hover:border-neutral-600 text-neutral-300 hover:text-white transition-colors text-xs font-semibold"
+                  >
+                    <span>{showScriptureMore ? "Hide Prayer" : "Morning Prayer"}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showScriptureMore ? "rotate-180" : ""}`} />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* 2.1 SUB-TABS (Glance style: HACKER NEWS | LOBSTERS / CAREER | GMAT | TECH | FARM) */}
@@ -2054,11 +1917,11 @@ export default function GlanceDashboard({
                     rel="noreferrer"
                     className="text-amber-400 hover:text-amber-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group"
                   >
-                    <span>Self-Hosted Executive Dashboards: Building Glance with Next.js 16</span>
+                    <span>Self-Hosted Executive Dashboards: High-Performance Architecture with Next.js 16</span>
                     <span className="text-neutral-400 text-xs">↗</span>
                   </a>
                   <div className="text-xs font-mono text-neutral-300 flex items-center gap-2">
-                    <span>2h · 184 points · 42 comments · github.com/glanceapp/glance ↗</span>
+                    <span>2h · 184 points · 42 comments · nextjs.org/blog ↗</span>
                   </div>
                 </div>
 
@@ -2124,264 +1987,116 @@ export default function GlanceDashboard({
             )}
           </div>
 
-          {/* 2.2 VIDEOS & SANCTUARY SHELF (Horizontal Media Strip) */}
+          {/* 2.2 YOUTUBE MUSIC CATALOG */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3.5">
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-neutral-300 uppercase font-bold">
-              <span className="flex items-center gap-1.5 text-white">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-mono tracking-wider uppercase font-bold text-neutral-300">
                 <Headphones className="w-3.5 h-3.5 text-amber-400" />
-                VIDEOS & SANCTUARY
-              </span>
+                <span>YOUTUBE MUSIC CATALOG</span>
+                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-red-500/15 text-red-400 border border-red-500/30">
+                  YT MUSIC
+                </span>
+              </div>
               <button
                 onClick={() => onSelectTab("music")}
-                className="text-[10px] text-amber-400 hover:text-amber-300 uppercase tracking-wider flex items-center gap-0.5 font-semibold"
+                className="text-[11px] font-mono text-amber-400 hover:text-amber-300 uppercase tracking-wider flex items-center gap-1 font-semibold"
               >
-                <span>All Rooms</span>
-                <ChevronRight className="w-3 h-3" />
+                <span>Open Sanctuary Deck</span>
+                <ArrowUpRight className="w-3 h-3" />
               </button>
             </div>
 
-            {/* Horizontal Video Cards Row (5 Cards Glance Architecture) */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              {/* Media Card 1 */}
-              <div
-                onClick={() => onSelectTab("music")}
-                className="group cursor-pointer space-y-1.5"
-              >
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-neutral-900 border border-[#262834] group-hover:border-neutral-500 transition-colors">
-                  <img
-                    src="https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=400&q=80"
-                    alt="Acoustic Worship"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
-                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-neutral-200">
-                    Live
-                  </span>
-                </div>
-                <div className="text-xs font-medium text-white group-hover:text-[#e5c07b] transition-colors line-clamp-1">
-                  Acoustic Worship Sanctuary
-                </div>
-                <div className="text-[10px] font-mono text-[#8b91a0]">
-                  Elevation & Maverick
-                </div>
-              </div>
+            {/* Curated Albums & Playlists Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {[
+                {
+                  id: "w-1",
+                  title: "Acoustic Worship & Prayer",
+                  artist: "Maverick City & Elevation",
+                  tag: "Devotional",
+                  cover: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=400&q=80",
+                  ytUrl: "https://music.youtube.com/search?q=acoustic+worship+intimate+prayer+elevation+maverick+city",
+                },
+                {
+                  id: "w-2",
+                  title: "Romans Companion Piano",
+                  artist: "Peaceful Piano & Cello",
+                  tag: "Study",
+                  cover: "https://images.unsplash.com/photo-1520523839898-507127053c37?auto=format&fit=crop&w=400&q=80",
+                  ytUrl: "https://music.youtube.com/search?q=peaceful+christian+instrumental+piano+hymns",
+                },
+                {
+                  id: "w-3",
+                  title: "Live Kingdom Anthems",
+                  artist: "Brandon Lake & Phil Wickham",
+                  tag: "Anthems",
+                  cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=400&q=80",
+                  ytUrl: "https://music.youtube.com/search?q=brandon+lake+phil+wickham+live+worship+anthems",
+                },
+                {
+                  id: "f-1",
+                  title: "GMAT 715+ Quant Lo-Fi",
+                  artist: "Chilled Focus Beats",
+                  tag: "80 BPM Lo-Fi",
+                  cover: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80",
+                  ytUrl: "https://music.youtube.com/search?q=lofi+beats+to+study+solve+quant+problems",
+                },
+                {
+                  id: "f-2",
+                  title: "Alpha Brainwaves (432Hz)",
+                  artist: "Deep Ambient Focus",
+                  tag: "432Hz",
+                  cover: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&q=80",
+                  ytUrl: "https://music.youtube.com/search?q=432hz+alpha+waves+deep+study+focus+piano",
+                },
+                {
+                  id: "e-1",
+                  title: "Kingdom High-BPM Workout",
+                  artist: "Lecrae, KB, Hulvey",
+                  tag: "Training",
+                  cover: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=400&q=80",
+                  ytUrl: "https://music.youtube.com/search?q=christian+hip+hop+workout+lecrae+kb+mineo",
+                },
+              ].map((album) => (
+                <div
+                  key={album.id}
+                  className="group rounded-xl bg-[#181920] border border-[#262834] hover:border-amber-400/50 p-2.5 transition-all space-y-2 flex flex-col justify-between"
+                >
+                  <div className="space-y-1.5">
+                    <div className="relative aspect-video rounded-lg overflow-hidden bg-neutral-900 border border-[#262834]">
+                      <img
+                        src={album.cover}
+                        alt={album.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors" />
+                      <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/85 text-[9px] font-mono text-amber-300 font-bold border border-amber-500/20">
+                        {album.tag}
+                      </span>
+                    </div>
 
-              {/* Media Card 2 */}
-              <div
-                onClick={() => onSelectTab("music")}
-                className="group cursor-pointer space-y-1.5"
-              >
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-neutral-900 border border-[#262834] group-hover:border-neutral-500 transition-colors">
-                  <img
-                    src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=400&q=80"
-                    alt="432Hz Study Flow"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
-                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-neutral-200">
-                    432Hz
-                  </span>
-                </div>
-                <div className="text-xs font-medium text-white group-hover:text-[#e5c07b] transition-colors line-clamp-1">
-                  Deep Flow & GMAT Focus
-                </div>
-                <div className="text-[10px] font-mono text-[#8b91a0]">
-                  Alpha Brainwaves
-                </div>
-              </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold text-white group-hover:text-amber-300 transition-colors truncate">
+                        {album.title}
+                      </div>
+                      <div className="text-[10px] font-mono text-neutral-400 truncate">
+                        {album.artist}
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Media Card 3 */}
-              <div
-                onClick={() => onSelectTab("gmat")}
-                className="group cursor-pointer space-y-1.5"
-              >
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-neutral-900 border border-[#262834] group-hover:border-neutral-500 transition-colors">
-                  <img
-                    src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=400&q=80"
-                    alt="GMAT Strategy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
-                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-neutral-200">
-                    705+
-                  </span>
+                  <a
+                    href={album.ytUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-center gap-1.5 w-full py-1 rounded bg-[#1e202a] hover:bg-amber-400 hover:text-neutral-950 text-[10px] font-mono font-bold text-neutral-300 transition-all border border-[#2a2c3a] hover:border-amber-400"
+                  >
+                    <span>▶ Play on YT Music</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
                 </div>
-                <div className="text-xs font-medium text-white group-hover:text-[#e5c07b] transition-colors line-clamp-1">
-                  GMAT Quant & DI Traps
-                </div>
-                <div className="text-[10px] font-mono text-[#8b91a0]">
-                  MBA.com Official OG
-                </div>
-              </div>
-
-              {/* Media Card 4 */}
-              <div
-                onClick={() => onSelectTab("career")}
-                className="group cursor-pointer space-y-1.5"
-              >
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-neutral-900 border border-[#262834] group-hover:border-neutral-500 transition-colors">
-                  <img
-                    src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&q=80"
-                    alt="ERP Architecture"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
-                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-neutral-200">
-                    Cloud
-                  </span>
-                </div>
-                <div className="text-xs font-medium text-white group-hover:text-[#e5c07b] transition-colors line-clamp-1">
-                  ERP Cloud Architectures
-                </div>
-                <div className="text-[10px] font-mono text-[#8b91a0]">
-                  Schneider Blueprint
-                </div>
-              </div>
-
-              {/* Media Card 5 (Glance 5th Card) */}
-              <div
-                onClick={() => onSelectTab("farm")}
-                className="group cursor-pointer space-y-1.5"
-              >
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-neutral-900 border border-[#262834] group-hover:border-neutral-500 transition-colors">
-                  <img
-                    src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?auto=format&fit=crop&w=400&q=80"
-                    alt="Farm Agribusiness"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
-                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-neutral-200">
-                    IoT
-                  </span>
-                </div>
-                <div className="text-xs font-medium text-white group-hover:text-[#e5c07b] transition-colors line-clamp-1">
-                  Veerakeralapudur Smart Agri
-                </div>
-                <div className="text-[10px] font-mono text-[#8b91a0]">
-                  Solar Drip & Telemetry
-                </div>
-              </div>
+              ))}
             </div>
-          </div>
-
-          {/* 2.3 COMMUNITY & REDDIT FEEDS (Glance style /r/technology /r/science) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-4">
-            <div className="flex items-center gap-4 text-xs font-mono tracking-wider uppercase font-bold text-neutral-300">
-              <button
-                onClick={() => setCommunityTab("erp")}
-                className={`transition-colors ${communityTab === "erp" ? "text-amber-400 font-bold" : "text-neutral-400 hover:text-white"}`}
-              >
-                /R/ERP_CONSULTING
-              </button>
-              <button
-                onClick={() => setCommunityTab("agri")}
-                className={`transition-colors ${communityTab === "agri" ? "text-amber-400 font-bold" : "text-neutral-400 hover:text-white"}`}
-              >
-                /R/AGRITECH_INDIA
-              </button>
-              <button
-                onClick={() => setCommunityTab("gmat")}
-                className={`transition-colors ${communityTab === "gmat" ? "text-amber-400 font-bold" : "text-neutral-400 hover:text-white"}`}
-              >
-                /R/GMAT_FOCUS
-              </button>
-            </div>
-
-            {communityTab === "erp" && (
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700 flex items-center justify-center shrink-0 text-amber-400 font-bold font-mono text-xs">
-                    SE
-                  </div>
-                  <div className="space-y-1 min-w-0">
-                    <div className="text-xs sm:text-sm font-semibold text-white hover:text-amber-300 transition-colors cursor-pointer flex items-center gap-2 flex-wrap">
-                      <span>Bridging Functional BA Specifications to Agentic Cloud Automation</span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-300 font-mono">Systems</span>
-                    </div>
-                    <div className="text-[11px] font-mono text-neutral-300 flex items-center gap-2">
-                      <span className="text-neutral-400">3h</span>
-                      <span>·</span>
-                      <span className="text-white font-medium">1,842 points</span>
-                      <span>·</span>
-                      <span className="text-neutral-400">148 comments</span>
-                      <span>·</span>
-                      <span className="text-amber-400/80">schneider-electric.com ↗</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700 flex items-center justify-center shrink-0 text-amber-400 font-bold font-mono text-xs">
-                    BLR
-                  </div>
-                  <div className="space-y-1 min-w-0">
-                    <div className="text-xs sm:text-sm font-semibold text-white hover:text-amber-300 transition-colors cursor-pointer flex items-center gap-2 flex-wrap">
-                      <span>Bangalore Tech Corridor 2026: Shift toward AI-Native Business Analysts</span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-300 font-mono">Market</span>
-                    </div>
-                    <div className="text-[11px] font-mono text-neutral-300 flex items-center gap-2">
-                      <span className="text-neutral-400">12h</span>
-                      <span>·</span>
-                      <span className="text-white font-medium">965 points</span>
-                      <span>·</span>
-                      <span className="text-neutral-400">82 comments</span>
-                      <span>·</span>
-                      <span className="text-amber-400/80">economictimes.indiatimes.com ↗</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {communityTab === "agri" && (
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-950/80 border border-emerald-700/60 flex items-center justify-center shrink-0 text-emerald-400 font-bold font-mono text-xs">
-                    TNL
-                  </div>
-                  <div className="space-y-1 min-w-0">
-                    <div className="text-xs sm:text-sm font-semibold text-white hover:text-amber-300 transition-colors cursor-pointer flex items-center gap-2 flex-wrap">
-                      <span>Tirunelveli Red Sandy Loam: Precision Drip & Micro-Fertigation Economics</span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-950/60 text-emerald-300 font-mono">Agronomy</span>
-                    </div>
-                    <div className="text-[11px] font-mono text-neutral-300 flex items-center gap-2">
-                      <span className="text-neutral-400">1d</span>
-                      <span>·</span>
-                      <span className="text-white font-medium">420 points</span>
-                      <span>·</span>
-                      <span className="text-neutral-400">54 comments</span>
-                      <span>·</span>
-                      <span className="text-amber-400/80">tnau.ac.in ↗</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {communityTab === "gmat" && (
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-700/60 flex items-center justify-center shrink-0 text-indigo-400 font-bold font-mono text-xs">
-                    705
-                  </div>
-                  <div className="space-y-1 min-w-0">
-                    <div className="text-xs sm:text-sm font-semibold text-white hover:text-amber-300 transition-colors cursor-pointer flex items-center gap-2 flex-wrap">
-                      <span>Debrief: Moving from 645 to 715 on Focus Edition in 4 Weeks</span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-950/60 text-indigo-300 font-mono">Debrief</span>
-                    </div>
-                    <div className="text-[11px] font-mono text-neutral-300 flex items-center gap-2">
-                      <span className="text-neutral-400">2d</span>
-                      <span>·</span>
-                      <span className="text-white font-medium">1,204 points</span>
-                      <span>·</span>
-                      <span className="text-neutral-400">198 comments</span>
-                      <span>·</span>
-                      <span className="text-amber-400/80">gmatclub.com ↗</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
@@ -2568,137 +2283,7 @@ export default function GlanceDashboard({
             )}
           </div>
 
-          {/* 3.2 REPOSITORY WIDGET CARD */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3">
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-[#8b91a0] uppercase font-bold">
-              <span className="flex items-center gap-1.5 text-white">
-                <GitPullRequest className="w-3.5 h-3.5 text-amber-400" />
-                REPOSITORY
-              </span>
-              <div className="flex items-center gap-1 text-[10px] font-mono">
-                <button
-                  onClick={() => setRepoTab("glance")}
-                  className={`px-1.5 py-0.5 rounded transition-colors ${
-                    repoTab === "glance"
-                      ? "bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30"
-                      : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  glance
-                </button>
-                <button
-                  onClick={() => setRepoTab("lifehub")}
-                  className={`px-1.5 py-0.5 rounded transition-colors ${
-                    repoTab === "lifehub"
-                      ? "bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30"
-                      : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  life-hub
-                </button>
-              </div>
-            </div>
-
-            {repoTab === "glance" ? (
-              <div className="space-y-2.5">
-                <div>
-                  <a
-                    href="https://github.com/glanceapp/glance"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-bold text-white hover:text-[#e5c07b] transition-colors text-xs sm:text-sm flex items-center gap-1"
-                  >
-                    <span>glanceapp/glance</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-neutral-400" />
-                  </a>
-                  <div className="text-xs font-mono text-[#8b91a0] mt-0.5">
-                    7,281 stars · 251 forks
-                  </div>
-                </div>
-
-                {/* Open PRs */}
-                <div className="text-xs space-y-1.5 pt-1 border-t border-[#232530]">
-                  <div className="font-mono text-[#8b91a0] text-[11px] font-semibold">
-                    Open pull requests (9 total)
-                  </div>
-                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
-                    <span className="truncate">25d !bangs at the end</span>
-                  </div>
-                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
-                    <span className="truncate">1mo Bookmark status indicator</span>
-                  </div>
-                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
-                    <span className="truncate">1mo CSS dynamic columns refactor an...</span>
-                  </div>
-                </div>
-
-                {/* Open Issues */}
-                <div className="text-xs space-y-1.5 pt-1 border-t border-[#232530]">
-                  <div className="font-mono text-[#8b91a0] text-[11px] font-semibold">
-                    Open issues (54 total)
-                  </div>
-                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
-                    <span className="truncate">7d [Bug(?)] Version tag not showin...</span>
-                  </div>
-                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
-                    <span className="truncate">7d [Request] Mark as read</span>
-                  </div>
-                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
-                    <span className="truncate">13d [Feature Request] Ability to ch...</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                <div>
-                  <a
-                    href="https://github.com/JaisonSam/life-hub"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-bold text-white hover:text-[#e5c07b] transition-colors text-xs sm:text-sm flex items-center gap-1"
-                  >
-                    <span>JaisonSam/life-hub</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-neutral-400" />
-                  </a>
-                  <div className="text-xs font-mono text-[#8b91a0] mt-0.5">
-                    24 stars · 6 forks
-                  </div>
-                </div>
-
-                {/* Open PRs */}
-                <div className="text-xs space-y-1.5 pt-1 border-t border-[#232530]">
-                  <div className="font-mono text-[#8b91a0] text-[11px] font-semibold">
-                    Open pull requests (2 total)
-                  </div>
-                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
-                    <span className="truncate">2d feat: Glance dashboard revamp</span>
-                    <span className="text-amber-400 font-bold shrink-0 ml-1">#12</span>
-                  </div>
-                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
-                    <span className="truncate">8d perf: 3D coverflow smooth glide</span>
-                    <span className="text-amber-400 font-bold shrink-0 ml-1">#11</span>
-                  </div>
-                </div>
-
-                {/* Open Issues */}
-                <div className="text-xs space-y-1.5 pt-1 border-t border-[#232530]">
-                  <div className="font-mono text-[#8b91a0] text-[11px] font-semibold">
-                    Open issues (3 total)
-                  </div>
-                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
-                    <span className="truncate">2d [Feature] Daily dynamic scripture</span>
-                    <span className="text-neutral-400 shrink-0 ml-1">#9</span>
-                  </div>
-                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
-                    <span className="truncate">5d [Telemetry] Farm sensor live sync</span>
-                    <span className="text-neutral-400 shrink-0 ml-1">#8</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 3.3 INDIAN MARKETS & GROWW PORTFOLIO WIDGET CARD */}
+          {/* 3.2 INDIAN MARKETS & GROWW PORTFOLIO WIDGET CARD */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3.5">
             {/* Header: Title + Groww Badge + Market Status */}
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-[#8b91a0] uppercase font-bold">
@@ -3200,76 +2785,6 @@ export default function GlanceDashboard({
               </div>
             )}
           </div>
-
-          {/* 3.4 EXECUTIVE SCRATCHPAD & TIMER CARD */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-4">
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-neutral-300 uppercase font-bold">
-              <span className="flex items-center gap-1.5 text-white">
-                <FileText className="w-3.5 h-3.5 text-amber-400" />
-                EXECUTIVE SCRATCHPAD
-              </span>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(scratchpadNote);
-                  setNoteCopied(true);
-                  setTimeout(() => setNoteCopied(false), 2000);
-                }}
-                className="text-[10px] text-neutral-300 hover:text-white transition-colors flex items-center gap-1 font-mono font-semibold"
-                title="Copy scratchpad notes"
-              >
-                <Copy className="w-3 h-3 text-amber-400" />
-                <span>{noteCopied ? "Copied" : "Copy"}</span>
-              </button>
-            </div>
-
-            <textarea
-              value={scratchpadNote}
-              onChange={(e) => handleSaveScratchpad(e.target.value)}
-              placeholder="Jot down quick meeting notes, GMAT error takeaways, or daily thoughts..."
-              rows={4}
-              className="w-full text-xs font-mono p-3 rounded-xl bg-[#1a1b23] border border-[#282a37] text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/80 leading-relaxed resize-none font-medium"
-            />
-            <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400">
-              <span>Auto-saved in browser</span>
-              <span>Markdown ready</span>
-            </div>
-
-            {/* DEEP WORK FOCUS TIMER HUD */}
-            <div className="p-3 rounded-xl bg-[#1a1b23] border border-[#282a37] flex items-center justify-between text-xs font-mono pt-3">
-              <div className="flex items-center gap-2">
-                <Timer className="w-4 h-4 text-amber-400" />
-                <div>
-                  <span className="text-neutral-300 font-semibold">Sprint: </span>
-                  <span className="text-amber-300 font-bold text-sm">
-                    {Math.floor(pomodoroSeconds / 60).toString().padStart(2, "0")}:
-                    {(pomodoroSeconds % 60).toString().padStart(2, "0")}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setPomodoroRunning(!pomodoroRunning)}
-                  className={`px-3 py-1 rounded-md text-[11px] font-bold transition-colors ${
-                    pomodoroRunning
-                      ? "bg-amber-500/25 text-amber-300 border border-amber-500/40"
-                      : "bg-neutral-800 text-white hover:bg-neutral-700"
-                  }`}
-                >
-                  {pomodoroRunning ? "Pause" : "Start 25m"}
-                </button>
-                <button
-                  onClick={() => {
-                    setPomodoroRunning(false);
-                    setPomodoroSeconds(25 * 60);
-                  }}
-                  className="p-1 text-neutral-400 hover:text-white"
-                  title="Reset timer"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -3291,7 +2806,7 @@ export default function GlanceDashboard({
             </div>
 
             <p className="text-xs text-neutral-300 leading-relaxed font-sans">
-              Sync your live Google Calendar agenda into your Glance dashboard to view your meetings, sprint reviews, and day-to-day commitments alongside your executive routines.
+              Sync your live Google Calendar agenda into your personal dashboard to view your meetings, sprint reviews, and day-to-day commitments alongside your routines.
             </p>
 
             {/* Connection Status Banner (if connected) */}
