@@ -140,27 +140,35 @@ export function getPlannedActivitiesForDate(
   targetDate: Date,
   customActivities: PlannedActivity[] = []
 ): PlannedActivity[] {
-  const y = targetDate.getFullYear();
-  const m = String(targetDate.getMonth() + 1).padStart(2, "0");
-  const d = String(targetDate.getDate()).padStart(2, "0");
-  const dateKey = `${y}-${m}-${d}`;
-  const dayOfWeek = targetDate.getDay(); // 0 = Sun, 6 = Sat
+  try {
+    const safeDate = targetDate instanceof Date && !isNaN(targetDate.getTime()) ? targetDate : new Date();
+    const safeCustom = Array.isArray(customActivities) ? customActivities : [];
 
-  // First check if there are specific date-bound activities
-  const dateSpecific = customActivities.filter((a) => a.date === dateKey);
+    const y = safeDate.getFullYear();
+    const m = String(safeDate.getMonth() + 1).padStart(2, "0");
+    const d = String(safeDate.getDate()).padStart(2, "0");
+    const dateKey = `${y}-${m}-${d}`;
+    const dayOfWeek = safeDate.getDay(); // 0 = Sun, 6 = Sat
 
-  // Default recurring base schedule for this day of week
-  let base: PlannedActivity[] = [];
-  if (dayOfWeek === 0) {
-    base = SUNDAY_SCHEDULE;
-  } else if (dayOfWeek === 6) {
-    base = SATURDAY_SCHEDULE;
-  } else {
-    base = DEFAULT_WEEKLY_SCHEDULE;
+    // First check if there are specific date-bound activities
+    const dateSpecific = safeCustom.filter((a) => a && a.date === dateKey);
+
+    // Default recurring base schedule for this day of week
+    let base: PlannedActivity[] = [];
+    if (dayOfWeek === 0) {
+      base = SUNDAY_SCHEDULE;
+    } else if (dayOfWeek === 6) {
+      base = SATURDAY_SCHEDULE;
+    } else {
+      base = DEFAULT_WEEKLY_SCHEDULE;
+    }
+
+    // Merge date-specific custom activities with base routine
+    return [...dateSpecific, ...base];
+  } catch (err) {
+    console.error("Error in getPlannedActivitiesForDate:", err);
+    return DEFAULT_WEEKLY_SCHEDULE;
   }
-
-  // Merge date-specific custom activities with base routine
-  return [...dateSpecific, ...base];
 }
 
 /**
@@ -170,35 +178,42 @@ export function getGoogleCalendarAddUrl(
   activity: PlannedActivity,
   targetDate: Date
 ): string {
-  const y = targetDate.getFullYear();
-  const m = String(targetDate.getMonth() + 1).padStart(2, "0");
-  const d = String(targetDate.getDate()).padStart(2, "0");
-  const dateStr = `${y}${m}${d}`;
+  try {
+    if (!activity) return "https://calendar.google.com";
+    const safeDate = targetDate instanceof Date && !isNaN(targetDate.getTime()) ? targetDate : new Date();
 
-  // Parse start time (e.g. "09:30 AM")
-  let startHour = 9;
-  let startMin = 30;
-  if (activity.time) {
-    const parts = activity.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
-    if (parts) {
-      let h = parseInt(parts[1], 10);
-      const min = parseInt(parts[2], 10);
-      const ampm = parts[3].toUpperCase();
-      if (ampm === "PM" && h < 12) h += 12;
-      if (ampm === "AM" && h === 12) h = 0;
-      startHour = h;
-      startMin = min;
+    const y = safeDate.getFullYear();
+    const m = String(safeDate.getMonth() + 1).padStart(2, "0");
+    const d = String(safeDate.getDate()).padStart(2, "0");
+    const dateStr = `${y}${m}${d}`;
+
+    // Parse start time (e.g. "09:30 AM")
+    let startHour = 9;
+    let startMin = 30;
+    if (activity.time && typeof activity.time === "string") {
+      const parts = activity.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (parts) {
+        let h = parseInt(parts[1], 10);
+        const min = parseInt(parts[2], 10);
+        const ampm = parts[3].toUpperCase();
+        if (ampm === "PM" && h < 12) h += 12;
+        if (ampm === "AM" && h === 12) h = 0;
+        startHour = h;
+        startMin = min;
+      }
     }
+
+    const startIso = `${dateStr}T${String(startHour).padStart(2, "0")}${String(startMin).padStart(2, "0")}00`;
+    const endHour = (startHour + 1) % 24;
+    const endIso = `${dateStr}T${String(endHour).padStart(2, "0")}${String(startMin).padStart(2, "0")}00`;
+
+    const title = encodeURIComponent(`[Life Hub] ${activity.title || "Scheduled Activity"}`);
+    const details = encodeURIComponent(
+      `${activity.notes || ""}\nCategory: ${activity.category || "Routine"}\nManaged via Jaison's Life OS.`
+    );
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}`;
+  } catch (e) {
+    return "https://calendar.google.com";
   }
-
-  const startIso = `${dateStr}T${String(startHour).padStart(2, "0")}${String(startMin).padStart(2, "0")}00`;
-  const endHour = (startHour + 1) % 24;
-  const endIso = `${dateStr}T${String(endHour).padStart(2, "0")}${String(startMin).padStart(2, "0")}00`;
-
-  const title = encodeURIComponent(`[Life Hub] ${activity.title}`);
-  const details = encodeURIComponent(
-    `${activity.notes || ""}\nCategory: ${activity.category}\nManaged via Jaison's Life OS.`
-  );
-
-  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}`;
 }

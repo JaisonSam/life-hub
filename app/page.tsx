@@ -63,6 +63,7 @@ import CareerBrandHub from "@/components/CareerBrandHub";
 import ExecutiveBentoDeck from "@/components/ExecutiveBentoDeck";
 import ExecutiveViewCarousel from "@/components/ExecutiveViewCarousel";
 import GlanceDashboard from "@/components/GlanceDashboard";
+import GlanceErrorBoundary from "@/components/GlanceErrorBoundary";
 import AnimatedCosmicBackground from "@/components/AnimatedCosmicBackground";
 import AOSInit from "@/components/AOSInit";
 import { getDailyScripture } from "@/lib/dailyScripture";
@@ -1504,11 +1505,13 @@ export default function LifeHub() {
 
           {/* View Mode 1: Glance 3-Column Master Dashboard (Default) */}
           {homeViewMode === "glance" && (
-            <GlanceDashboard
-              onSelectTab={handleSelectTab}
-              currentTime={currentTime}
-              currentDate={currentDate}
-            />
+            <GlanceErrorBoundary>
+              <GlanceDashboard
+                onSelectTab={handleSelectTab}
+                currentTime={currentTime}
+                currentDate={currentDate}
+              />
+            </GlanceErrorBoundary>
           )}
 
           {/* View Mode 2: 3D Coverflow Carousel */}

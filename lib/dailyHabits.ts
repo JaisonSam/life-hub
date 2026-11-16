@@ -78,25 +78,38 @@ export function loadDailyHabits(targetDateKey: string = getDateKey()): DynamicHa
 
   try {
     const rawHistory = localStorage.getItem("lifehub_habits_history");
-    const history: Record<string, Record<string, boolean>> = rawHistory ? JSON.parse(rawHistory) : {};
+    let history: Record<string, Record<string, boolean>> = {};
+    if (rawHistory) {
+      try {
+        const parsedHist = JSON.parse(rawHistory);
+        if (parsedHist && typeof parsedHist === "object" && !Array.isArray(parsedHist)) {
+          history = parsedHist;
+        }
+      } catch {}
+    }
 
     const rawBase = localStorage.getItem("lifehub_habits_base");
-    const baseHabits: DynamicHabit[] = rawBase ? JSON.parse(rawBase) : DEFAULT_HABITS;
+    let baseHabits: DynamicHabit[] = DEFAULT_HABITS;
+    if (rawBase) {
+      try {
+        const parsedBase = JSON.parse(rawBase);
+        if (Array.isArray(parsedBase) && parsedBase.length > 0) {
+          baseHabits = parsedBase;
+        }
+      } catch {}
+    }
 
-    const todayChecks = history[targetDateKey] || {};
+    const todayChecks = (history && typeof history === "object" && history[targetDateKey]) || {};
 
     // Calculate dynamic streaks by looking backwards through days
     return baseHabits.map((habit) => {
+      if (!habit || typeof habit !== "object") return DEFAULT_HABITS[0];
       const isCompletedToday = Boolean(todayChecks[habit.id]);
 
       // Calculate real streak backwards from yesterday
       let streak = isCompletedToday ? 1 : 0;
       let checkDate = new Date();
-      if (!isCompletedToday) {
-        checkDate.setDate(checkDate.getDate() - 1);
-      } else {
-        checkDate.setDate(checkDate.getDate() - 1);
-      }
+      checkDate.setDate(checkDate.getDate() - 1);
 
       for (let i = 0; i < 60; i++) {
         const dKey = getDateKey(checkDate);
@@ -134,9 +147,17 @@ export function toggleDailyHabitStorage(
 
   try {
     const rawHistory = localStorage.getItem("lifehub_habits_history");
-    const history: Record<string, Record<string, boolean>> = rawHistory ? JSON.parse(rawHistory) : {};
+    let history: Record<string, Record<string, boolean>> = {};
+    if (rawHistory) {
+      try {
+        const parsed = JSON.parse(rawHistory);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          history = parsed;
+        }
+      } catch {}
+    }
 
-    if (!history[targetDateKey]) {
+    if (!history[targetDateKey] || typeof history[targetDateKey] !== "object") {
       history[targetDateKey] = {};
     }
 

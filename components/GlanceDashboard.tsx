@@ -161,19 +161,31 @@ export default function GlanceDashboard({
         syncGCal(savedIcs);
       }
       const savedCustom = localStorage.getItem("lifehub_custom_activities");
-      if (savedCustom) setCustomActivities(JSON.parse(savedCustom));
+      if (savedCustom) {
+        try {
+          const parsed = JSON.parse(savedCustom);
+          if (Array.isArray(parsed)) setCustomActivities(parsed);
+        } catch {}
+      }
 
       const savedChecks = localStorage.getItem(`lifehub_act_checks_${liveKey}`);
-      if (savedChecks) setCompletedActivityIds(JSON.parse(savedChecks));
+      if (savedChecks) {
+        try {
+          const parsed = JSON.parse(savedChecks);
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            setCompletedActivityIds(parsed);
+          }
+        } catch {}
+      }
 
       const savedPad = localStorage.getItem("lifehub_scratchpad");
-      if (savedPad) setScratchpadNote(savedPad);
+      if (savedPad && typeof savedPad === "string") setScratchpadNote(savedPad);
     } catch {}
   }, [scriptureOffset]);
 
   const handleToggleActivity = (id: string) => {
-    const nextVal = !completedActivityIds[id];
-    const updated = { ...completedActivityIds, [id]: nextVal };
+    const nextVal = !completedActivityIds?.[id];
+    const updated = { ...(completedActivityIds || {}), [id]: nextVal };
     setCompletedActivityIds(updated);
     try {
       localStorage.setItem(`lifehub_act_checks_${todayKey}`, JSON.stringify(updated));
@@ -192,7 +204,8 @@ export default function GlanceDashboard({
       completed: false,
       source: "local",
     };
-    const updated = [newAct, ...customActivities];
+    const currentList = Array.isArray(customActivities) ? customActivities : [];
+    const updated = [newAct, ...currentList];
     setCustomActivities(updated);
     try {
       localStorage.setItem("lifehub_custom_activities", JSON.stringify(updated));
@@ -213,8 +226,9 @@ export default function GlanceDashboard({
     setDailyHabits(updated);
   };
 
-  const completedHabitsCount = dailyHabits.filter((h) => h.completedToday).length;
-  const habitPct = dailyHabits.length > 0 ? Math.round((completedHabitsCount / dailyHabits.length) * 100) : 0;
+  const safeHabits = Array.isArray(dailyHabits) ? dailyHabits : DEFAULT_HABITS;
+  const completedHabitsCount = safeHabits.filter((h) => h?.completedToday).length;
+  const habitPct = safeHabits.length > 0 ? Math.round((completedHabitsCount / safeHabits.length) * 100) : 0;
 
   // 4. Center Column Sub-Tabs
   const [centerSubTab, setCenterSubTab] = useState<"career" | "gmat" | "tech" | "farm">("career");
@@ -534,7 +548,7 @@ export default function GlanceDashboard({
                   </div>
                 ) : (
                   plannedActivities.map((act) => {
-                    const isDone = Boolean(completedActivityIds[act.id]);
+                    const isDone = Boolean(completedActivityIds && typeof completedActivityIds === "object" && completedActivityIds[act.id]);
                     const gcalAddLink = getGoogleCalendarAddUrl(act, selectedDateObj);
 
                     return (
