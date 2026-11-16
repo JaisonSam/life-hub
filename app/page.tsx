@@ -487,20 +487,50 @@ export default function LifeHub() {
     setIsMuted((prev) => !prev);
   }, []);
 
-  const handleUnlockAudio = useCallback(() => {
-    setIsMuted(false);
+  const handleStopVideoAndShowScripture = useCallback(() => {
+    setHasVideoEnded(true);
+    setIsMuted(true);
+
+    // Stop background video and release audio stream immediately
     const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
     if (bg) {
+      bg.pause();
+      bg.muted = true;
+      bg.currentTime = 0;
+      try {
+        bg.src = "";
+        bg.load();
+      } catch {}
+    }
+
+    // Stop section video immediately
+    const sectionVideo = sectionVideoRef.current;
+    if (sectionVideo) {
+      sectionVideo.pause();
+      sectionVideo.muted = true;
+      try {
+        sectionVideo.src = "";
+        sectionVideo.load();
+      } catch {}
+    }
+  }, []);
+
+  const handleUnlockAudio = useCallback(() => {
+    if (hasVideoEnded) return;
+    setIsMuted(false);
+    const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
+    if (bg && !bg.ended) {
       bg.muted = false;
       bg.volume = 0.85;
       bg.play().catch(() => {});
     }
-  }, []);
+  }, [hasVideoEnded]);
 
   const handleGreetingAppear = useCallback(() => {
+    if (hasVideoEnded) return;
     setIsMuted(false);
     const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
-    if (bg) {
+    if (bg && !bg.ended) {
       bg.currentTime = 0;
       bg.muted = false;
       const playPromise = bg.play();
@@ -512,27 +542,29 @@ export default function LifeHub() {
         });
       }
     }
-  }, []);
+  }, [hasVideoEnded]);
 
   // Section Video Manager:
   // - Keeps section video actively playing at all times (never freezes when scrolling down or up)
   // - Syncs timestamp continuously with the background video
   // - Visual-only (always muted) so browsers never restrict or block it
   useEffect(() => {
+    if (hasVideoEnded) return;
     const video = sectionVideoRef.current;
-    if (!video) return;
+    if (!video || video.ended) return;
 
     video.muted = true; // Visual only, background player handles master soundtrack
 
     const ensurePlayingAndSynced = () => {
+      if (hasVideoEnded || video.ended) return;
       const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
-      if (bg && !isNaN(bg.currentTime) && bg.currentTime > 0) {
+      if (bg && !bg.ended && !isNaN(bg.currentTime) && bg.currentTime > 0) {
         const diff = Math.abs(video.currentTime - bg.currentTime);
         if (diff > 0.6) {
           video.currentTime = bg.currentTime;
         }
       }
-      if (video.paused) {
+      if (video.paused && !video.ended) {
         video.play().catch(() => {});
       }
     };
@@ -544,7 +576,7 @@ export default function LifeHub() {
 
     // 2. Anti-pause safeguard: if browser tries to pause offscreen, immediately resume
     const handlePause = () => {
-      if (!document.hidden) {
+      if (!document.hidden && !hasVideoEnded && !video.ended) {
         requestAnimationFrame(() => {
           ensurePlayingAndSynced();
         });
@@ -554,7 +586,9 @@ export default function LifeHub() {
 
     // 3. Scroll listener: whenever user scrolls down or back up, ensure playing & synced
     const handleScroll = () => {
-      ensurePlayingAndSynced();
+      if (!hasVideoEnded && !video.ended) {
+        ensurePlayingAndSynced();
+      }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
 
@@ -564,7 +598,7 @@ export default function LifeHub() {
       observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting) {
+            if (entry.isIntersecting && !hasVideoEnded && !video.ended) {
               ensurePlayingAndSynced();
             }
           });
@@ -576,7 +610,7 @@ export default function LifeHub() {
 
     // 5. Visibility change (when switching tabs)
     const handleVisibilityChange = () => {
-      if (!document.hidden) {
+      if (!document.hidden && !hasVideoEnded && !video.ended) {
         ensurePlayingAndSynced();
       }
     };
@@ -584,7 +618,9 @@ export default function LifeHub() {
 
     // 6. Periodic sync (every 1s) to keep showcase in lockstep with background video
     const syncInterval = setInterval(() => {
-      ensurePlayingAndSynced();
+      if (!hasVideoEnded && !video.ended) {
+        ensurePlayingAndSynced();
+      }
     }, 1000);
 
     return () => {
@@ -596,7 +632,7 @@ export default function LifeHub() {
       if (observer) observer.disconnect();
       clearInterval(syncInterval);
     };
-  }, [homescreenVisible]);
+  }, [homescreenVisible, hasVideoEnded]);
 
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music">("all");
@@ -1399,7 +1435,7 @@ export default function LifeHub() {
         isMuted={isMuted}
         onToggleSound={handleToggleSound}
         hasVideoEnded={hasVideoEnded}
-        onVideoEnded={() => setHasVideoEnded(true)}
+        onVideoEnded={handleStopVideoAndShowScripture}
       />
 
       {/* Intro Sequence: Black Greeting -> 5s Video Solo -> Homescreen Reveal */}
@@ -1500,13 +1536,13 @@ export default function LifeHub() {
                 muted
                 playsInline
                 preload="auto"
-                onEnded={() => setHasVideoEnded(true)}
+                onEnded={handleStopVideoAndShowScripture}
                 className="w-full h-full object-cover"
               />
               {/* Subtle button to switch to scripture passage directly */}
               <div className="absolute top-3 right-3 z-10">
                 <button
-                  onClick={() => setHasVideoEnded(true)}
+                  onClick={handleStopVideoAndShowScripture}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/75 hover:bg-black/95 text-neutral-300 hover:text-white border border-white/10 text-xs font-sans backdrop-blur-md transition-all shadow-lg"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-amber-400" />

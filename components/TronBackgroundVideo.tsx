@@ -62,32 +62,66 @@ export default function TronBackgroundVideo({
     }
   }, [isMuted]);
 
+  // Clean shutdown whenever video has ended
+  useEffect(() => {
+    if (hasVideoEnded) {
+      const video = bgVideoRef.current;
+      if (video) {
+        video.pause();
+        video.muted = true;
+        video.currentTime = 0;
+        try {
+          video.src = "";
+          video.load();
+        } catch {}
+      }
+    }
+  }, [hasVideoEnded]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      const video = bgVideoRef.current;
+      if (video) {
+        video.pause();
+        video.muted = true;
+        try {
+          video.src = "";
+          video.load();
+        } catch {}
+      }
+    };
+  }, []);
+
   // MASTER AUDIO CONTROLLER: Sync audio volume & muted state with isMuted prop
   // bgVideoRef handles audio across the entire site (both intro and homescreen)
   useEffect(() => {
+    if (hasVideoEnded) return;
     const video = bgVideoRef.current;
-    if (!video) return;
+    if (!video || video.ended) return;
 
     video.muted = isMuted;
     if (!isMuted) {
       applyFadeInVolume(video);
       video.play().catch(() => {});
     }
-  }, [isMuted, applyFadeInVolume]);
+  }, [isMuted, applyFadeInVolume, hasVideoEnded]);
 
   // Handle explicit audio unlock trigger from parent
   useEffect(() => {
-    if (triggerUnlockAudio && bgVideoRef.current && !isMuted) {
+    if (hasVideoEnded) return;
+    if (triggerUnlockAudio && bgVideoRef.current && !isMuted && !bgVideoRef.current.ended) {
       bgVideoRef.current.muted = false;
       applyFadeInVolume(bgVideoRef.current);
       bgVideoRef.current.play().catch(() => {});
     }
-  }, [triggerUnlockAudio, isMuted, applyFadeInVolume]);
+  }, [triggerUnlockAudio, isMuted, applyFadeInVolume, hasVideoEnded]);
 
   // Robust instant start playback with zero stalling and 4-second volume fade-in
   const startVideoInstant = useCallback(() => {
+    if (hasVideoEnded) return;
     const video = bgVideoRef.current;
-    if (!video) return;
+    if (!video || video.ended) return;
 
     // Start with low initial volume; keep muted during initial 2s black screen
     video.volume = 0.01;
@@ -106,9 +140,10 @@ export default function TronBackgroundVideo({
           if (onVideoReady) onVideoReady();
         });
     }
-  }, [onVideoReady]);
+  }, [hasVideoEnded, onVideoReady]);
 
   useEffect(() => {
+    if (hasVideoEnded) return;
     const video = bgVideoRef.current;
     if (!video) return;
 
@@ -121,6 +156,12 @@ export default function TronBackgroundVideo({
 
     // Video plays only once: trigger completion callback when it finishes
     const handleEnded = () => {
+      video.pause();
+      video.muted = true;
+      try {
+        video.src = "";
+        video.load();
+      } catch {}
       if (onVideoEnded) {
         onVideoEnded();
       }
@@ -130,16 +171,18 @@ export default function TronBackgroundVideo({
     // Smooth volume fade-in animation frame loop from 4.0s to 6.2s
     let animId: number;
     const rampVolume = () => {
-      if (video && !video.paused && video.currentTime < 6.2) {
+      if (hasVideoEnded) return;
+      if (video && !video.paused && !video.ended && video.currentTime < 6.2) {
         applyFadeInVolume(video);
         animId = requestAnimationFrame(rampVolume);
-      } else if (video && !video.paused && !isMuted) {
+      } else if (video && !video.paused && !video.ended && !isMuted) {
         video.volume = TARGET_VOLUME;
       }
     };
     animId = requestAnimationFrame(rampVolume);
 
     const handleTimeUpdate = () => {
+      if (hasVideoEnded || video.ended) return;
       applyFadeInVolume(video);
     };
     video.addEventListener("timeupdate", handleTimeUpdate);
@@ -148,6 +191,7 @@ export default function TronBackgroundVideo({
 
     // Audio starts 2 seconds later (exactly when "Hi, Jaison" appears)
     const audioDelayTimer = setTimeout(() => {
+      if (hasVideoEnded || video.ended) return;
       audioAllowed = true;
       if (video && !isMuted) {
         video.currentTime = 0;
@@ -158,8 +202,9 @@ export default function TronBackgroundVideo({
     }, 2000);
 
     // Audio Unlocker: On the very first user interaction anywhere on the window or document
-    // Only unlocks once the initial 2-second black screen has passed
+    // Only unlocks once the initial 2-second black screen has passed and video has not ended
     const unlockMasterAudio = () => {
+      if (hasVideoEnded || video.ended) return;
       if (audioAllowed && video && !isMuted) {
         video.muted = false;
         applyFadeInVolume(video);
@@ -197,7 +242,7 @@ export default function TronBackgroundVideo({
         document.removeEventListener(evt, unlockMasterAudio);
       });
     };
-  }, [startVideoInstant, isMuted, applyFadeInVolume]);
+  }, [startVideoInstant, isMuted, applyFadeInVolume, hasVideoEnded, onVideoEnded]);
 
   return (
     <>
