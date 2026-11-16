@@ -66,6 +66,7 @@ import GlanceDashboard from "@/components/GlanceDashboard";
 import GlanceErrorBoundary from "@/components/GlanceErrorBoundary";
 import AOSInit from "@/components/AOSInit";
 import WelcomeIntro from "@/components/WelcomeIntro";
+import TronBackgroundVideo from "@/components/TronBackgroundVideo";
 import { getDailyScripture } from "@/lib/dailyScripture";
 import { loadDailyHabits, toggleDailyHabitStorage, getDateKey } from "@/lib/dailyHabits";
 
@@ -482,6 +483,9 @@ const initialStrategicBooks: StrategicBook[] = [
 ];
 
 export default function LifeHub() {
+  // Intro & Homescreen visibility (Tron background integration)
+  const [homescreenVisible, setHomescreenVisible] = useState<boolean>(false);
+
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
   const [homeViewMode, setHomeViewMode] = useState<"glance" | "carousel" | "bento">("glance");
@@ -1350,12 +1354,21 @@ export default function LifeHub() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0c0d11] text-neutral-100 font-sans selection:bg-amber-500/30 selection:text-amber-200 relative pb-16">
-      {/* 2-Second Cinematic Black Welcome Intro */}
-      <WelcomeIntro />
+    <div className="min-h-screen text-neutral-100 font-sans selection:bg-amber-500/30 selection:text-amber-200 relative pb-16">
+      {/* Tron Motorcycle Ambient Video (0:09 - 1:35) */}
+      <TronBackgroundVideo isHomescreenVisible={homescreenVisible} />
 
-      {/* AOS Scroll Animation Engine for Mobile & Desktop */}
-      <AOSInit />
+      {/* Intro Sequence: Black Greeting -> 5s Video Solo -> Homescreen Reveal */}
+      <WelcomeIntro onRevealHomescreen={() => setHomescreenVisible(true)} />
+
+      {/* Homescreen Layer: Fades in smoothly overlapping the video */}
+      <div
+        className={`transition-opacity duration-1000 ease-out ${
+          homescreenVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        {/* AOS Scroll Animation Engine for Mobile & Desktop */}
+        <AOSInit />
 
       {/* TOP NAVIGATION BAR */}
       <header className="sticky top-2.5 z-50 max-w-7xl mx-auto px-2 sm:px-4 mb-5">
@@ -3841,6 +3854,7 @@ export default function LifeHub() {
           existingBookTitles={bookshelf.map((b) => b.title)}
         />
       )}
+      </div>
     </div>
   );
 }
