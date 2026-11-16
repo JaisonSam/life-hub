@@ -61,8 +61,12 @@ import DailyRecommendationsDeck from "@/components/DailyRecommendationsDeck";
 import GoogleDriveBookshelf from "@/components/GoogleDriveBookshelf";
 import CareerBrandHub from "@/components/CareerBrandHub";
 import ExecutiveBentoDeck from "@/components/ExecutiveBentoDeck";
+import ExecutiveViewCarousel from "@/components/ExecutiveViewCarousel";
+import GlanceDashboard from "@/components/GlanceDashboard";
 import AnimatedCosmicBackground from "@/components/AnimatedCosmicBackground";
 import AOSInit from "@/components/AOSInit";
+import { getDailyScripture } from "@/lib/dailyScripture";
+import { loadDailyHabits, toggleDailyHabitStorage, getDateKey } from "@/lib/dailyHabits";
 
 interface Project {
   id: string;
@@ -479,6 +483,7 @@ const initialStrategicBooks: StrategicBook[] = [
 export default function LifeHub() {
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
+  const [homeViewMode, setHomeViewMode] = useState<"glance" | "carousel" | "bento">("glance");
 
   // Veerakeralapudur Agribusiness State
   const [activeAgriModelId, setActiveAgriModelId] = useState("guava");
@@ -752,6 +757,18 @@ export default function LifeHub() {
     updateTime();
     const timer = setInterval(updateTime, 1000);
 
+    // Load dynamic daily scripture immediately for today
+    try {
+      const todayScripture = getDailyScripture(new Date());
+      setDailyVerse({
+        reference: todayScripture.reference,
+        text: todayScripture.text,
+        translation: todayScripture.translation,
+        theme: todayScripture.theme,
+        reflection: todayScripture.reflection,
+      });
+    } catch {}
+
     // Fetch daily verse from backend API
     fetch("/api/bible/daily")
       .then((res) => res.json())
@@ -774,8 +791,14 @@ export default function LifeHub() {
 
     // Try reading localStorage for saved habits/projects/notes/gmat
     try {
-      const savedHabits = localStorage.getItem("lifehub_habits");
-      if (savedHabits) setHabits(JSON.parse(savedHabits));
+      const todayKey = getDateKey(new Date());
+      const dailyHabits = loadDailyHabits(todayKey);
+      if (dailyHabits && dailyHabits.length > 0) {
+        setHabits(dailyHabits as any);
+      } else {
+        const savedHabits = localStorage.getItem("lifehub_habits");
+        if (savedHabits) setHabits(JSON.parse(savedHabits));
+      }
 
       const savedProjects = localStorage.getItem("lifehub_projects");
       if (savedProjects) setProjects(JSON.parse(savedProjects));
@@ -1191,18 +1214,25 @@ export default function LifeHub() {
   };
 
   const toggleHabit = (id: string) => {
-    const updated = habits.map((h) => {
-      if (h.id === id) {
-        const nextCompleted = !h.completedToday;
-        return {
-          ...h,
-          completedToday: nextCompleted,
-          streak: nextCompleted ? h.streak + 1 : Math.max(0, h.streak - 1),
-        };
-      }
-      return h;
-    });
-    saveHabits(updated);
+    try {
+      const todayKey = getDateKey(new Date());
+      const updated = toggleDailyHabitStorage(id, todayKey);
+      setHabits(updated as any);
+      saveHabits(updated as any);
+    } catch {
+      const updated = habits.map((h) => {
+        if (h.id === id) {
+          const nextCompleted = !h.completedToday;
+          return {
+            ...h,
+            completedToday: nextCompleted,
+            streak: nextCompleted ? h.streak + 1 : Math.max(0, h.streak - 1),
+          };
+        }
+        return h;
+      });
+      saveHabits(updated);
+    }
   };
 
   const addProject = (e: React.FormEvent) => {
@@ -1326,95 +1356,188 @@ export default function LifeHub() {
       {/* AOS Scroll Animation Engine for Mobile & Desktop */}
       <AOSInit />
 
-      {/* Top Floating Glass Header (EkiZR + Anime.js style) */}
-      <header className="sticky top-3 z-50 max-w-7xl mx-auto px-3 sm:px-6 mb-6">
-        <div className="relative group/header">
-          {/* Subtle Ambient Backlight Glow */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/20 via-indigo-500/20 to-purple-600/20 rounded-3xl blur-md opacity-30 group-hover/header:opacity-50 transition duration-500 pointer-events-none" />
+      {/* GLANCE TOP NAVIGATION BAR (Authentic glanceapp/glance style) */}
+      <header className="sticky top-2.5 z-50 max-w-7xl mx-auto px-2 sm:px-4 mb-5">
+        <div className="bg-[#111215] border border-neutral-800/90 rounded-2xl px-3 sm:px-4 py-2 flex items-center justify-between shadow-2xl backdrop-blur-xl">
+          {/* Left: Glance Monogram Logo + Tab Navigation */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {/* Minimalist Monogram 'G' (Glance Style) */}
+            <button
+              onClick={() => handleSelectTab("all")}
+              className="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700/80 flex items-center justify-center text-sm font-mono font-bold text-neutral-200 hover:text-amber-300 hover:border-amber-400/80 transition-all shadow-sm shrink-0"
+              title="Glance Home"
+            >
+              G
+            </button>
 
-          <div className="relative glass-panel rounded-3xl p-3 sm:p-3.5 border border-white/[0.08] shadow-2xl bg-[#0b0c16]/85 backdrop-blur-2xl">
-            <div className="flex items-center justify-between gap-3 px-1 sm:px-2">
-              {/* Left: Brand Monogram & Live Status (clickable to return to Carousel) */}
-              <div
-                onClick={() => handleSelectTab("all")}
-                className="flex items-center gap-3 cursor-pointer group/brand"
-                title="Return to Overview & Carousel"
-              >
-                <div className="relative group/logo">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl blur opacity-35 group-hover/brand:opacity-85 transition duration-300" />
-                  <div className="relative h-9 w-9 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-bold text-white shadow-lg shadow-amber-500/20 text-sm">
-                    ✝
-                  </div>
-                </div>
-
-                <div>
-                  <div className="font-bold text-sm sm:text-base text-white tracking-tight flex items-center gap-2">
-                    <span className="bg-gradient-to-r from-white via-neutral-100 to-neutral-300 bg-clip-text text-transparent group-hover/brand:text-amber-300 transition-colors">
-                      Jaison's Life OS
-                    </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                      LIVE • BLR
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-neutral-400 flex items-center gap-2 font-mono">
-                    <span>{currentDate || "Syncing date..."}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right: Technical Ticker, Return to Carousel & Time */}
-              <div className="flex items-center gap-2 sm:gap-3 text-xs">
-                {activeTab !== "all" && (
+            {/* Glance Navigation Tabs Strip */}
+            <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+              {[
+                { id: "all", label: "Home" },
+                { id: "career", label: "Career" },
+                { id: "gmat", label: "GMAT" },
+                { id: "farm", label: "Farm" },
+                { id: "books", label: "Books" },
+                { id: "bible", label: "Bible" },
+                { id: "habits", label: "Habits" },
+                { id: "projects", label: "Projects" },
+                { id: "music", label: "Music" },
+              ].map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
                   <button
-                    onClick={() => handleSelectTab("all")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-neutral-950 font-bold text-xs shadow-md shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all"
-                    title="Return to Overview & Carousel"
+                    key={tab.id}
+                    onClick={() => handleSelectTab(tab.id as any)}
+                    className={`relative text-xs sm:text-sm font-medium px-2.5 sm:px-3 py-1 rounded-md transition-all whitespace-nowrap ${
+                      isActive
+                        ? "text-white font-semibold after:absolute after:-bottom-[9px] after:left-2 after:right-2 after:h-[2px] after:bg-white"
+                        : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
+                    }`}
                   >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Overview & Carousel</span>
-                    <span className="sm:hidden">Home</span>
+                    {tab.label}
                   </button>
-                )}
+                );
+              })}
+            </nav>
+          </div>
 
-                {/* Time pill */}
-                <div className="flex items-center gap-1.5 glass-pill px-3 py-1.5 rounded-full text-xs font-mono text-neutral-300">
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{currentTime || "--:--"}</span>
-                </div>
+          {/* Right: Date, Time & GitHub Link (NO Live Status Pill!) */}
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0 text-xs font-mono text-neutral-400">
+            {activeTab !== "all" && (
+              <button
+                onClick={() => handleSelectTab("all")}
+                className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white transition-colors"
+                title="Return to Glance Dashboard"
+              >
+                <ChevronLeft className="w-3 h-3 text-amber-400" />
+                <span>Home</span>
+              </button>
+            )}
 
-                {/* GitHub Link */}
-                <a
-                  href="https://github.com/JaisonSam/life-hub"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hidden sm:flex items-center gap-1 text-[11px] font-mono text-neutral-400 hover:text-white transition-colors glass-pill px-2.5 py-1.5 rounded-full"
-                >
-                  <span>GH</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
-            </div>
+            <span className="hidden sm:inline text-neutral-400">
+              {currentDate}
+            </span>
+            <span className="text-neutral-300">
+              {currentTime}
+            </span>
+
+            {/* GitHub Repo Link */}
+            <a
+              href="https://github.com/JaisonSam/life-hub"
+              target="_blank"
+              rel="noreferrer"
+              className="text-neutral-400 hover:text-white transition-colors flex items-center gap-0.5"
+              title="GitHub Repository"
+            >
+              <span>GH</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-8 sm:space-y-10">
-        {/* EXECUTIVE BENTO SANCTUARY DECK (Uncluttered, High-Signal, Aesthetic) */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-7 sm:space-y-8">
+        {/* Glance Return Breadcrumb banner when viewing a deep-dive module */}
+        {activeTab !== "all" && (
+          <div className="flex items-center justify-between p-3 px-4 rounded-xl bg-[#111215] border border-neutral-800 text-xs font-mono shadow-md">
+            <button
+              onClick={() => handleSelectTab("all")}
+              className="flex items-center gap-1.5 text-neutral-300 hover:text-white transition-colors group"
+            >
+              <ChevronLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
+              <span>← Back to Glance Dashboard</span>
+            </button>
+            <div className="flex items-center gap-2 text-neutral-400 uppercase tracking-wider text-[11px]">
+              <span>Viewing:</span>
+              <span className="text-amber-400 font-bold">{activeTab} Deck</span>
+            </div>
+          </div>
+        )}
+
+        {/* GLANCE MASTER DASHBOARD (Default) + Multi-Deck Switcher */}
         <div id="module-all" className={activeTab === "all" ? "block" : "block md:hidden"}>
-          <ExecutiveBentoDeck
-            onSelectTab={handleSelectTab}
-            completedHabitsCount={completedHabitsCount}
-            habits={habits}
-            onToggleHabit={toggleHabit}
-            currentTime={currentTime}
-            currentDate={currentDate}
-            greeting={greeting}
-            verseBookmarked={verseBookmarked}
-            onToggleBookmarkVerse={() => setVerseBookmarked(!verseBookmarked)}
-            projectsCount={projects.length}
-          />
+          {/* Deck View Mode Switcher Pill */}
+          <div className="flex items-center justify-between gap-3 mb-5 px-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono uppercase tracking-widest text-neutral-400 font-semibold">
+                Home Deck:
+              </span>
+              <div className="inline-flex items-center p-0.5 rounded-lg bg-neutral-900/90 border border-neutral-800 text-xs font-mono">
+                <button
+                  onClick={() => setHomeViewMode("glance")}
+                  className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                    homeViewMode === "glance"
+                      ? "bg-neutral-800 text-white font-bold shadow-sm"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  <span>▦ Glance 3-Column</span>
+                </button>
+                <button
+                  onClick={() => setHomeViewMode("carousel")}
+                  className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                    homeViewMode === "carousel"
+                      ? "bg-neutral-800 text-white font-bold shadow-sm"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  <span>✦ 3D Coverflow</span>
+                </button>
+                <button
+                  onClick={() => setHomeViewMode("bento")}
+                  className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                    homeViewMode === "bento"
+                      ? "bg-neutral-800 text-white font-bold shadow-sm"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  <span>▤ Bento Deck</span>
+                </button>
+              </div>
+            </div>
+
+            <span className="text-xs font-mono text-neutral-500 hidden sm:inline-block">
+              Glance Architecture • Live Hub Aggregator
+            </span>
+          </div>
+
+          {/* View Mode 1: Glance 3-Column Master Dashboard (Default) */}
+          {homeViewMode === "glance" && (
+            <GlanceDashboard
+              onSelectTab={handleSelectTab}
+              currentTime={currentTime}
+              currentDate={currentDate}
+            />
+          )}
+
+          {/* View Mode 2: 3D Coverflow Carousel */}
+          {homeViewMode === "carousel" && (
+            <div className="p-4 sm:p-6 rounded-3xl bg-[#0b0c16]/85 border border-white/[0.08] backdrop-blur-2xl">
+              <ExecutiveViewCarousel
+                onSelectTab={handleSelectTab}
+                completedHabitsCount={completedHabitsCount}
+                totalHabitsCount={habits.length}
+                projectsCount={projects.length}
+              />
+            </div>
+          )}
+
+          {/* View Mode 3: Executive Bento Deck */}
+          {homeViewMode === "bento" && (
+            <ExecutiveBentoDeck
+              onSelectTab={handleSelectTab}
+              completedHabitsCount={completedHabitsCount}
+              habits={habits}
+              onToggleHabit={toggleHabit}
+              currentTime={currentTime}
+              currentDate={currentDate}
+              greeting={greeting}
+              verseBookmarked={verseBookmarked}
+              onToggleBookmarkVerse={() => setVerseBookmarked(!verseBookmarked)}
+              projectsCount={projects.length}
+            />
+          )}
         </div>
 
         {/* CAREER BRANDING & BANGALORE JOB RADAR */}
