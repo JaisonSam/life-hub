@@ -1363,7 +1363,7 @@ export default function LifeHub() {
 
       {/* Homescreen Layer: Fades in smoothly overlapping the video */}
       <div
-        className={`transition-opacity duration-1000 ease-out ${
+        className={`relative z-10 transition-opacity duration-1000 ease-out ${
           homescreenVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >

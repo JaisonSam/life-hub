@@ -12,116 +12,86 @@ export default function TronBackgroundVideo({
   isHomescreenVisible,
   onVideoReady,
 }: TronBackgroundVideoProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [videoLoaded, setVideoLoaded] = useState(false);
   const [showControls, setShowControls] = useState(false);
 
-  // Send command to YouTube IFrame API via postMessage
-  const postCommand = (func: string, args: any[] = []) => {
-    try {
-      if (iframeRef.current && iframeRef.current.contentWindow) {
-        iframeRef.current.contentWindow.postMessage(
-          JSON.stringify({ event: "command", func, args }),
-          "*"
-        );
-      }
-    } catch {}
-  };
-
   const toggleSound = () => {
+    if (!videoRef.current) return;
     if (isMuted) {
-      postCommand("unMute");
-      postCommand("setVolume", [70]);
+      videoRef.current.muted = false;
+      videoRef.current.volume = 0.75;
       setIsMuted(false);
     } else {
-      postCommand("mute");
+      videoRef.current.muted = true;
       setIsMuted(true);
     }
   };
 
   const togglePlay = () => {
+    if (!videoRef.current) return;
     if (isPlaying) {
-      postCommand("pauseVideo");
+      videoRef.current.pause();
       setIsPlaying(false);
     } else {
-      postCommand("playVideo");
+      videoRef.current.play().catch(() => {});
       setIsPlaying(true);
     }
   };
 
   useEffect(() => {
-    // Start clip at 0:09 (9 seconds)
-    const clipStart = 9;
-    const clipEnd = 95; // 1:35
-    const clipDurationMs = (clipEnd - clipStart) * 1000; // 86,000ms
+    const video = videoRef.current;
+    if (!video) return;
 
-    // Initial seek and play
-    const initTimer = setTimeout(() => {
-      postCommand("seekTo", [clipStart, true]);
-      postCommand("mute");
-      postCommand("playVideo");
-      setVideoLoaded(true);
+    // Autoplay muted immediately for 100% browser compatibility (iOS, Safari, Chrome)
+    const startPlay = () => {
+      video.play().catch((err) => {
+        console.warn("Video autoplay prevented:", err);
+      });
       if (onVideoReady) onVideoReady();
-    }, 1200);
-
-    // Loop timer: seek back to 0:09 every 86 seconds
-    const loopInterval = setInterval(() => {
-      postCommand("seekTo", [clipStart, true]);
-      postCommand("playVideo");
-    }, clipDurationMs);
-
-    // Also listen for YouTube state change postMessages as fallback loop
-    const handleMessage = (event: MessageEvent) => {
-      try {
-        if (typeof event.data === "string") {
-          const data = JSON.parse(event.data);
-          // 0 = YT.PlayerState.ENDED
-          if (data.event === "onStateChange" && data.info === 0) {
-            postCommand("seekTo", [clipStart, true]);
-            postCommand("playVideo");
-          }
-        }
-      } catch {}
     };
 
-    window.addEventListener("message", handleMessage);
+    if (video.readyState >= 2) {
+      startPlay();
+    } else {
+      video.addEventListener("loadeddata", startPlay, { once: true });
+    }
+
+    // Safety restart on loop
+    const handleEnded = () => {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    };
+    video.addEventListener("ended", handleEnded);
 
     return () => {
-      clearTimeout(initTimer);
-      clearInterval(loopInterval);
-      window.removeEventListener("message", handleMessage);
+      video.removeEventListener("ended", handleEnded);
     };
-  }, []);
+  }, [onVideoReady]);
 
   return (
     <>
-      {/* Fixed Fullscreen YouTube Background Video Layer */}
+      {/* Fixed Fullscreen Native Background Video Layer (0:09 - 1:35 scene) */}
       <div
-        className="fixed inset-0 overflow-hidden pointer-events-none -z-20 bg-black"
+        className="fixed inset-0 overflow-hidden pointer-events-none z-0 bg-black"
         aria-hidden="true"
       >
-        <div className="relative w-full h-full">
-          <iframe
-            ref={iframeRef}
-            src="https://www.youtube-nocookie.com/embed/loGNj5jJBTQ?enablejsapi=1&autoplay=1&mute=1&controls=0&disablekb=1&fs=0&loop=1&playlist=loGNj5jJBTQ&start=9&end=95&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3"
-            title="Tron Motorcycle Intro Background"
-            className="absolute top-1/2 left-1/2 pointer-events-none select-none"
-            style={{
-              width: "max(100vw, 177.78vh)",
-              height: "max(100vh, 56.25vw)",
-              transform: "translate(-50%, -50%) scale(1.08)",
-              border: "none",
-            }}
-            allow="autoplay; encrypted-media"
-          />
-        </div>
+        <video
+          ref={videoRef}
+          src="/videos/tron-intro.mp4"
+          autoPlay
+          loop
+          muted={isMuted}
+          playsInline
+          preload="auto"
+          className="w-full h-full object-cover"
+        />
       </div>
 
-      {/* Cinematic Tint Overlay: Transitions from clear during 5s video intro to readable backdrop for homescreen */}
+      {/* Cinematic Tint Overlay: Transitions from clear during 5s video intro to readable dark backdrop for homescreen */}
       <div
-        className={`fixed inset-0 pointer-events-none -z-10 transition-all duration-1000 ease-out ${
+        className={`fixed inset-0 pointer-events-none z-[1] transition-all duration-1000 ease-out ${
           isHomescreenVisible
             ? "bg-[#090a10]/75 backdrop-blur-[1.5px]"
             : "bg-black/10"
