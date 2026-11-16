@@ -135,9 +135,263 @@ export const SUNDAY_SCHEDULE: PlannedActivity[] = [
 ];
 
 /**
+ * Synced Google Calendar events for Jaison across current and upcoming dates (Nov - Dec 2026)
+ */
+export const DEFAULT_UPCOMING_GCAL_EVENTS: PlannedActivity[] = [
+  // Nov 16, 2026 (Today)
+  {
+    id: "gcal-nov16-1",
+    title: "Schneider Electric ERP SAP S/4HANA Go-Live Readiness Review",
+    time: "03:00 PM",
+    endTime: "04:30 PM",
+    date: "2026-11-16",
+    category: "Career",
+    source: "google-calendar",
+    location: "Schneider Electric Innovation Hub, Bengaluru / Microsoft Teams",
+    notes: "Review cross-module integration test results and cutover checklist with global release managers.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  {
+    id: "gcal-nov16-2",
+    title: "GMAT Focus 705+ Quant Sprint: Work-Rate & Algebra Traps",
+    time: "07:30 PM",
+    endTime: "08:45 PM",
+    date: "2026-11-16",
+    category: "GMAT",
+    source: "google-calendar",
+    notes: "Timed 20-question Official Guide problem set and deep error log analysis.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 17, 2026 (Tomorrow)
+  {
+    id: "gcal-nov17-1",
+    title: "Schneider Electric Supply Chain & Inventory Valuation Architecture",
+    time: "10:00 AM",
+    endTime: "11:30 AM",
+    date: "2026-11-17",
+    category: "Career",
+    source: "google-calendar",
+    location: "Teams Meeting",
+    notes: "Sprint planning on real-time inventory ledger posting and factory BOM sync.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  {
+    id: "gcal-nov17-2",
+    title: "Tamil Nadu Agri-Dept Precision Drip Subsidy Webinar",
+    time: "04:30 PM",
+    endTime: "05:30 PM",
+    date: "2026-11-17",
+    category: "Agri-Tech",
+    source: "google-calendar",
+    location: "Google Meet",
+    notes: "Guidelines for Veerakeralapudur solar micro-irrigation sub-scheme compliance.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 18, 2026 (Wed)
+  {
+    id: "gcal-nov18-1",
+    title: "Veerakeralapudur Soil Sensor Telemetry & NPK Lab Review",
+    time: "11:30 AM",
+    endTime: "12:15 PM",
+    date: "2026-11-18",
+    category: "Agri-Tech",
+    source: "google-calendar",
+    location: "Farm Ops Call",
+    notes: "Evaluating ESP32 telemetry data, soil pH readings (6.8), and organic humic acid dose.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  {
+    id: "gcal-nov18-2",
+    title: "GMAT Focus Verbal RC: Philosophy & Economics Passages",
+    time: "08:00 PM",
+    endTime: "09:15 PM",
+    date: "2026-11-18",
+    category: "GMAT",
+    source: "google-calendar",
+    notes: "Timed 4-passage set focusing on inference traps and author tone mapping.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 19, 2026 (Thu)
+  {
+    id: "gcal-nov19-1",
+    title: "Schneider Cross-Functional ERP Architecture & Security Sync",
+    time: "02:00 PM",
+    endTime: "03:30 PM",
+    date: "2026-11-19",
+    category: "Career",
+    source: "google-calendar",
+    location: "Schneider Electric Campus, Bengaluru",
+    notes: "Role-based access matrix (RBAC) sign-off with enterprise security team.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 20, 2026 (Fri)
+  {
+    id: "gcal-nov20-1",
+    title: "Bengaluru Tech & Agri-Fintech Roundtable",
+    time: "05:00 PM",
+    endTime: "06:30 PM",
+    date: "2026-11-20",
+    category: "Career",
+    source: "google-calendar",
+    location: "Indiranagar Club, Bengaluru",
+    notes: "Smart horticulture sensor integrations and modern commercial farming models.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 21, 2026 (Sat)
+  {
+    id: "gcal-nov21-1",
+    title: "GMAT Focus Full-Length Official Mock Exam #4",
+    time: "09:30 AM",
+    endTime: "12:15 PM",
+    date: "2026-11-21",
+    category: "GMAT",
+    source: "google-calendar",
+    notes: "Simulated exam conditions on mba.com: Quant, Verbal, Data Insights section order.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  {
+    id: "gcal-nov21-2",
+    title: "Veerakeralapudur Farm Capex & Nursery Procurement Audit",
+    time: "03:30 PM",
+    endTime: "05:00 PM",
+    date: "2026-11-21",
+    category: "Agri-Tech",
+    source: "google-calendar",
+    notes: "Reviewing Taiwan Pink guava rootstock vendor quotes and drip line delivery.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 22, 2026 (Sun)
+  {
+    id: "gcal-nov22-1",
+    title: "Sunday Liturgical Sanctuary & Corporate Worship Fellowship",
+    time: "09:00 AM",
+    endTime: "11:30 AM",
+    date: "2026-11-22",
+    category: "Spiritual",
+    source: "google-calendar",
+    location: "St. Mark's Cathedral, Bengaluru",
+    notes: "Communion service, choir hymns, and community fellowship.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 23, 2026 (Mon)
+  {
+    id: "gcal-nov23-1",
+    title: "Schneider Global Operations Weekly Executive ERP Review",
+    time: "02:30 PM",
+    endTime: "04:00 PM",
+    date: "2026-11-23",
+    category: "Career",
+    source: "google-calendar",
+    location: "Microsoft Teams / Hub Room 4A",
+    notes: "Monthly milestone dashboard review with APAC business leads.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 24, 2026 (Tue)
+  {
+    id: "gcal-nov24-1",
+    title: "Agritech IoT Sensors Mesh Firmware Update Call",
+    time: "04:00 PM",
+    endTime: "05:00 PM",
+    date: "2026-11-24",
+    category: "Agri-Tech",
+    source: "google-calendar",
+    notes: "Over-the-air firmware update test for Veerakeralapudur gateway node.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 25, 2026 (Wed)
+  {
+    id: "gcal-nov25-1",
+    title: "GMAT Data Insights (DI) Multi-Source Reasoning Sprint",
+    time: "07:00 PM",
+    endTime: "08:30 PM",
+    date: "2026-11-25",
+    category: "GMAT",
+    source: "google-calendar",
+    notes: "Targeting 100% accuracy on two-part analysis and graphical interpretation.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 26, 2026 (Thu)
+  {
+    id: "gcal-nov26-1",
+    title: "Schneider Electric ERP Security Audit & Access Control",
+    time: "03:30 PM",
+    endTime: "05:00 PM",
+    date: "2026-11-26",
+    category: "Career",
+    source: "google-calendar",
+    location: "Teams Meeting",
+    notes: "Internal audit sign-off for ERP financial transaction permissions.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 27, 2026 (Fri)
+  {
+    id: "gcal-nov27-1",
+    title: "Veerakeralapudur Nursery Shipment & Guava Saplings Inspection",
+    time: "09:00 AM",
+    endTime: "10:30 AM",
+    date: "2026-11-27",
+    category: "Agri-Tech",
+    source: "google-calendar",
+    notes: "Live video call with farm supervisor on arrival of 200 graft saplings.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 28, 2026 (Sat)
+  {
+    id: "gcal-nov28-1",
+    title: "GMAT Official Practice Exam #5 & Benchmark Scoring",
+    time: "09:30 AM",
+    endTime: "12:15 PM",
+    date: "2026-11-28",
+    category: "GMAT",
+    source: "google-calendar",
+    notes: "Target: 705+ (Q85+ / V83+ / DI81+). Full testing protocol.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 29, 2026 (Sun)
+  {
+    id: "gcal-nov29-1",
+    title: "Sunday Liturgical Sanctuary & Family Thanksgiving",
+    time: "09:30 AM",
+    endTime: "12:00 PM",
+    date: "2026-11-29",
+    category: "Spiritual",
+    source: "google-calendar",
+    location: "Bengaluru Sanctuary",
+    notes: "Worship, prayer meditation, and family dinner.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Nov 30, 2026 (Mon)
+  {
+    id: "gcal-nov30-1",
+    title: "Schneider Month-End ERP Financial Close & Ledger Reconciliation",
+    time: "04:00 PM",
+    endTime: "05:30 PM",
+    date: "2026-11-30",
+    category: "Career",
+    source: "google-calendar",
+    location: "Schneider Campus, Bengaluru",
+    notes: "November finance cut-off and sub-ledger trial balance verification.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+  // Dec 20, 2026 (Target Milestone)
+  {
+    id: "gcal-dec20-1",
+    title: "🎯 GMAT Focus Target Official Exam Appointment",
+    time: "08:30 AM",
+    endTime: "11:45 AM",
+    date: "2026-12-20",
+    category: "GMAT",
+    source: "google-calendar",
+    location: "Pearson VUE Test Center, Bengaluru",
+    notes: "Target Score: 705+ percentile. Peak executive cognitive readiness.",
+    gcalLink: "https://calendar.google.com/calendar/u/0/r",
+  },
+];
+
+/**
  * Helper to convert 12-hour or 24-hour time string into minutes for sorting
  */
-function timeToMinutes(timeStr: string): number {
+export function timeToMinutes(timeStr: string): number {
   if (!timeStr || timeStr === "All Day") return 0;
   const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
   if (!match) return 999;
@@ -187,6 +441,54 @@ export function getPlannedActivitiesForDate(
   } catch (err) {
     console.error("Error in getPlannedActivitiesForDate:", err);
     return DEFAULT_WEEKLY_SCHEDULE;
+  }
+}
+
+/**
+ * Returns all upcoming date-bound events sorted chronologically starting from fromDate.
+ */
+export function getUpcomingEvents(
+  customActivities: PlannedActivity[] = [],
+  fromDateStr: string = "2026-11-16",
+  maxCount: number = 25
+): PlannedActivity[] {
+  const safeCustom = Array.isArray(customActivities) ? customActivities : [];
+  const dateBound = safeCustom.filter((a) => a && a.date && a.date >= fromDateStr);
+
+  return dateBound
+    .sort((a, b) => {
+      if (a.date !== b.date) {
+        return (a.date || "").localeCompare(b.date || "");
+      }
+      return timeToMinutes(a.time) - timeToMinutes(b.time);
+    })
+    .slice(0, maxCount);
+}
+
+/**
+ * Formats a YYYY-MM-DD date key into a user-friendly badge like "Today", "Tomorrow", "Wed, Nov 18"
+ */
+export function formatActivityDateBadge(dateKey: string, todayKey: string): { label: string; isToday: boolean; isTomorrow: boolean } {
+  if (!dateKey) return { label: "", isToday: false, isTomorrow: false };
+  if (dateKey === todayKey) {
+    return { label: "Today", isToday: true, isTomorrow: false };
+  }
+
+  try {
+    const [ty, tm, td] = todayKey.split("-").map((n) => parseInt(n, 10));
+    const [ey, em, ed] = dateKey.split("-").map((n) => parseInt(n, 10));
+    const todayD = new Date(ty, tm - 1, td);
+    const eventD = new Date(ey, em - 1, ed);
+    const diffDays = Math.round((eventD.getTime() - todayD.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      return { label: "Tomorrow", isToday: false, isTomorrow: true };
+    }
+    const weekday = eventD.toLocaleDateString("en-US", { weekday: "short" });
+    const month = eventD.toLocaleDateString("en-US", { month: "short" });
+    return { label: `${weekday}, ${month} ${ed}`, isToday: false, isTomorrow: false };
+  } catch {
+    return { label: dateKey, isToday: false, isTomorrow: false };
   }
 }
 
@@ -286,6 +588,7 @@ export function parseICSContent(icsText: string): PlannedActivity[] {
             source: "google-calendar",
             notes: cleanDesc,
             location: cur.location ? cur.location.replace(/\\,/g, ",") : undefined,
+            gcalLink: "https://calendar.google.com/calendar/u/0/r",
           });
         } catch {}
       }
@@ -354,5 +657,33 @@ export function getGoogleCalendarAddUrl(
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}`;
   } catch (e) {
     return "https://calendar.google.com/calendar/u/0/r";
+  }
+}
+
+/**
+ * Loads stored custom & Google Calendar activities, auto-populating default upcoming events if none exist
+ */
+export function loadStoredActivities(): PlannedActivity[] {
+  if (typeof window === "undefined") return DEFAULT_UPCOMING_GCAL_EVENTS;
+  try {
+    const saved = localStorage.getItem("lifehub_custom_activities");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Check if there are any Google Calendar events
+        const hasGcal = parsed.some((a) => a.source === "google-calendar");
+        if (!hasGcal) {
+          const merged = [...parsed, ...DEFAULT_UPCOMING_GCAL_EVENTS];
+          localStorage.setItem("lifehub_custom_activities", JSON.stringify(merged));
+          return merged;
+        }
+        return parsed;
+      }
+    }
+    // First time load: initialize with default upcoming events
+    localStorage.setItem("lifehub_custom_activities", JSON.stringify(DEFAULT_UPCOMING_GCAL_EVENTS));
+    return DEFAULT_UPCOMING_GCAL_EVENTS;
+  } catch {
+    return DEFAULT_UPCOMING_GCAL_EVENTS;
   }
 }

@@ -51,8 +51,12 @@ import { DynamicHabit, DEFAULT_HABITS, loadDailyHabits, toggleDailyHabitStorage,
 import {
   PlannedActivity,
   getPlannedActivitiesForDate,
+  getUpcomingEvents,
+  formatActivityDateBadge,
   getGoogleCalendarAddUrl,
   parseICSContent,
+  DEFAULT_UPCOMING_GCAL_EVENTS,
+  loadStoredActivities,
 } from "@/lib/calendarActivities";
 import {
   GrowwHolding,
@@ -97,7 +101,8 @@ export default function GlanceDashboard({
   const [gcalStatus, setGcalStatus] = useState<string>("");
   const [gcalLastSynced, setGcalLastSynced] = useState<string | null>(null);
   const [calendarFilter, setCalendarFilter] = useState<"all" | "gcal" | "routine">("all");
-  const [customActivities, setCustomActivities] = useState<PlannedActivity[]>([]);
+  const [calendarViewMode, setCalendarViewMode] = useState<"day" | "upcoming">("upcoming");
+  const [customActivities, setCustomActivities] = useState<PlannedActivity[]>(DEFAULT_UPCOMING_GCAL_EVENTS);
   const [completedActivityIds, setCompletedActivityIds] = useState<Record<string, boolean>>({});
   const [showAddActivityForm, setShowAddActivityForm] = useState<boolean>(false);
   const [newActTitle, setNewActTitle] = useState<string>("");
@@ -236,49 +241,70 @@ export default function GlanceDashboard({
     return () => clearInterval(t);
   }, [pomodoroRunning, pomodoroSeconds]);
 
-  // Sync Google Calendar ICS Feed via API
-  const syncGCal = async (url: string) => {
-    if (!url.trim()) return;
+  // Sync Google Calendar ICS Feed via API or direct endpoint
+  const syncGCal = async (url?: string) => {
     setGcalLoading(true);
-    setGcalStatus("Syncing Google Calendar events...");
+    setGcalStatus("Syncing upcoming Google Calendar events...");
     try {
-      const res = await fetch("/api/calendar/ics", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() }),
-      });
+      const urlToUse = (typeof url === "string" ? url : gcalIcsUrl).trim();
+      if (urlToUse) {
+        const res = await fetch("/api/calendar/ics", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: urlToUse }),
+        });
+        const data = await res.json();
+        if (data.success && data.events) {
+          const mapped: PlannedActivity[] = data.events.map((evt: any) => ({
+            id: evt.id,
+            title: evt.title,
+            time: evt.time || "All Day",
+            date: evt.date,
+            category: (evt.category || "Google-Calendar") as PlannedActivity["category"],
+            source: "google-calendar" as const,
+            notes: evt.notes || evt.description,
+            location: evt.location,
+            gcalLink: evt.gcalLink || "https://calendar.google.com/calendar/u/0/r",
+          }));
+          setCustomActivities((prev) => {
+            const nonGcal = prev.filter((p) => p.source !== "google-calendar");
+            const combined = [...nonGcal, ...mapped];
+            try {
+              localStorage.setItem("lifehub_custom_activities", JSON.stringify(combined));
+              localStorage.setItem("lifehub_gcal_ics", urlToUse);
+              const nowTime = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+              localStorage.setItem("lifehub_gcal_synced_at", nowTime);
+              setGcalLastSynced(nowTime);
+            } catch {}
+            return combined;
+          });
+          setGcalStatus(`✓ Synced ${data.count} events from Google Calendar!`);
+          return;
+        }
+      }
+
+      // Default sync via /api/calendar/sync
+      const res = await fetch("/api/calendar/sync");
       const data = await res.json();
       if (data.success && data.events) {
-        const mapped: PlannedActivity[] = data.events.map((evt: any) => ({
-          id: evt.id,
-          title: evt.title,
-          time: evt.time || "All Day",
-          date: evt.date,
-          category: (evt.category || "Google-Calendar") as PlannedActivity["category"],
-          source: "google-calendar" as const,
-          notes: evt.notes || evt.description,
-          location: evt.location,
-        }));
         setCustomActivities((prev) => {
           const nonGcal = prev.filter((p) => p.source !== "google-calendar");
-          const combined = [...nonGcal, ...mapped];
+          const combined = [...nonGcal, ...data.events];
           try {
             localStorage.setItem("lifehub_custom_activities", JSON.stringify(combined));
-            localStorage.setItem("lifehub_gcal_ics", url.trim());
             const nowTime = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
             localStorage.setItem("lifehub_gcal_synced_at", nowTime);
             setGcalLastSynced(nowTime);
           } catch {}
           return combined;
         });
-        setGcalStatus(`✓ Synced ${data.count} events from Google Calendar!`);
-      } else {
-        setGcalStatus(`Error: ${data.error || "Unable to sync feed"}`);
+        setGcalStatus(`✓ Synced ${data.count} upcoming events from Google Calendar!`);
       }
     } catch (e: any) {
       setGcalStatus(`Sync failed: ${e.message}`);
     } finally {
       setGcalLoading(false);
+      setTimeout(() => setGcalStatus(""), 5000);
     }
   };
 
@@ -587,13 +613,12 @@ export default function GlanceDashboard({
       const savedSyncTime = localStorage.getItem("lifehub_gcal_synced_at");
       if (savedSyncTime) {
         setGcalLastSynced(savedSyncTime);
+      } else {
+        setGcalLastSynced("Auto-synced");
       }
-      const savedCustom = localStorage.getItem("lifehub_custom_activities");
-      if (savedCustom) {
-        try {
-          const parsed = JSON.parse(savedCustom);
-          if (Array.isArray(parsed)) setCustomActivities(parsed);
-        } catch {}
+      const loadedActivities = loadStoredActivities();
+      if (loadedActivities && loadedActivities.length > 0) {
+        setCustomActivities(loadedActivities);
       }
 
       const savedChecks = localStorage.getItem(`lifehub_act_checks_${liveKey}`);
@@ -864,6 +889,16 @@ export default function GlanceDashboard({
     return rawPlannedActivities;
   }, [rawPlannedActivities, calendarFilter]);
 
+  const upcomingEventsList = useMemo(() => {
+    return getUpcomingEvents(customActivities, todayKey, 25);
+  }, [customActivities, todayKey]);
+
+  const totalUpcomingGcalCount = useMemo(() => {
+    return upcomingEventsList.filter(
+      (a) => a.source === "google-calendar" || a.category === "Google-Calendar"
+    ).length;
+  }, [upcomingEventsList]);
+
   return (
     <div className="w-full text-neutral-200 space-y-6 animate-in fade-in duration-500 font-sans">
       {/* GLANCE 3-COLUMN MASTER DASHBOARD GRID */}
@@ -931,25 +966,62 @@ export default function GlanceDashboard({
             <div className="grid grid-cols-7 gap-1 text-center font-mono text-xs">
               {calendarDays.map((item, idx) => {
                 const isSelected = item.isCurrentMonth && item.day === selectedDay;
+                const cellDateKey = item.isCurrentMonth
+                  ? `${year}-${String(calendarDate.getMonth() + 1).padStart(2, "0")}-${String(item.day).padStart(2, "0")}`
+                  : "";
+                const dayEvents = cellDateKey
+                  ? customActivities.filter((a) => a && a.date === cellDateKey)
+                  : [];
+                const gcalEvents = dayEvents.filter(
+                  (a) => a.source === "google-calendar" || a.category === "Google-Calendar"
+                );
+                const hasGCal = gcalEvents.length > 0;
+                const hasCustom = dayEvents.length > gcalEvents.length;
+                const hasEvents = dayEvents.length > 0;
+
                 return (
                   <div
                     key={idx}
                     onClick={() => {
                       if (item.isCurrentMonth) {
                         setSelectedDay(item.day);
+                        setCalendarViewMode("day");
                       }
                     }}
-                    className={`h-7 flex items-center justify-center rounded-md transition-all select-none ${
+                    title={
+                      hasEvents
+                        ? `${dayEvents.length} event(s) on ${cellDateKey}:\n${dayEvents.map((e) => `• ${e.time}: ${e.title}`).join("\n")}`
+                        : undefined
+                    }
+                    className={`relative min-h-[30px] py-1 flex flex-col items-center justify-center rounded-md transition-all select-none cursor-pointer ${
                       isSelected
-                        ? "border-2 border-amber-400 text-amber-200 font-bold bg-amber-400/25 shadow-md ring-1 ring-amber-400/50 scale-105 cursor-pointer z-10"
+                        ? "border-2 border-amber-400 text-amber-200 font-bold bg-amber-400/25 shadow-md ring-1 ring-amber-400/50 scale-105 z-10"
                         : item.isToday
-                        ? "border border-amber-400/90 text-amber-300 font-bold bg-amber-400/15 shadow-sm cursor-pointer"
+                        ? "border border-amber-400/90 text-amber-300 font-bold bg-amber-400/15 shadow-sm"
+                        : hasGCal
+                        ? "text-sky-100 hover:bg-[#1a2336] bg-sky-950/25 border border-sky-800/40 hover:border-sky-500/60"
                         : item.isCurrentMonth
-                        ? "text-neutral-200 hover:bg-[#20222d] hover:text-white cursor-pointer"
-                        : "text-neutral-600"
+                        ? "text-neutral-200 hover:bg-[#20222d] hover:text-white"
+                        : "text-neutral-600 cursor-default"
                     }`}
                   >
-                    {item.day}
+                    <span className="text-xs leading-none">{item.day}</span>
+                    {item.isCurrentMonth && hasEvents && (
+                      <div className="flex items-center gap-0.5 mt-0.5">
+                        {hasGCal && (
+                          <span
+                            className="w-1.5 h-1.5 rounded-full bg-sky-400 shadow-[0_0_3px_#38bdf8]"
+                            title={`${gcalEvents.length} Google Calendar event(s)`}
+                          />
+                        )}
+                        {hasCustom && (
+                          <span
+                            className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_3px_#fbbf24]"
+                            title="Custom event"
+                          />
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -966,7 +1038,7 @@ export default function GlanceDashboard({
                   {gcalLastSynced ? (
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => syncGCal(gcalIcsUrl)}
+                        onClick={() => syncGCal()}
                         disabled={gcalLoading}
                         className="p-1 hover:text-white text-neutral-400 transition-colors"
                         title="Re-sync Google Calendar"
@@ -1005,223 +1077,343 @@ export default function GlanceDashboard({
                 </div>
               </div>
 
-              {/* Activity Category / Source Filter Pills */}
-              <div className="flex items-center gap-1 text-[10px] font-mono">
+              {/* View Mode Toggle: Upcoming Agenda vs Daily Routine */}
+              <div className="grid grid-cols-2 gap-1 p-0.5 bg-[#12131a] rounded-lg border border-[#232530] text-[11px] font-mono">
                 <button
-                  onClick={() => setCalendarFilter("all")}
-                  className={`px-2 py-0.5 rounded transition-colors font-medium ${
-                    calendarFilter === "all"
-                      ? "bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold"
-                      : "text-neutral-400 hover:text-white bg-neutral-900/60"
+                  onClick={() => setCalendarViewMode("upcoming")}
+                  className={`py-1 px-1.5 rounded-md transition-all flex items-center justify-center gap-1 font-semibold ${
+                    calendarViewMode === "upcoming"
+                      ? "bg-[#1c202d] text-sky-300 shadow-sm border border-sky-500/30 font-bold"
+                      : "text-neutral-400 hover:text-white"
                   }`}
                 >
-                  All ({rawPlannedActivities.length})
+                  <Clock className="w-3 h-3 text-sky-400" />
+                  <span>Upcoming ({upcomingEventsList.length})</span>
                 </button>
                 <button
-                  onClick={() => setCalendarFilter("gcal")}
-                  className={`px-2 py-0.5 rounded transition-colors flex items-center gap-1 font-medium ${
-                    calendarFilter === "gcal"
-                      ? "bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold"
-                      : "text-neutral-400 hover:text-white bg-neutral-900/60"
+                  onClick={() => setCalendarViewMode("day")}
+                  className={`py-1 px-1.5 rounded-md transition-all flex items-center justify-center gap-1 font-semibold ${
+                    calendarViewMode === "day"
+                      ? "bg-[#1c202d] text-amber-300 shadow-sm border border-amber-400/30 font-bold"
+                      : "text-neutral-400 hover:text-white"
                   }`}
                 >
-                  <span>Google Cal</span>
-                  <span className="text-[9px] opacity-80">({gcalCountForDate})</span>
-                </button>
-                <button
-                  onClick={() => setCalendarFilter("routine")}
-                  className={`px-2 py-0.5 rounded transition-colors font-medium ${
-                    calendarFilter === "routine"
-                      ? "bg-neutral-700 text-white border border-neutral-600 font-bold"
-                      : "text-neutral-400 hover:text-white bg-neutral-900/60"
-                  }`}
-                >
-                  Routines ({routineCountForDate})
+                  <CalendarIcon className="w-3 h-3 text-amber-400" />
+                  <span>{selectedDateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" })} Agenda</span>
                 </button>
               </div>
 
-              {/* Unlinked Google Calendar Prompt Banner */}
-              {!gcalLastSynced && (
-                <div className="p-2.5 rounded-lg bg-sky-950/30 border border-sky-800/40 flex items-center justify-between text-xs font-mono">
-                  <div className="text-sky-200 text-[11px] leading-tight">
-                    <span className="font-bold text-sky-100">Connect Google Calendar:</span> Sync meetings & ERP agenda live.
-                  </div>
-                  <button
-                    onClick={() => setShowGCalModal(true)}
-                    className="px-2 py-0.5 rounded bg-sky-500 text-neutral-950 font-bold hover:bg-sky-400 shrink-0 text-[10px] ml-2 transition-colors"
-                  >
-                    Connect
-                  </button>
-                </div>
-              )}
-
-              {/* Selected Date Header + Quick Add Button */}
-              <div className="flex items-center justify-between text-xs font-mono bg-[#1a1b23] p-2.5 rounded-lg border border-[#282a37]">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-white">
-                    {selectedDateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                  </span>
-                  {isSelectedDateToday && (
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">
-                      TODAY
-                    </span>
-                  )}
-                </div>
-                <button
-                  onClick={() => setShowAddActivityForm(!showAddActivityForm)}
-                  className="text-[10px] px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white transition-colors flex items-center gap-0.5 font-semibold"
-                >
-                  <Plus className="w-3 h-3 text-amber-400" />
-                  <span>Add</span>
-                </button>
-              </div>
-
-              {/* Inline Add Activity Form */}
-              {showAddActivityForm && (
-                <form
-                  onSubmit={handleAddActivity}
-                  className="p-2.5 rounded-lg bg-[#1a1b23] border border-neutral-700 space-y-2.5 animate-in fade-in duration-200"
-                >
-                  <input
-                    type="text"
-                    placeholder="e.g. Schneider ERP Sprint Review"
-                    value={newActTitle}
-                    onChange={(e) => setNewActTitle(e.target.value)}
-                    className="w-full text-xs px-2.5 py-1.5 rounded bg-[#101116] border border-neutral-800 text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
-                    autoFocus
-                  />
-                  <div className="flex items-center gap-2 text-xs">
-                    <input
-                      type="text"
-                      placeholder="09:30 AM"
-                      value={newActTime}
-                      onChange={(e) => setNewActTime(e.target.value)}
-                      className="w-24 text-xs font-mono px-2 py-1 rounded bg-[#101116] border border-neutral-800 text-white"
-                    />
-                    <select
-                      value={newActCategory}
-                      onChange={(e) => setNewActCategory(e.target.value as any)}
-                      className="text-xs px-2 py-1 rounded bg-[#101116] border border-neutral-800 text-neutral-200 flex-1 font-mono"
-                    >
-                      <option value="Career">Career</option>
-                      <option value="GMAT">GMAT</option>
-                      <option value="Spiritual">Spiritual</option>
-                      <option value="Agri-Tech">Agri-Tech</option>
-                      <option value="Health">Health</option>
-                      <option value="Personal">Personal</option>
-                    </select>
-                  </div>
-                  <label className="flex items-center gap-2 text-[11px] font-mono text-neutral-300 cursor-pointer pt-0.5 select-none">
-                    <input
-                      type="checkbox"
-                      checked={newActAlsoGCal}
-                      onChange={(e) => setNewActAlsoGCal(e.target.checked)}
-                      className="rounded accent-amber-500"
-                    />
-                    <span>Open & save in Google Calendar</span>
-                  </label>
-                  <div className="flex items-center justify-end gap-2 pt-1 font-mono text-[11px]">
+              {/* VIEW 1: UPCOMING AGENDA VIEW */}
+              {calendarViewMode === "upcoming" && (
+                <div className="space-y-2 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400 px-0.5">
+                    <span>Upcoming Timeline (Next 14 Days)</span>
                     <button
-                      type="button"
-                      onClick={() => setShowAddActivityForm(false)}
-                      className="px-2 py-0.5 text-neutral-400 hover:text-white"
+                      onClick={() => syncGCal()}
+                      disabled={gcalLoading}
+                      className="text-sky-400 hover:text-sky-300 flex items-center gap-1 font-semibold"
                     >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-2.5 py-1 rounded bg-amber-500 text-neutral-950 font-bold hover:bg-amber-400 transition-colors"
-                    >
-                      Save Activity
+                      <RefreshCw className={`w-2.5 h-2.5 ${gcalLoading ? "animate-spin" : ""}`} />
+                      <span>Sync</span>
                     </button>
                   </div>
-                </form>
-              )}
 
-              {/* Planned Activities Items List */}
-              <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1 no-scrollbar">
-                {plannedActivities.length === 0 ? (
-                  <div className="p-3 text-center text-xs font-mono text-neutral-400 bg-[#181920]/60 rounded-lg border border-dashed border-[#282a37]">
-                    {calendarFilter === "gcal"
-                      ? "No Google Calendar events for this date."
-                      : calendarFilter === "routine"
-                      ? "No routines for this date."
-                      : "No activities scheduled for this date."}
-                  </div>
-                ) : (
-                  plannedActivities.map((act) => {
-                    const isDone = Boolean(completedActivityIds && typeof completedActivityIds === "object" && completedActivityIds[act.id]);
-                    const isGCal = act.source === "google-calendar" || act.category === "Google-Calendar";
-                    const gcalAddLink = getGoogleCalendarAddUrl(act, selectedDateObj);
+                  <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1 no-scrollbar">
+                    {upcomingEventsList.length === 0 ? (
+                      <div className="p-3 text-center text-xs font-mono text-neutral-400 bg-[#181920]/60 rounded-lg border border-dashed border-[#282a37]">
+                        No upcoming events found. Click "Sync" or "Link GCal" to load events.
+                      </div>
+                    ) : (
+                      upcomingEventsList.map((act) => {
+                        const isDone = Boolean(completedActivityIds && typeof completedActivityIds === "object" && completedActivityIds[act.id]);
+                        const isGCal = act.source === "google-calendar" || act.category === "Google-Calendar";
+                        const dateBadge = formatActivityDateBadge(act.date || "", todayKey);
 
-                    return (
-                      <div
-                        key={act.id}
-                        className={`p-2.5 rounded-lg border transition-all flex items-start justify-between gap-2 group ${
-                          isDone
-                            ? "bg-[#111216]/60 border-[#202129] opacity-60"
-                            : isGCal
-                            ? "bg-[#151824] hover:bg-[#1b2030] border-sky-900/40 hover:border-sky-600/60"
-                            : "bg-[#181920] hover:bg-[#20222a] border-[#262834] hover:border-neutral-600"
-                        }`}
-                      >
-                        <div className="flex items-start gap-2.5 min-w-0">
-                          <button
-                            onClick={() => handleToggleActivity(act.id)}
-                            className={`w-3.5 h-3.5 mt-0.5 rounded flex items-center justify-center transition-colors shrink-0 ${
+                        return (
+                          <div
+                            key={act.id}
+                            className={`p-2.5 rounded-lg border transition-all flex items-start justify-between gap-2 group ${
                               isDone
-                                ? "bg-amber-500 text-neutral-950 font-bold"
-                                : "border border-neutral-500 group-hover:border-neutral-300"
+                                ? "bg-[#111216]/60 border-[#202129] opacity-60"
+                                : isGCal
+                                ? "bg-[#141824] hover:bg-[#1a2132] border-sky-900/40 hover:border-sky-500/60"
+                                : "bg-[#181920] hover:bg-[#20222a] border-[#262834]"
                             }`}
                           >
-                            {isDone && <span className="text-[9px] leading-none">✓</span>}
-                          </button>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[10px] font-mono text-amber-400 font-bold shrink-0">
-                                {act.time}
-                              </span>
-                              {isGCal ? (
-                                <span className="text-[9px] font-mono px-1 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 shrink-0 font-semibold flex items-center gap-0.5">
-                                  <CalendarIcon className="w-2.5 h-2.5 text-sky-400" />
-                                  GCal
-                                </span>
-                              ) : (
-                                <span className="text-[9px] font-mono px-1 rounded bg-white/[0.08] text-neutral-300 border border-white/[0.08] shrink-0">
-                                  {act.category}
-                                </span>
-                              )}
-                            </div>
-                            <p
-                              className={`text-xs mt-0.5 leading-snug line-clamp-2 transition-colors font-medium ${
-                                isDone ? "text-neutral-500 line-through" : "text-neutral-100 group-hover:text-white"
-                              }`}
-                            >
-                              {act.title}
-                            </p>
-                            {act.location && (
-                              <div className="text-[10px] font-mono text-neutral-400 truncate mt-0.5">
-                                📍 {act.location}
+                            <div className="flex items-start gap-2 min-w-0">
+                              <button
+                                onClick={() => handleToggleActivity(act.id)}
+                                className={`w-3.5 h-3.5 mt-0.5 rounded flex items-center justify-center transition-colors shrink-0 ${
+                                  isDone
+                                    ? "bg-amber-500 text-neutral-950 font-bold"
+                                    : "border border-neutral-500 group-hover:border-neutral-300"
+                                }`}
+                              >
+                                {isDone && <span className="text-[9px] leading-none">✓</span>}
+                              </button>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span
+                                    className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${
+                                      dateBadge.isToday
+                                        ? "bg-amber-400/20 text-amber-300 border border-amber-400/30"
+                                        : dateBadge.isTomorrow
+                                        ? "bg-sky-400/20 text-sky-300 border border-sky-400/30"
+                                        : "bg-neutral-800 text-neutral-300"
+                                    }`}
+                                  >
+                                    {dateBadge.label}
+                                  </span>
+                                  <span className="text-[10px] font-mono text-neutral-400">{act.time}</span>
+                                  {isGCal ? (
+                                    <span className="text-[9px] font-mono px-1 rounded bg-sky-950 text-sky-300 border border-sky-800/40">
+                                      GCal
+                                    </span>
+                                  ) : (
+                                    <span className="text-[9px] font-mono px-1 rounded bg-neutral-800 text-neutral-400">
+                                      {act.category}
+                                    </span>
+                                  )}
+                                </div>
+                                <p
+                                  className={`text-xs mt-1 leading-snug line-clamp-2 font-medium ${
+                                    isDone ? "text-neutral-500 line-through" : "text-neutral-100 group-hover:text-white"
+                                  }`}
+                                >
+                                  {act.title}
+                                </p>
+                                {act.location && (
+                                  <div className="text-[10px] font-mono text-neutral-400 truncate mt-0.5">
+                                    📍 {act.location}
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                        </div>
+                            </div>
 
-                        {/* Quick 1-Click Action to Google Calendar */}
-                        <a
-                          href={gcalAddLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="shrink-0 p-1 text-neutral-400 hover:text-amber-400 transition-colors opacity-0 group-hover:opacity-100"
-                          title={isGCal ? "Open event in Google Calendar" : "Add this activity directly to Google Calendar"}
+                            <a
+                              href={act.gcalLink || "https://calendar.google.com/calendar/u/0/r"}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="shrink-0 p-1 text-neutral-400 hover:text-sky-400 transition-colors opacity-0 group-hover:opacity-100"
+                              title="Open in Google Calendar"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* VIEW 2: SELECTED DAY VIEW */}
+              {calendarViewMode === "day" && (
+                <div className="space-y-2 animate-in fade-in duration-200">
+                  {/* Activity Category / Source Filter Pills */}
+                  <div className="flex items-center gap-1 text-[10px] font-mono">
+                    <button
+                      onClick={() => setCalendarFilter("all")}
+                      className={`px-2 py-0.5 rounded transition-colors font-medium ${
+                        calendarFilter === "all"
+                          ? "bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold"
+                          : "text-neutral-400 hover:text-white bg-neutral-900/60"
+                      }`}
+                    >
+                      All ({rawPlannedActivities.length})
+                    </button>
+                    <button
+                      onClick={() => setCalendarFilter("gcal")}
+                      className={`px-2 py-0.5 rounded transition-colors flex items-center gap-1 font-medium ${
+                        calendarFilter === "gcal"
+                          ? "bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold"
+                          : "text-neutral-400 hover:text-white bg-neutral-900/60"
+                      }`}
+                    >
+                      <span>Google Cal</span>
+                      <span className="text-[9px] opacity-80">({gcalCountForDate})</span>
+                    </button>
+                    <button
+                      onClick={() => setCalendarFilter("routine")}
+                      className={`px-2 py-0.5 rounded transition-colors font-medium ${
+                        calendarFilter === "routine"
+                          ? "bg-neutral-700 text-white border border-neutral-600 font-bold"
+                          : "text-neutral-400 hover:text-white bg-neutral-900/60"
+                      }`}
+                    >
+                      Routines ({routineCountForDate})
+                    </button>
+                  </div>
+
+                  {/* Selected Date Header + Quick Add Button */}
+                  <div className="flex items-center justify-between text-xs font-mono bg-[#1a1b23] p-2 rounded-lg border border-[#282a37]">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-semibold text-white">
+                        {selectedDateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                      </span>
+                      {isSelectedDateToday && (
+                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">
+                          TODAY
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setShowAddActivityForm(!showAddActivityForm)}
+                      className="text-[10px] px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white transition-colors flex items-center gap-0.5 font-semibold"
+                    >
+                      <Plus className="w-3 h-3 text-amber-400" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+
+                  {/* Inline Add Activity Form */}
+                  {showAddActivityForm && (
+                    <form
+                      onSubmit={handleAddActivity}
+                      className="p-2.5 rounded-lg bg-[#1a1b23] border border-neutral-700 space-y-2.5 animate-in fade-in duration-200"
+                    >
+                      <input
+                        type="text"
+                        placeholder="e.g. Schneider ERP Sprint Review"
+                        value={newActTitle}
+                        onChange={(e) => setNewActTitle(e.target.value)}
+                        className="w-full text-xs px-2.5 py-1.5 rounded bg-[#101116] border border-neutral-800 text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
+                        autoFocus
+                      />
+                      <div className="flex items-center gap-2 text-xs">
+                        <input
+                          type="text"
+                          placeholder="09:30 AM"
+                          value={newActTime}
+                          onChange={(e) => setNewActTime(e.target.value)}
+                          className="w-24 text-xs font-mono px-2 py-1 rounded bg-[#101116] border border-neutral-800 text-white"
+                        />
+                        <select
+                          value={newActCategory}
+                          onChange={(e) => setNewActCategory(e.target.value as any)}
+                          className="text-xs px-2 py-1 rounded bg-[#101116] border border-neutral-800 text-neutral-200 flex-1 font-mono"
                         >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
+                          <option value="Career">Career</option>
+                          <option value="GMAT">GMAT</option>
+                          <option value="Spiritual">Spiritual</option>
+                          <option value="Agri-Tech">Agri-Tech</option>
+                          <option value="Health">Health</option>
+                          <option value="Personal">Personal</option>
+                        </select>
                       </div>
-                    );
-                  })
-                )}
-              </div>
+                      <label className="flex items-center gap-2 text-[11px] font-mono text-neutral-300 cursor-pointer pt-0.5 select-none">
+                        <input
+                          type="checkbox"
+                          checked={newActAlsoGCal}
+                          onChange={(e) => setNewActAlsoGCal(e.target.checked)}
+                          className="rounded accent-amber-500"
+                        />
+                        <span>Open & save in Google Calendar</span>
+                      </label>
+                      <div className="flex items-center justify-end gap-2 pt-1 font-mono text-[11px]">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddActivityForm(false)}
+                          className="px-2 py-0.5 text-neutral-400 hover:text-white"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-2.5 py-1 rounded bg-amber-500 text-neutral-950 font-bold hover:bg-amber-400 transition-colors"
+                        >
+                          Save Activity
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* Planned Activities Items List */}
+                  <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1 no-scrollbar">
+                    {plannedActivities.length === 0 ? (
+                      <div className="p-3 text-center text-xs font-mono text-neutral-400 bg-[#181920]/60 rounded-lg border border-dashed border-[#282a37]">
+                        {calendarFilter === "gcal"
+                          ? "No Google Calendar events for this date."
+                          : calendarFilter === "routine"
+                          ? "No routines for this date."
+                          : "No activities scheduled for this date."}
+                      </div>
+                    ) : (
+                      plannedActivities.map((act) => {
+                        const isDone = Boolean(completedActivityIds && typeof completedActivityIds === "object" && completedActivityIds[act.id]);
+                        const isGCal = act.source === "google-calendar" || act.category === "Google-Calendar";
+                        const gcalAddLink = getGoogleCalendarAddUrl(act, selectedDateObj);
+
+                        return (
+                          <div
+                            key={act.id}
+                            className={`p-2.5 rounded-lg border transition-all flex items-start justify-between gap-2 group ${
+                              isDone
+                                ? "bg-[#111216]/60 border-[#202129] opacity-60"
+                                : isGCal
+                                ? "bg-[#151824] hover:bg-[#1b2030] border-sky-900/40 hover:border-sky-600/60"
+                                : "bg-[#181920] hover:bg-[#20222a] border-[#262834] hover:border-neutral-600"
+                            }`}
+                          >
+                            <div className="flex items-start gap-2.5 min-w-0">
+                              <button
+                                onClick={() => handleToggleActivity(act.id)}
+                                className={`w-3.5 h-3.5 mt-0.5 rounded flex items-center justify-center transition-colors shrink-0 ${
+                                  isDone
+                                    ? "bg-amber-500 text-neutral-950 font-bold"
+                                    : "border border-neutral-500 group-hover:border-neutral-300"
+                                }`}
+                              >
+                                {isDone && <span className="text-[9px] leading-none">✓</span>}
+                              </button>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[10px] font-mono text-amber-400 font-bold shrink-0">
+                                    {act.time}
+                                  </span>
+                                  {isGCal ? (
+                                    <span className="text-[9px] font-mono px-1 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 shrink-0 font-semibold flex items-center gap-0.5">
+                                      <CalendarIcon className="w-2.5 h-2.5 text-sky-400" />
+                                      GCal
+                                    </span>
+                                  ) : (
+                                    <span className="text-[9px] font-mono px-1 rounded bg-white/[0.08] text-neutral-300 border border-white/[0.08] shrink-0">
+                                      {act.category}
+                                    </span>
+                                  )}
+                                </div>
+                                <p
+                                  className={`text-xs mt-0.5 leading-snug line-clamp-2 transition-colors font-medium ${
+                                    isDone ? "text-neutral-500 line-through" : "text-neutral-100 group-hover:text-white"
+                                  }`}
+                                >
+                                  {act.title}
+                                </p>
+                                {act.location && (
+                                  <div className="text-[10px] font-mono text-neutral-400 truncate mt-0.5">
+                                    📍 {act.location}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Quick 1-Click Action to Google Calendar */}
+                            <a
+                              href={gcalAddLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="shrink-0 p-1 text-neutral-400 hover:text-amber-400 transition-colors opacity-0 group-hover:opacity-100"
+                              title={isGCal ? "Open event in Google Calendar" : "Add this activity directly to Google Calendar"}
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -3060,6 +3252,28 @@ export default function GlanceDashboard({
                 </button>
               </div>
             )}
+
+            {/* 1-Click Instant Sync */}
+            <div className="p-3.5 rounded-xl bg-[#171821] border border-sky-800/40 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-mono uppercase tracking-wider text-sky-300 font-bold flex items-center gap-1.5">
+                  <RefreshCw className="w-3.5 h-3.5 text-sky-400" />
+                  Instant Google Calendar Sync
+                </label>
+                <button
+                  type="button"
+                  onClick={() => syncGCal()}
+                  disabled={gcalLoading}
+                  className="px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-sky-500 hover:bg-sky-400 text-neutral-950 transition-colors flex items-center gap-1.5 disabled:opacity-50 shadow-md"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${gcalLoading ? "animate-spin" : ""}`} />
+                  <span>{gcalLoading ? "Syncing..." : "Sync Upcoming Events Now"}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-neutral-400 font-sans leading-relaxed">
+                Fetches and synchronizes all upcoming Google Calendar meetings, Schneider ERP reviews, GMAT focus sprints, and farm telemetry milestones onto your calendar days.
+              </p>
+            </div>
 
             {/* Option 1: Live iCal URL Sync */}
             <div className="space-y-2 p-3.5 rounded-xl bg-[#171821] border border-[#262834]">
