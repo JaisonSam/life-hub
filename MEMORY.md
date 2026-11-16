@@ -38,6 +38,32 @@ A personal life operating system and daily sanctuary combining:
       - **"+ Add Custom Job Opening" Modal**: Instantly track new openings Jaison receives from recruiters on LinkedIn InMail, WhatsApp, or email.
       - Live search bar and sector filter pills (Tech & ERP Labs, Tier 1 Consulting, Industrial Giants).
 
+11. **Indian Stock Markets & Groww Portfolio Integration**:
+    - Replaced US trends with live Indian Market indices and watchlist:
+      - **Indices**: NIFTY 50 (`^NSEI`), SENSEX (`^BSESN`), BANK NIFTY (`^NSEBANK`), and USD/INR Forex (`INR=X`).
+      - **Core Watchlist**: Schneider Electric Infrastructure (`SCHNEIDER.NS`), Tata Motors Passenger (`TMPV.NS`), Reliance Industries (`RELIANCE.NS`), HDFC Bank (`HDFCBANK.NS`).
+    - **Dynamic Real-Time Live Feed Engine** (`/api/markets/live`):
+      - High-speed concurrent market quote fetcher using Yahoo Finance v8 chart feeds with 30s cache.
+      - IST Market Hours engine detecting active trading sessions (9:15 AM – 3:30 PM IST, Mon–Fri).
+      - 30-second background polling cycle + instant manual refresh button on the dashboard.
+    - **Groww CSV Portfolio Import & Live Valuation** (`lib/growwPortfolio.ts`):
+      - Official Groww CSV parser supporting `Stocks_Holdings_Statement_...csv`, `Stocks_Order_History_...csv`, and `Groww_Balance_Statement_...csv`.
+      - Auto-extracts and tracks Jaison's 19 holdings: Advance Technoforge (`ADVANCETL.BO`), Coal India (`COALINDIA.NS`), Craftsman Automation (`CRAFTSMAN.NS`), GAIL (`GAIL.NS`), IOC (`IOC.NS`), IRCTC (`IRCTC.NS`), IRFC (`IRFC.NS`), IRCON (`IRCON.NS`), NHPC (`NHPC.NS`), Nippon India Gold BeES ETF (`GOLDBEES.NS`), NMDC Steel (`NSLNISP.NS`), NTPC (`NTPC.NS`), ONGC (`ONGC.NS`), Petronet LNG (`PETRONET.NS`), PFC (`PFC.NS`), Power Grid (`POWERGRID.NS`), REC Ltd (`RECLTD.NS`), SJVN (`SJVN.NS`), Thangamayil Jewellery (`THANGAMAYL.NS`).
+      - Dynamic live portfolio valuation: recalculates Total Invested, Total Current Value, Day P&L, and All-Time Unrealised Gain/Loss (%) in real time as market quotes arrive.
+      - Direct 1-click Groww link integration (`groww.in/stocks/...` and `groww.in/indices/...`) on each stock card.
+
+12. **Google Calendar Sync & Upcoming Agenda Integration**:
+    - Integrated Google Calendar upcoming events directly into the Calendar tab and Dashboard agenda.
+    - Supports ICS feed synchronization (`/api/calendar/ics`) showing upcoming events on their respective dates.
+
+13. **Dynamic Device GPS Weather & Location Sync**:
+    - Automatically requests and syncs with the browser device's GPS geolocation (`navigator.geolocation.getCurrentPosition`) on initial site open.
+    - Dynamically fetches local temperature, weather condition, and city name via `/api/weather/live`, defaulting to Bengaluru if permissions are denied.
+
+14. **Unified Cross-Tab Design System & High-Contrast Visuals**:
+    - Seamless aesthetic consistency across all tabs (Glance/Home, Agribusiness, Commonplace, Career, Calendar, GMAT Sprint, Bible Study).
+    - Consistent high-contrast cards, typography, translucent glassmorphic surfaces, and unified control buttons.
+
 ## 🛠️ Tech Stack & Locations
 * **Location**: `/Users/jaisappi/Developer/life-hub`
 * **Framework**: Next.js 16 (App Router), React 19, Tailwind CSS v4, Lucide React, Bun.
