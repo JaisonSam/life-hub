@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ChevronDown, ChevronRight, Volume2 } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface WelcomeIntroProps {
   onRevealHomescreen: () => void;
@@ -13,10 +13,11 @@ export default function WelcomeIntro({
   onUserGesture,
 }: WelcomeIntroProps) {
   // Stages:
-  // "greeting_enter": Black screen, "Hi, Jaison" gliding up from bottom to middle (0 - 2s)
-  // "greeting_exit": "Hi, Jaison" dissolves and black overlay fades out (2s - 2.6s)
-  // "video_solo": Tron video playing full-screen without homescreen (2.6s onwards)
-  // "done": User has scrolled down; homescreen has faded in overlapping the video; intro unmounts
+  // "greeting_start": Pure black for 1 second (0 - 1.0s)
+  // "greeting_enter": "Hi, Jaison" enters with slow, smooth animation (1.0s - 3.2s)
+  // "greeting_exit": "Hi, Jaison" smoothly dissolves (3.2s - 4.0s)
+  // "video_solo": Tron video playing full-screen with music on (4.0s onwards)
+  // "done": User has scrolled down; homescreen has faded in; intro unmounts
   const [stage, setStage] = useState<
     "greeting_start" | "greeting_enter" | "greeting_exit" | "video_solo" | "done"
   >("greeting_start");
@@ -25,7 +26,6 @@ export default function WelcomeIntro({
   const [showScrollPrompt, setShowScrollPrompt] = useState(false);
 
   const handleUserInteraction = useCallback(() => {
-    // Notify parent to unlock audio immediately on any click / tap
     if (onUserGesture) {
       onUserGesture();
     }
@@ -47,25 +47,27 @@ export default function WelcomeIntro({
       document.body.style.overflow = "hidden";
     } catch {}
 
-    // 1. Pop up "Hi, Jaison" from bottom to middle
+    // 1. "Hi, Jaison" shows up after 1 sec (stays pure black for 1000ms)
     const enterTimer = setTimeout(() => {
       setStage("greeting_enter");
-    }, 50);
+    }, 1000);
 
-    // 2. After 2s, dissolve "Hi, Jaison" and reveal the video
+    // 2. Slow animation: let it linger elegantly until 3.2s
     const exitGreetingTimer = setTimeout(() => {
       setStage("greeting_exit");
-    }, 2000);
+    }, 3200);
 
-    // 3. Black veil clears, Tron video plays solo
+    // 3. Black veil clears at 4.0s, Tron video plays solo with music!
     const videoSoloTimer = setTimeout(() => {
       setStage("video_solo");
-    }, 2600);
+      // Trigger audio play immediately when video starts
+      handleUserInteraction();
+    }, 4000);
 
-    // 4. After 5 seconds of the video loading (2.6s + 5.0s = 7.6s), make "Scroll Down" prompt visible!
+    // 4. After 5 seconds of the video playing (4.0s + 5.0s = 9.0s), show minimal "Scroll down" prompt!
     const promptTimer = setTimeout(() => {
       setShowScrollPrompt(true);
-    }, 7600);
+    }, 9000);
 
     return () => {
       clearTimeout(enterTimer);
@@ -76,7 +78,7 @@ export default function WelcomeIntro({
         document.body.style.overflow = "";
       } catch {}
     };
-  }, []);
+  }, [handleUserInteraction]);
 
   // Listen for user scroll down or gestures to fade in homescreen (only active during video_solo)
   useEffect(() => {
@@ -144,7 +146,7 @@ export default function WelcomeIntro({
         stage === "greeting_exit") && (
         <div
           onPointerDown={handleUserInteraction}
-          className={`fixed inset-0 z-[99999] bg-black flex items-center justify-center transition-opacity duration-600 ease-out select-none cursor-pointer ${
+          className={`fixed inset-0 z-[99999] bg-black flex items-center justify-center transition-opacity duration-800 ease-out select-none cursor-pointer ${
             stage === "greeting_exit" ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
           style={{ backgroundColor: "#000000" }}
@@ -152,19 +154,19 @@ export default function WelcomeIntro({
         >
           {/* Subtle warm ambient backlight */}
           <div
-            className={`absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-amber-400/10 blur-3xl pointer-events-none transition-all duration-1000 ease-out ${
+            className={`absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-amber-400/10 blur-3xl pointer-events-none transition-all duration-1400 ease-out ${
               stage === "greeting_enter" ? "opacity-100 scale-100" : "opacity-0 scale-75"
             }`}
           />
 
-          {/* "Hi, Jaison" text moving from bottom to middle */}
+          {/* "Hi, Jaison" text moving from bottom to middle (Loads after 1s, slowed animation) */}
           <div
-            className={`relative z-10 flex flex-col items-center justify-center text-center px-4 transition-all duration-800 ${
+            className={`relative z-10 flex flex-col items-center justify-center text-center px-4 transition-all duration-1200 ${
               stage === "greeting_start"
-                ? "translate-y-24 opacity-0 scale-90"
+                ? "translate-y-28 opacity-0 scale-90"
                 : stage === "greeting_enter"
                 ? "translate-y-0 opacity-100 scale-100"
-                : "-translate-y-6 opacity-0 scale-95"
+                : "-translate-y-8 opacity-0 scale-95"
             }`}
             style={{
               transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
@@ -176,22 +178,12 @@ export default function WelcomeIntro({
             </h1>
 
             <p
-              className={`mt-3 text-xs sm:text-sm font-mono tracking-widest uppercase text-neutral-400 transition-all duration-700 delay-150 ${
+              className={`mt-4 text-xs sm:text-sm font-mono tracking-widest uppercase text-neutral-400 transition-all duration-1000 delay-200 ${
                 stage === "greeting_enter" ? "opacity-80 translate-y-0" : "opacity-0 translate-y-3"
               }`}
             >
               Life OS & Sanctuary
             </p>
-
-            {/* Subtle click prompt to unlock audio immediately in all browsers */}
-            <div
-              className={`mt-6 flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-900/90 border border-amber-400/40 text-amber-300 text-xs font-mono shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all duration-700 delay-300 ${
-                stage === "greeting_enter" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-              }`}
-            >
-              <Volume2 className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-              <span>Tap anywhere to start with Soundtrack</span>
-            </div>
           </div>
         </div>
       )}
@@ -204,41 +196,38 @@ export default function WelcomeIntro({
         >
           {/* Top Title Tag & Quick Enter Button */}
           <div className="flex items-center justify-between pointer-events-auto">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/65 border border-cyan-500/40 text-cyan-300 font-mono text-xs backdrop-blur-md shadow-lg">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/65 border border-white/10 text-neutral-300 font-mono text-xs backdrop-blur-md shadow-lg">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-              <span className="font-semibold tracking-wider">TRON: LEGACY</span>
+              <span className="font-semibold tracking-wider text-white">TRON: LEGACY</span>
               <span className="hidden sm:inline text-neutral-500">•</span>
-              <span className="hidden sm:inline text-neutral-300">DUCATI ESCAPE</span>
+              <span className="hidden sm:inline text-neutral-400">DUCATI ESCAPE</span>
             </div>
 
             {/* Quick Skip Pill */}
             <button
               onClick={triggerEnterHomescreen}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-neutral-900/85 hover:bg-neutral-800 text-neutral-200 hover:text-white border border-neutral-700 text-xs font-mono backdrop-blur-md transition-all shadow-xl hover:border-cyan-500/50 group"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-neutral-900/85 hover:bg-neutral-800 text-neutral-200 hover:text-white border border-neutral-700 text-xs font-mono backdrop-blur-md transition-all shadow-xl group"
             >
               <span>Enter Life Hub</span>
-              <ChevronRight className="w-3.5 h-3.5 text-cyan-400 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="w-3.5 h-3.5 text-neutral-400 group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
 
-          {/* BOTTOM SCROLL DOWN PROMPT: Visible after 5 seconds of the video loading */}
+          {/* 
+            BOTTOM SCROLL DOWN PROMPT (Minimal & Aesthetic):
+            - White font ("Scroll down for dashboard")
+            - Exactly one small arrow pointing below that
+            - No two arrows, no heavy border box
+          */}
           {showScrollPrompt && (
             <div
               onClick={triggerEnterHomescreen}
-              className="pointer-events-auto self-center flex flex-col items-center gap-2 cursor-pointer group animate-in fade-in slide-in-from-bottom-6 duration-700 select-none pb-4"
+              className="pointer-events-auto self-center flex flex-col items-center gap-1.5 cursor-pointer group animate-in fade-in slide-in-from-bottom-4 duration-1000 select-none pb-6"
             >
-              <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-black/80 hover:bg-black/95 border border-cyan-500/50 hover:border-cyan-400 shadow-[0_0_35px_rgba(6,182,212,0.45)] backdrop-blur-md transition-all group-hover:scale-105 active:scale-95">
-                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 animate-bounce group-hover:text-cyan-300 transition-colors" />
-                <span className="text-xs sm:text-sm font-mono font-bold tracking-widest text-cyan-200 group-hover:text-white uppercase">
-                  Scroll Down to Enter Life Hub
-                </span>
-                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 animate-bounce group-hover:text-cyan-300 transition-colors" />
-              </div>
-
-              <div className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase bg-black/60 px-3.5 py-1 rounded-full border border-white/10 backdrop-blur-sm flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Music Always On • Daft Punk "The Grid"</span>
-              </div>
+              <span className="text-xs sm:text-sm font-light tracking-[0.25em] text-white/90 group-hover:text-white uppercase transition-colors drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
+                Scroll down for dashboard
+              </span>
+              <ChevronDown className="w-3.5 h-3.5 text-white/70 group-hover:text-white animate-bounce transition-colors drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]" />
             </div>
           )}
         </div>

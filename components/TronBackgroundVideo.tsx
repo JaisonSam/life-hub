@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
 interface TronBackgroundVideoProps {
@@ -30,12 +30,32 @@ export default function TronBackgroundVideo({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Update audio volume & muted state on bgVideoRef
   useEffect(() => {
     const video = bgVideoRef.current;
     if (!video) return;
 
-    // Start video playback
+    // During intro (!isHomescreenVisible), bgVideoRef is the main solo player and must play music!
+    // Once homescreen is visible, sectionVideo in page.tsx takes over audio so bgVideo is muted to prevent echo.
+    const shouldMute = isHomescreenVisible ? true : isMuted;
+    video.muted = shouldMute;
+    video.volume = 0.85;
+
+    if (!shouldMute) {
+      video.play().catch(() => {});
+    }
+  }, [isMuted, isHomescreenVisible]);
+
+  useEffect(() => {
+    const video = bgVideoRef.current;
+    if (!video) return;
+
+    video.volume = 0.85;
+    // Initially unmuted so music plays right as video loads
+    video.muted = isMuted;
+
     const startPlay = () => {
+      video.muted = isMuted;
       video.play().catch(() => {});
       if (onVideoReady) onVideoReady();
     };
@@ -46,7 +66,6 @@ export default function TronBackgroundVideo({
       video.addEventListener("loadeddata", startPlay, { once: true });
     }
 
-    // Keep background video playing smoothly
     const handleEnded = () => {
       video.currentTime = 0;
       video.play().catch(() => {});
@@ -56,13 +75,13 @@ export default function TronBackgroundVideo({
     return () => {
       video.removeEventListener("ended", handleEnded);
     };
-  }, [onVideoReady]);
+  }, [isMuted, onVideoReady]);
 
   return (
     <>
       {/* 
         AMBIENT BACKGROUND VIDEO LAYER
-        - During Intro (!isHomescreenVisible): Full-screen solo video view
+        - During Intro (!isHomescreenVisible): Full-screen solo video view playing WITH MUSIC!
         - On Homescreen: Fades in behind dashboard contents as the user scrolls down (scrollY > 120)
         - When at the top (scrollY <= 120): Hidden (opacity-0) so video only shows inside the showcase section box!
       */}
@@ -81,7 +100,7 @@ export default function TronBackgroundVideo({
           src="/videos/tron-intro.mp4"
           autoPlay
           loop
-          muted={true}
+          muted={!isHomescreenVisible ? isMuted : true}
           playsInline
           preload="auto"
           className="w-full h-full object-cover"
@@ -100,7 +119,7 @@ export default function TronBackgroundVideo({
 
       {/* 
         AUDIO CONTROL FEATURE AT BOTTOM-RIGHT
-        - User requirement: "Have only the audio off feature at the bottom right which should function. No need to have the video off function"
+        - Minimal & aesthetic audio toggle only
       */}
       {isHomescreenVisible && (
         <div className="fixed bottom-4 right-4 z-40 flex items-center">
