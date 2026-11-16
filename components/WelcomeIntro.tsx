@@ -15,10 +15,10 @@ export default function WelcomeIntro({
   onGreetingAppear,
 }: WelcomeIntroProps) {
   // Stages:
-  // "greeting_start": Pure black for 1 second (0 - 1.0s)
-  // "greeting_enter": "Hi, Jaison" enters with slow, smooth animation (1.0s - 3.2s)
-  // "greeting_exit": "Hi, Jaison" smoothly dissolves (3.2s - 4.0s)
-  // "video_solo": Tron video playing full-screen with music on (4.0s onwards)
+  // "greeting_start": Pure black for 2 seconds (0 - 2.0s)
+  // "greeting_enter": "Hi, Jaison" enters with slow, smooth animation (2.0s - 6.0s)
+  // "greeting_exit": "Hi, Jaison" smoothly dissolves (6.0s - 7.0s)
+  // "video_solo": Tron video playing full-screen with music on (7.0s onwards)
   // "done": User has scrolled down; homescreen has faded in; intro unmounts
   const [stage, setStage] = useState<
     "greeting_start" | "greeting_enter" | "greeting_exit" | "video_solo" | "done"
@@ -49,7 +49,7 @@ export default function WelcomeIntro({
       document.body.style.overflow = "hidden";
     } catch {}
 
-    // 1. "Hi, Jaison" shows up after 1 sec (stays pure black for 1000ms)
+    // 1. "Hi, Jaison" shows up after 2 sec (stays pure black for 2000ms)
     const enterTimer = setTimeout(() => {
       setStage("greeting_enter");
       if (onGreetingAppear) {
@@ -57,23 +57,23 @@ export default function WelcomeIntro({
       } else {
         handleUserInteraction();
       }
-    }, 1000);
+    }, 2000);
 
-    // 2. Stays for 4 full seconds: 1.0s + 4.0s = 5.0s (5000ms)
+    // 2. Stays for 4 full seconds: 2.0s + 4.0s = 6.0s (6000ms)
     const exitGreetingTimer = setTimeout(() => {
       setStage("greeting_exit");
-    }, 5000);
+    }, 6000);
 
-    // 3. Black veil clears at 6.0s (6000ms), matching audio reaching full volume!
+    // 3. Black veil clears at 7.0s (7000ms), matching audio reaching full volume!
     const videoSoloTimer = setTimeout(() => {
       setStage("video_solo");
       handleUserInteraction();
-    }, 6000);
+    }, 7000);
 
-    // 4. After 5 seconds of the solo video playing (6.0s + 5.0s = 11.0s), show minimal "Scroll down" prompt!
+    // 4. After 5 seconds of the solo video playing (7.0s + 5.0s = 12.0s), show minimal "Scroll down" prompt!
     const promptTimer = setTimeout(() => {
       setShowScrollPrompt(true);
-    }, 11000);
+    }, 12000);
 
     return () => {
       clearTimeout(enterTimer);
@@ -165,7 +165,7 @@ export default function WelcomeIntro({
             }`}
           />
 
-          {/* "Hi, Jaison" text moving from bottom to middle (Loads after 1s, slowed 1800ms animation, stays 4s) */}
+          {/* "Hi, Jaison" text moving from bottom to middle (Loads after 2s, slowed 1800ms animation, stays 4s) */}
           <div
             className={`relative z-10 flex flex-col items-center justify-center text-center px-4 transition-all duration-[1800ms] ${
               stage === "greeting_start"

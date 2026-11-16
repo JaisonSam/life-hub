@@ -89,9 +89,9 @@ export default function TronBackgroundVideo({
     const video = bgVideoRef.current;
     if (!video) return;
 
-    // Start with low initial volume so it ramps up smoothly over 4s
+    // Start with low initial volume; keep muted during initial 2s black screen
     video.volume = 0.01;
-    video.muted = isMuted;
+    video.muted = true;
 
     const playPromise = video.play();
     if (playPromise !== undefined) {
@@ -100,13 +100,13 @@ export default function TronBackgroundVideo({
           if (onVideoReady) onVideoReady();
         })
         .catch(() => {
-          // If browser restricts unmuted autoplay initially, start muted so video displays without any delay
+          // If browser restricts autoplay, ensure muted
           video.muted = true;
           video.play().catch(() => {});
           if (onVideoReady) onVideoReady();
         });
     }
-  }, [isMuted, onVideoReady]);
+  }, [onVideoReady]);
 
   useEffect(() => {
     const video = bgVideoRef.current;
@@ -144,10 +144,23 @@ export default function TronBackgroundVideo({
     };
     video.addEventListener("timeupdate", handleTimeUpdate);
 
-    // Audio Unlocker: On the very first user interaction anywhere on the window or document
-    // Listens to mousemove, pointermove, focus, wheel, scroll, touch, and click
-    const unlockMasterAudio = () => {
+    let audioAllowed = false;
+
+    // Audio starts 2 seconds later (exactly when "Hi, Jaison" appears)
+    const audioDelayTimer = setTimeout(() => {
+      audioAllowed = true;
       if (video && !isMuted) {
+        video.currentTime = 0;
+        video.muted = false;
+        applyFadeInVolume(video);
+        video.play().catch(() => {});
+      }
+    }, 2000);
+
+    // Audio Unlocker: On the very first user interaction anywhere on the window or document
+    // Only unlocks once the initial 2-second black screen has passed
+    const unlockMasterAudio = () => {
+      if (audioAllowed && video && !isMuted) {
         video.muted = false;
         applyFadeInVolume(video);
         video.play().catch(() => {});
@@ -173,6 +186,7 @@ export default function TronBackgroundVideo({
     });
 
     return () => {
+      clearTimeout(audioDelayTimer);
       video.removeEventListener("ended", handleEnded);
       video.removeEventListener("loadedmetadata", startVideoInstant);
       video.removeEventListener("canplay", startVideoInstant);

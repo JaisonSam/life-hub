@@ -479,7 +479,7 @@ const initialStrategicBooks: StrategicBook[] = [
 export default function LifeHub() {
   // Intro & Homescreen visibility (Tron background integration)
   const [homescreenVisible, setHomescreenVisible] = useState<boolean>(false);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(true);
   const [hasVideoEnded, setHasVideoEnded] = useState<boolean>(false);
   const sectionVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -501,6 +501,7 @@ export default function LifeHub() {
     setIsMuted(false);
     const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
     if (bg) {
+      bg.currentTime = 0;
       bg.muted = false;
       const playPromise = bg.play();
       if (playPromise !== undefined) {
