@@ -38,6 +38,7 @@ import {
   Timer,
   Copy,
   CalendarCheck2,
+  Radio,
 } from "lucide-react";
 import { getDailyScripture, ScriptureDay } from "@/lib/dailyScripture";
 import { DynamicHabit, DEFAULT_HABITS, loadDailyHabits, toggleDailyHabitStorage, getDateKey } from "@/lib/dailyHabits";
@@ -239,6 +240,9 @@ export default function GlanceDashboard({
 
   // 6. Weather Location Toggle
   const [weatherLocation, setWeatherLocation] = useState<"blr" | "farm">("blr");
+
+  // 7. Repository Toggle (Glance screenshot parity)
+  const [repoTab, setRepoTab] = useState<"glance" | "lifehub">("glance");
 
   // Calendar calculations
   const { monthName, year, weekNumber, calendarDays, currentDayOfMonth } = useMemo(() => {
@@ -770,6 +774,121 @@ export default function GlanceDashboard({
               <ArrowUpRight className="w-3 h-3" />
             </button>
           </div>
+
+          {/* 1.4 TWITCH CHANNELS & EXECUTIVE STREAMS (Glance Signature Widget) */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3.5">
+            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-[#8b91a0] uppercase font-bold">
+              <span className="flex items-center gap-1.5 text-white">
+                <Radio className="w-3.5 h-3.5 text-amber-400" />
+                TWITCH CHANNELS
+              </span>
+              <span className="text-[10px] text-emerald-400 font-mono font-semibold">2 LIVE</span>
+            </div>
+
+            <div className="space-y-2.5">
+              {/* Channel 1 */}
+              <a
+                href="https://twitch.tv/zackrawrr"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between p-2 rounded-lg bg-[#181920] border border-[#262834] hover:border-neutral-600 transition-colors group"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="relative w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80"
+                      alt="zackrawrr"
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 ring-1 ring-neutral-900" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold text-white group-hover:text-[#e5c07b] truncate flex items-center gap-1.5 transition-colors">
+                      <span>zackrawrr</span>
+                      <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                        LIVE
+                      </span>
+                    </div>
+                    <div className="text-[10px] font-mono text-[#8b91a0] truncate">
+                      Just Chatting · 2h · 64k viewers
+                    </div>
+                  </div>
+                </div>
+              </a>
+
+              {/* Channel 2 */}
+              <a
+                href="https://twitch.tv/ThePrimeagen"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between p-2 rounded-lg bg-[#181920] border border-[#262834] hover:border-neutral-600 transition-colors group"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="relative w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&q=80"
+                      alt="ThePrimeagen"
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 ring-1 ring-neutral-900" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold text-white group-hover:text-[#e5c07b] truncate flex items-center gap-1.5 transition-colors">
+                      <span>ThePrimeagen</span>
+                      <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                        LIVE
+                      </span>
+                    </div>
+                    <div className="text-[10px] font-mono text-[#8b91a0] truncate">
+                      Software & Architecture · 26m · 1.6k viewers
+                    </div>
+                  </div>
+                </div>
+              </a>
+
+              {/* Channel 3 */}
+              <div className="flex items-center justify-between p-2 rounded-lg bg-[#181920] border border-[#262834] hover:border-neutral-600 transition-colors opacity-75">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80"
+                      alt="KevinPowellCSS"
+                      className="w-full h-full object-cover grayscale"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-medium text-neutral-300 truncate">
+                      KevinPowellCSS
+                    </div>
+                    <div className="text-[10px] font-mono text-neutral-500 truncate">
+                      Offline
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Channel 4 */}
+              <div className="flex items-center justify-between p-2 rounded-lg bg-[#181920] border border-[#262834] hover:border-neutral-600 transition-colors opacity-75">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80"
+                      alt="j_blow"
+                      className="w-full h-full object-cover grayscale"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-medium text-neutral-300 truncate">
+                      j_blow
+                    </div>
+                    <div className="text-[10px] font-mono text-neutral-500 truncate">
+                      Offline
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* ========================================================= */}
@@ -1156,8 +1275,8 @@ export default function GlanceDashboard({
               </button>
             </div>
 
-            {/* Horizontal Video Cards Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {/* Horizontal Video Cards Row (5 Cards Glance Architecture) */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {/* Media Card 1 */}
               <div
                 onClick={() => onSelectTab("music")}
@@ -1174,10 +1293,10 @@ export default function GlanceDashboard({
                     Live
                   </span>
                 </div>
-                <div className="text-xs font-medium text-white group-hover:text-amber-300 transition-colors line-clamp-1">
+                <div className="text-xs font-medium text-white group-hover:text-[#e5c07b] transition-colors line-clamp-1">
                   Acoustic Worship Sanctuary
                 </div>
-                <div className="text-[10px] font-mono text-neutral-400">
+                <div className="text-[10px] font-mono text-[#8b91a0]">
                   Elevation & Maverick
                 </div>
               </div>
@@ -1198,10 +1317,10 @@ export default function GlanceDashboard({
                     432Hz
                   </span>
                 </div>
-                <div className="text-xs font-medium text-white group-hover:text-amber-300 transition-colors line-clamp-1">
+                <div className="text-xs font-medium text-white group-hover:text-[#e5c07b] transition-colors line-clamp-1">
                   Deep Flow & GMAT Focus
                 </div>
-                <div className="text-[10px] font-mono text-neutral-400">
+                <div className="text-[10px] font-mono text-[#8b91a0]">
                   Alpha Brainwaves
                 </div>
               </div>
@@ -1222,10 +1341,10 @@ export default function GlanceDashboard({
                     705+
                   </span>
                 </div>
-                <div className="text-xs font-medium text-white group-hover:text-amber-300 transition-colors line-clamp-1">
+                <div className="text-xs font-medium text-white group-hover:text-[#e5c07b] transition-colors line-clamp-1">
                   GMAT Quant & DI Traps
                 </div>
-                <div className="text-[10px] font-mono text-neutral-400">
+                <div className="text-[10px] font-mono text-[#8b91a0]">
                   MBA.com Official OG
                 </div>
               </div>
@@ -1246,11 +1365,35 @@ export default function GlanceDashboard({
                     Cloud
                   </span>
                 </div>
-                <div className="text-xs font-medium text-white group-hover:text-amber-300 transition-colors line-clamp-1">
+                <div className="text-xs font-medium text-white group-hover:text-[#e5c07b] transition-colors line-clamp-1">
                   ERP Cloud Architectures
                 </div>
-                <div className="text-[10px] font-mono text-neutral-400">
+                <div className="text-[10px] font-mono text-[#8b91a0]">
                   Schneider Blueprint
+                </div>
+              </div>
+
+              {/* Media Card 5 (Glance 5th Card) */}
+              <div
+                onClick={() => onSelectTab("farm")}
+                className="group cursor-pointer space-y-1.5"
+              >
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-neutral-900 border border-[#262834] group-hover:border-neutral-500 transition-colors">
+                  <img
+                    src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?auto=format&fit=crop&w=400&q=80"
+                    alt="Farm Agribusiness"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
+                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-neutral-200">
+                    IoT
+                  </span>
+                </div>
+                <div className="text-xs font-medium text-white group-hover:text-[#e5c07b] transition-colors line-clamp-1">
+                  Veerakeralapudur Smart Agri
+                </div>
+                <div className="text-[10px] font-mono text-[#8b91a0]">
+                  Solar Drip & Telemetry
                 </div>
               </div>
             </div>
@@ -1508,87 +1651,236 @@ export default function GlanceDashboard({
 
           {/* 3.2 REPOSITORY WIDGET CARD */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3">
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-neutral-300 uppercase font-bold">
+            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-[#8b91a0] uppercase font-bold">
               <span className="flex items-center gap-1.5 text-white">
                 <GitPullRequest className="w-3.5 h-3.5 text-amber-400" />
                 REPOSITORY
               </span>
-              <a
-                href="https://github.com/JaisonSam/life-hub"
-                target="_blank"
-                rel="noreferrer"
-                className="text-[10px] text-amber-400 hover:text-white transition-colors font-semibold"
-              >
-                GitHub ↗
-              </a>
-            </div>
-
-            <div className="space-y-2.5">
-              <div>
-                <a
-                  href="https://github.com/JaisonSam/life-hub"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-bold text-white hover:text-amber-300 transition-colors text-xs sm:text-sm flex items-center gap-1"
+              <div className="flex items-center gap-1 text-[10px] font-mono">
+                <button
+                  onClick={() => setRepoTab("glance")}
+                  className={`px-1.5 py-0.5 rounded transition-colors ${
+                    repoTab === "glance"
+                      ? "bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
                 >
-                  <span>JaisonSam/life-hub</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 text-neutral-400" />
-                </a>
-                <div className="text-xs font-mono text-neutral-300 mt-0.5">
-                  24 stars · 6 forks
-                </div>
-              </div>
-
-              {/* Open PRs */}
-              <div className="text-xs space-y-1.5 pt-1 border-t border-[#232530]">
-                <div className="font-mono text-neutral-400 text-[11px] font-semibold">
-                  Open pull requests (2 total)
-                </div>
-                <div className="font-mono text-[11px] text-neutral-200 flex items-center justify-between">
-                  <span className="truncate">2d feat: Glance dashboard revamp</span>
-                  <span className="text-amber-400 font-bold shrink-0 ml-1">#12</span>
-                </div>
-                <div className="font-mono text-[11px] text-neutral-200 flex items-center justify-between">
-                  <span className="truncate">8d perf: 3D coverflow smooth glide</span>
-                  <span className="text-amber-400 font-bold shrink-0 ml-1">#11</span>
-                </div>
-              </div>
-
-              {/* Open Issues */}
-              <div className="text-xs space-y-1.5 pt-1 border-t border-[#232530]">
-                <div className="font-mono text-neutral-400 text-[11px] font-semibold">
-                  Open issues (3 total)
-                </div>
-                <div className="font-mono text-[11px] text-neutral-200 flex items-center justify-between">
-                  <span className="truncate">2d [Feature] Daily dynamic scripture</span>
-                  <span className="text-neutral-400 shrink-0 ml-1">#9</span>
-                </div>
-                <div className="font-mono text-[11px] text-neutral-200 flex items-center justify-between">
-                  <span className="truncate">5d [Telemetry] Farm sensor live sync</span>
-                  <span className="text-neutral-400 shrink-0 ml-1">#8</span>
-                </div>
+                  glance
+                </button>
+                <button
+                  onClick={() => setRepoTab("lifehub")}
+                  className={`px-1.5 py-0.5 rounded transition-colors ${
+                    repoTab === "lifehub"
+                      ? "bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  life-hub
+                </button>
               </div>
             </div>
+
+            {repoTab === "glance" ? (
+              <div className="space-y-2.5">
+                <div>
+                  <a
+                    href="https://github.com/glanceapp/glance"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-bold text-white hover:text-[#e5c07b] transition-colors text-xs sm:text-sm flex items-center gap-1"
+                  >
+                    <span>glanceapp/glance</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-neutral-400" />
+                  </a>
+                  <div className="text-xs font-mono text-[#8b91a0] mt-0.5">
+                    7,281 stars · 251 forks
+                  </div>
+                </div>
+
+                {/* Open PRs */}
+                <div className="text-xs space-y-1.5 pt-1 border-t border-[#232530]">
+                  <div className="font-mono text-[#8b91a0] text-[11px] font-semibold">
+                    Open pull requests (9 total)
+                  </div>
+                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
+                    <span className="truncate">25d !bangs at the end</span>
+                  </div>
+                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
+                    <span className="truncate">1mo Bookmark status indicator</span>
+                  </div>
+                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
+                    <span className="truncate">1mo CSS dynamic columns refactor an...</span>
+                  </div>
+                </div>
+
+                {/* Open Issues */}
+                <div className="text-xs space-y-1.5 pt-1 border-t border-[#232530]">
+                  <div className="font-mono text-[#8b91a0] text-[11px] font-semibold">
+                    Open issues (54 total)
+                  </div>
+                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
+                    <span className="truncate">7d [Bug(?)] Version tag not showin...</span>
+                  </div>
+                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
+                    <span className="truncate">7d [Request] Mark as read</span>
+                  </div>
+                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
+                    <span className="truncate">13d [Feature Request] Ability to ch...</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                <div>
+                  <a
+                    href="https://github.com/JaisonSam/life-hub"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-bold text-white hover:text-[#e5c07b] transition-colors text-xs sm:text-sm flex items-center gap-1"
+                  >
+                    <span>JaisonSam/life-hub</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-neutral-400" />
+                  </a>
+                  <div className="text-xs font-mono text-[#8b91a0] mt-0.5">
+                    24 stars · 6 forks
+                  </div>
+                </div>
+
+                {/* Open PRs */}
+                <div className="text-xs space-y-1.5 pt-1 border-t border-[#232530]">
+                  <div className="font-mono text-[#8b91a0] text-[11px] font-semibold">
+                    Open pull requests (2 total)
+                  </div>
+                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
+                    <span className="truncate">2d feat: Glance dashboard revamp</span>
+                    <span className="text-amber-400 font-bold shrink-0 ml-1">#12</span>
+                  </div>
+                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
+                    <span className="truncate">8d perf: 3D coverflow smooth glide</span>
+                    <span className="text-amber-400 font-bold shrink-0 ml-1">#11</span>
+                  </div>
+                </div>
+
+                {/* Open Issues */}
+                <div className="text-xs space-y-1.5 pt-1 border-t border-[#232530]">
+                  <div className="font-mono text-[#8b91a0] text-[11px] font-semibold">
+                    Open issues (3 total)
+                  </div>
+                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
+                    <span className="truncate">2d [Feature] Daily dynamic scripture</span>
+                    <span className="text-neutral-400 shrink-0 ml-1">#9</span>
+                  </div>
+                  <div className="font-mono text-[11px] text-[#d6daf0] flex items-center justify-between">
+                    <span className="truncate">5d [Telemetry] Farm sensor live sync</span>
+                    <span className="text-neutral-400 shrink-0 ml-1">#8</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* 3.3 MARKETS WIDGET CARD */}
+          {/* 3.3 MARKETS WIDGET CARD (Glance Parity + Jaison's Portfolio) */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3">
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-neutral-300 uppercase font-bold">
+            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-[#8b91a0] uppercase font-bold">
               <span className="flex items-center gap-1.5 text-white">
                 <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
                 MARKETS
               </span>
-              <span className="text-[10px] font-mono text-neutral-400 font-semibold">Live / EOD</span>
+              <span className="text-[10px] font-mono text-[#8b91a0] font-semibold">Live Feed</span>
             </div>
 
             <div className="space-y-3">
-              {/* Ticker 1: Schneider Electric */}
+              {/* Ticker 1: BTC-USD (Glance Screenshot) */}
               <div className="flex items-center justify-between text-xs">
                 <div>
-                  <div className="font-bold text-white font-mono text-sm">SE.PA</div>
-                  <div className="text-[11px] text-neutral-400 font-mono">Schneider Electric</div>
+                  <div className="font-bold text-white font-mono text-sm">BTC-USD</div>
+                  <div className="text-[11px] text-[#8b91a0] font-mono">Bitcoin</div>
                 </div>
-                {/* SVG Sparkline (Green Up) */}
+                {/* SVG Sparkline (Red Down, Glance style) */}
+                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
+                  <path
+                    d="M2 4 L14 6 L26 5 L38 11 L50 12 L62 17"
+                    stroke="#f87171"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <div className="text-right font-mono">
+                  <div className="text-rose-400 font-bold">-4.80%</div>
+                  <div className="text-neutral-200 text-[11px] font-semibold">$53,464.86</div>
+                </div>
+              </div>
+
+              {/* Ticker 2: AMD (Glance Screenshot) */}
+              <div className="flex items-center justify-between text-xs">
+                <div>
+                  <div className="font-bold text-white font-mono text-sm">AMD</div>
+                  <div className="text-[11px] text-[#8b91a0] font-mono">AMD</div>
+                </div>
+                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
+                  <path
+                    d="M2 5 L14 7 L26 6 L38 13 L50 14 L62 18"
+                    stroke="#f87171"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <div className="text-right font-mono">
+                  <div className="text-rose-400 font-bold">-4.27%</div>
+                  <div className="text-neutral-200 text-[11px] font-semibold">$133.48</div>
+                </div>
+              </div>
+
+              {/* Ticker 3: NVDA (Glance Screenshot) */}
+              <div className="flex items-center justify-between text-xs">
+                <div>
+                  <div className="font-bold text-white font-mono text-sm">NVDA</div>
+                  <div className="text-[11px] text-[#8b91a0] font-mono">NVIDIA</div>
+                </div>
+                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
+                  <path
+                    d="M2 6 L14 8 L26 7 L38 14 L50 13 L62 17"
+                    stroke="#f87171"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <div className="text-right font-mono">
+                  <div className="text-rose-400 font-bold">-4.12%</div>
+                  <div className="text-neutral-200 text-[11px] font-semibold">$102.79</div>
+                </div>
+              </div>
+
+              {/* Ticker 4: GOOGL (Glance Screenshot) */}
+              <div className="flex items-center justify-between text-xs">
+                <div>
+                  <div className="font-bold text-white font-mono text-sm">GOOGL</div>
+                  <div className="text-[11px] text-[#8b91a0] font-mono">Alphabet</div>
+                </div>
+                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
+                  <path
+                    d="M2 5 L14 6 L26 8 L38 12 L50 13 L62 16"
+                    stroke="#f87171"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <div className="text-right font-mono">
+                  <div className="text-rose-400 font-bold">-3.46%</div>
+                  <div className="text-neutral-200 text-[11px] font-semibold">$151.84</div>
+                </div>
+              </div>
+
+              {/* Ticker 5: Schneider Electric (Jaison's Core) */}
+              <div className="flex items-center justify-between text-xs pt-1 border-t border-[#232530]">
+                <div>
+                  <div className="font-bold text-white font-mono text-sm">SE.PA</div>
+                  <div className="text-[11px] text-[#8b91a0] font-mono">Schneider Electric</div>
+                </div>
                 <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
                   <path
                     d="M2 14 L12 12 L22 15 L32 9 L42 11 L52 5 L62 3"
@@ -1599,79 +1891,16 @@ export default function GlanceDashboard({
                   />
                 </svg>
                 <div className="text-right font-mono">
-                  <div className="text-emerald-400 font-bold">+1.25%</div>
-                  <div className="text-neutral-200 text-[11px] font-semibold">€244.50</div>
+                  <div className="text-emerald-400 font-bold">+1.45%</div>
+                  <div className="text-neutral-200 text-[11px] font-semibold">€242.80</div>
                 </div>
               </div>
 
-              {/* Ticker 2: NIFTY 50 */}
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-white font-mono text-sm">NIFTY 50</div>
-                  <div className="text-[11px] text-neutral-400 font-mono">NSE India</div>
-                </div>
-                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
-                  <path
-                    d="M2 15 L14 13 L26 10 L38 12 L50 6 L62 4"
-                    stroke="#10b981"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="text-right font-mono">
-                  <div className="text-emerald-400 font-bold">+0.48%</div>
-                  <div className="text-neutral-200 text-[11px] font-semibold">24,580.40</div>
-                </div>
-              </div>
-
-              {/* Ticker 3: SENSEX */}
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-white font-mono text-sm">SENSEX</div>
-                  <div className="text-[11px] text-neutral-400 font-mono">BSE India</div>
-                </div>
-                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
-                  <path
-                    d="M2 14 L15 13 L28 15 L40 9 L52 8 L62 5"
-                    stroke="#10b981"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="text-right font-mono">
-                  <div className="text-emerald-400 font-bold">+0.39%</div>
-                  <div className="text-neutral-200 text-[11px] font-semibold">80,620.10</div>
-                </div>
-              </div>
-
-              {/* Ticker 4: BTC-USD */}
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-white font-mono text-sm">BTC-USD</div>
-                  <div className="text-[11px] text-neutral-400 font-mono">Bitcoin</div>
-                </div>
-                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
-                  <path
-                    d="M2 16 L12 11 L24 13 L36 7 L48 9 L62 2"
-                    stroke="#10b981"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="text-right font-mono">
-                  <div className="text-emerald-400 font-bold">+2.14%</div>
-                  <div className="text-neutral-200 text-[11px] font-semibold">$91,420</div>
-                </div>
-              </div>
-
-              {/* Ticker 5: USD-INR */}
+              {/* Ticker 6: USD/INR */}
               <div className="flex items-center justify-between text-xs">
                 <div>
                   <div className="font-bold text-white font-mono text-sm">USD/INR</div>
-                  <div className="text-[11px] text-neutral-400 font-mono">Rupee Rate</div>
+                  <div className="text-[11px] text-[#8b91a0] font-mono">Rupee Rate</div>
                 </div>
                 <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
                   <path

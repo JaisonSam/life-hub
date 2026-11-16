@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #030014;
+  --background: #0c0d11;
   --foreground: #f4f4f6;
   --accent-amber: #f59e0b;
   --accent-blue: #3b82f6;
@@ -17,7 +17,7 @@
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
-  background-color: #030014;
+  background-color: #0c0d11;
 }
 
 body {
