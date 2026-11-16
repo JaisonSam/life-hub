@@ -63,15 +63,15 @@ export default function TronBackgroundVideo({
       {/* 
         AMBIENT BACKGROUND VIDEO LAYER
         - During Intro (!isHomescreenVisible): Full-screen solo video view
-        - On Homescreen: Fades in behind dashboard contents as the user scrolls down (scrollY > 50)
-        - When at the top (scrollY <= 50): Hidden (opacity-0) so video only shows inside the showcase section box!
+        - On Homescreen: Fades in behind dashboard contents as the user scrolls down (scrollY > 120)
+        - When at the top (scrollY <= 120): Hidden (opacity-0) so video only shows inside the showcase section box!
       */}
       <div
-        className={`fixed inset-0 w-full h-full z-0 overflow-hidden bg-black pointer-events-none select-none transition-opacity duration-700 ease-out ${
+        className={`fixed inset-0 w-full h-full z-0 overflow-hidden bg-black pointer-events-none select-none transition-opacity duration-1000 ease-out ${
           !isHomescreenVisible
             ? "opacity-100"
-            : scrollY > 50
-            ? "opacity-35"
+            : scrollY > 120
+            ? "opacity-40"
             : "opacity-0"
         }`}
         aria-hidden="true"
@@ -90,8 +90,8 @@ export default function TronBackgroundVideo({
 
       {/* AMBIENT DARK OVERLAY WHEN SCROLLED DOWN IN DASHBOARD */}
       <div
-        className={`fixed inset-0 pointer-events-none z-[1] transition-opacity duration-700 ease-out ${
-          isHomescreenVisible && scrollY > 50
+        className={`fixed inset-0 pointer-events-none z-[1] transition-opacity duration-1000 ease-out ${
+          isHomescreenVisible && scrollY > 120
             ? "opacity-100 bg-[#090a10]/60 backdrop-blur-[1px]"
             : "opacity-0"
         }`}

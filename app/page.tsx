@@ -1473,9 +1473,9 @@ export default function LifeHub() {
         </div>
       </header>
 
-      {/* SEPARATE TRON VIDEO SHOWCASE SECTION (Below Main Top Tab, Over Homescreen Content) */}
+      {/* SEPARATE TRON VIDEO SHOWCASE SECTION (Below Main Top Tab, Clean & Frameless) */}
       <section className="max-w-7xl mx-auto px-2 sm:px-4">
-        <div className="relative rounded-2xl overflow-hidden border border-cyan-500/40 shadow-[0_0_35px_rgba(6,182,212,0.25)] h-[300px] sm:h-[400px] md:h-[460px] bg-black flex flex-col justify-end items-center p-6 sm:p-8">
+        <div className="relative rounded-2xl overflow-hidden h-[300px] sm:h-[400px] md:h-[480px] bg-black shadow-2xl">
           {/* Native Video Playing INSIDE the Section */}
           <video
             ref={sectionVideoRef}
@@ -1485,36 +1485,13 @@ export default function LifeHub() {
             muted={isMuted}
             playsInline
             preload="auto"
-            className="absolute inset-0 w-full h-full object-cover"
+            className="w-full h-full object-cover"
           />
-
-          {/* Subtle cyan corner tech accents */}
-          <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-cyan-400/50 pointer-events-none z-10" />
-          <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-cyan-400/50 pointer-events-none z-10" />
-          <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-cyan-400/50 pointer-events-none z-10" />
-          <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-cyan-400/50 pointer-events-none z-10" />
-
-          {/* Only the Scroll Down for Dashboard prompt is shown (No fullscreen options or other details) */}
-          <div className="relative z-20">
-            <button
-              onClick={() => {
-                const el = document.getElementById("dashboard-contents");
-                if (el) el.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-black/80 hover:bg-black/95 border border-cyan-500/50 hover:border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.45)] backdrop-blur-md transition-all hover:scale-105 active:scale-95 group cursor-pointer"
-            >
-              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 animate-bounce group-hover:text-cyan-300 transition-colors" />
-              <span className="text-xs sm:text-sm font-mono font-bold tracking-widest text-cyan-200 group-hover:text-white uppercase">
-                Scroll Down for Dashboard
-              </span>
-              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 animate-bounce group-hover:text-cyan-300 transition-colors" />
-            </button>
-          </div>
         </div>
       </section>
 
-      {/* SMALL GAP (Gap between video and contents for seamless transition into background) */}
-      <div className="h-6 sm:h-8" aria-hidden="true" />
+      {/* GENEROUS TRANSITION GAP (Allows smooth visible transition between main video and background video) */}
+      <div className="h-44 sm:h-60 md:h-72" aria-hidden="true" />
 
       {/* Main Content Area */}
       <main id="dashboard-contents" className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-7 sm:space-y-8">
