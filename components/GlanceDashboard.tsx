@@ -39,10 +39,17 @@ import {
   Copy,
   CalendarCheck2,
   Radio,
+  Upload,
+  RefreshCw,
 } from "lucide-react";
 import { getDailyScripture, ScriptureDay } from "@/lib/dailyScripture";
 import { DynamicHabit, DEFAULT_HABITS, loadDailyHabits, toggleDailyHabitStorage, getDateKey } from "@/lib/dailyHabits";
-import { PlannedActivity, getPlannedActivitiesForDate, getGoogleCalendarAddUrl } from "@/lib/calendarActivities";
+import {
+  PlannedActivity,
+  getPlannedActivitiesForDate,
+  getGoogleCalendarAddUrl,
+  parseICSContent,
+} from "@/lib/calendarActivities";
 
 interface GlanceDashboardProps {
   onSelectTab: (tabId: "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music") => void;
@@ -77,12 +84,15 @@ export default function GlanceDashboard({
   const [gcalIcsUrl, setGcalIcsUrl] = useState<string>("");
   const [gcalLoading, setGcalLoading] = useState<boolean>(false);
   const [gcalStatus, setGcalStatus] = useState<string>("");
+  const [gcalLastSynced, setGcalLastSynced] = useState<string | null>(null);
+  const [calendarFilter, setCalendarFilter] = useState<"all" | "gcal" | "routine">("all");
   const [customActivities, setCustomActivities] = useState<PlannedActivity[]>([]);
   const [completedActivityIds, setCompletedActivityIds] = useState<Record<string, boolean>>({});
   const [showAddActivityForm, setShowAddActivityForm] = useState<boolean>(false);
   const [newActTitle, setNewActTitle] = useState<string>("");
   const [newActTime, setNewActTime] = useState<string>("09:30 AM");
   const [newActCategory, setNewActCategory] = useState<PlannedActivity["category"]>("Career");
+  const [newActAlsoGCal, setNewActAlsoGCal] = useState<boolean>(true);
 
   // 5. Executive Scratchpad & Pomodoro HUD
   const [scratchpadNote, setScratchpadNote] = useState<string>(
@@ -91,6 +101,13 @@ export default function GlanceDashboard({
   const [noteCopied, setNoteCopied] = useState<boolean>(false);
   const [pomodoroSeconds, setPomodoroSeconds] = useState<number>(25 * 60);
   const [pomodoroRunning, setPomodoroRunning] = useState<boolean>(false);
+
+  // 6. Indian Market Trends (Groww App) State
+  const [marketFilter, setMarketFilter] = useState<"all" | "indices" | "stocks">("all");
+  const [marketTickVersion, setMarketTickVersion] = useState<number>(0);
+  const [marketLastUpdated, setMarketLastUpdated] = useState<string>("Just now");
+  const [marketRefreshing, setMarketRefreshing] = useState<boolean>(false);
+  const [isIndianMarketOpen, setIsIndianMarketOpen] = useState<boolean>(true);
 
   useEffect(() => {
     let t: any = null;
@@ -120,9 +137,10 @@ export default function GlanceDashboard({
           title: evt.title,
           time: evt.time || "All Day",
           date: evt.date,
-          category: "Personal" as const,
+          category: (evt.category || "Google-Calendar") as PlannedActivity["category"],
           source: "google-calendar" as const,
-          notes: evt.description,
+          notes: evt.notes || evt.description,
+          location: evt.location,
         }));
         setCustomActivities((prev) => {
           const nonGcal = prev.filter((p) => p.source !== "google-calendar");
@@ -130,6 +148,9 @@ export default function GlanceDashboard({
           try {
             localStorage.setItem("lifehub_custom_activities", JSON.stringify(combined));
             localStorage.setItem("lifehub_gcal_ics", url.trim());
+            const nowTime = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+            localStorage.setItem("lifehub_gcal_synced_at", nowTime);
+            setGcalLastSynced(nowTime);
           } catch {}
           return combined;
         });
@@ -144,6 +165,208 @@ export default function GlanceDashboard({
     }
   };
 
+  // Upload and parse local .ics file directly in browser
+  const handleIcsFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setGcalLoading(true);
+    setGcalStatus(`Parsing ${file.name}...`);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const parsed = parseICSContent(text);
+        if (parsed.length > 0) {
+          setCustomActivities((prev) => {
+            const nonGcal = prev.filter((p) => p.source !== "google-calendar");
+            const combined = [...nonGcal, ...parsed];
+            try {
+              localStorage.setItem("lifehub_custom_activities", JSON.stringify(combined));
+              const nowTime = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+              localStorage.setItem("lifehub_gcal_synced_at", `${nowTime} (file)`);
+              setGcalLastSynced(`${nowTime} (file)`);
+            } catch {}
+            return combined;
+          });
+          setGcalStatus(`✓ Successfully imported ${parsed.length} events from ${file.name}!`);
+        } else {
+          setGcalStatus("No events found in this .ics file.");
+        }
+      } catch (err: any) {
+        setGcalStatus(`Failed to read file: ${err.message}`);
+      } finally {
+        setGcalLoading(false);
+      }
+    };
+    reader.onerror = () => {
+      setGcalStatus("Failed to open file.");
+      setGcalLoading(false);
+    };
+    reader.readAsText(file);
+  };
+
+  // Disconnect Google Calendar feed
+  const handleDisconnectGCal = () => {
+    setGcalIcsUrl("");
+    setGcalLastSynced(null);
+    setGcalStatus("");
+    setCustomActivities((prev) => {
+      const nonGcal = prev.filter((p) => p.source !== "google-calendar");
+      try {
+        localStorage.removeItem("lifehub_gcal_ics");
+        localStorage.removeItem("lifehub_gcal_synced_at");
+        localStorage.setItem("lifehub_custom_activities", JSON.stringify(nonGcal));
+      } catch {}
+      return nonGcal;
+    });
+  };
+
+  // Check if Indian markets are currently open (09:15 AM - 03:30 PM IST, Mon-Fri)
+  const checkIndianMarketHours = () => {
+    try {
+      const now = new Date();
+      const istTimeStr = now.toLocaleTimeString("en-US", {
+        timeZone: "Asia/Kolkata",
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const parts = istTimeStr.split(":");
+      const h = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      const totalMinutes = h * 60 + m;
+
+      const istDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+      const day = istDate.getDay(); // 0 is Sun, 6 is Sat
+      if (day === 0 || day === 6) return false;
+
+      return totalMinutes >= 555 && totalMinutes <= 930;
+    } catch {
+      return false;
+    }
+  };
+
+  // Refresh Indian Market quotes (simulating live tick)
+  const handleRefreshMarkets = () => {
+    setMarketRefreshing(true);
+    setTimeout(() => {
+      setMarketTickVersion((v) => v + 1);
+      const timeStr = new Date().toLocaleTimeString("en-IN", {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      setMarketLastUpdated(`${timeStr} IST`);
+      setIsIndianMarketOpen(checkIndianMarketHours());
+      setMarketRefreshing(false);
+    }, 400);
+  };
+
+  // Indian Market Instruments on Groww
+  const indianMarketData = useMemo(() => {
+    return [
+      {
+        symbol: "NIFTY 50",
+        name: "NSE Benchmark Index",
+        type: "indices" as const,
+        price: "₹24,148.20",
+        change: "+101.40 (+0.42%)",
+        isPositive: true,
+        growwUrl: "https://groww.in/indices/nifty-50",
+        sparkline: "M2 14 L12 12 L22 15 L32 9 L42 11 L52 5 L62 3",
+        tag: "National Index",
+      },
+      {
+        symbol: "SENSEX",
+        name: "BSE Benchmark Index",
+        type: "indices" as const,
+        price: "₹79,485.60",
+        change: "+302.20 (+0.38%)",
+        isPositive: true,
+        growwUrl: "https://groww.in/indices/bse-sensex",
+        sparkline: "M2 13 L12 14 L22 10 L32 11 L42 7 L52 8 L62 4",
+        tag: "Bombay 30",
+      },
+      {
+        symbol: "BANK NIFTY",
+        name: "NSE Banking Index",
+        type: "indices" as const,
+        price: "₹51,820.10",
+        change: "+334.80 (+0.65%)",
+        isPositive: true,
+        growwUrl: "https://groww.in/indices/nifty-bank",
+        sparkline: "M2 15 L12 11 L22 13 L32 8 L42 9 L52 4 L62 2",
+        tag: "Banking",
+      },
+      {
+        symbol: "SCHNEIDER",
+        name: "Schneider Electric Infra Ltd",
+        type: "stocks" as const,
+        price: "₹842.50",
+        change: "+₹19.35 (+2.35%)",
+        isPositive: true,
+        growwUrl: "https://groww.in/stocks/schneider-electric-infrastructure-ltd",
+        sparkline: "M2 16 L12 14 L22 12 L32 10 L42 6 L52 5 L62 2",
+        tag: "Jaison's Company",
+        highlight: true,
+      },
+      {
+        symbol: "TATAMOTORS",
+        name: "Tata Motors Ltd",
+        type: "stocks" as const,
+        price: "₹784.90",
+        change: "+₹8.90 (+1.15%)",
+        isPositive: true,
+        growwUrl: "https://groww.in/stocks/tata-motors-ltd",
+        sparkline: "M2 14 L12 13 L22 11 L32 12 L42 8 L52 7 L62 4",
+        tag: "Auto / EV",
+      },
+      {
+        symbol: "RELIANCE",
+        name: "Reliance Industries Ltd",
+        type: "stocks" as const,
+        price: "₹1,268.40",
+        change: "-₹3.55 (-0.28%)",
+        isPositive: false,
+        growwUrl: "https://groww.in/stocks/reliance-industries-ltd",
+        sparkline: "M2 5 L14 6 L26 8 L38 12 L50 13 L62 16",
+        tag: "Energy & Retail",
+      },
+      {
+        symbol: "HDFCBANK",
+        name: "HDFC Bank Ltd",
+        type: "stocks" as const,
+        price: "₹1,742.00",
+        change: "+₹14.15 (+0.82%)",
+        isPositive: true,
+        growwUrl: "https://groww.in/stocks/hdfc-bank-ltd",
+        sparkline: "M2 12 L12 14 L22 10 L32 9 L42 7 L52 8 L62 5",
+        tag: "Private Bank",
+      },
+      {
+        symbol: "USD/INR",
+        name: "Indian Rupee Forex Spot",
+        type: "indices" as const,
+        price: "₹84.42",
+        change: "+0.04%",
+        isPositive: null,
+        growwUrl: "https://groww.in/us-stocks",
+        sparkline: "M2 10 L14 11 L26 9 L38 10 L50 9 L62 10",
+        tag: "Forex",
+      },
+    ];
+  }, [marketTickVersion]);
+
+  const filteredMarketData = useMemo(() => {
+    if (marketFilter === "indices") {
+      return indianMarketData.filter((m) => m.type === "indices");
+    }
+    if (marketFilter === "stocks") {
+      return indianMarketData.filter((m) => m.type === "stocks");
+    }
+    return indianMarketData;
+  }, [indianMarketData, marketFilter]);
+
   // On client mount, sync immediately with real client time, date, GCal & storage
   useEffect(() => {
     const liveNow = new Date();
@@ -154,12 +377,17 @@ export default function GlanceDashboard({
     setTodayKey(liveKey);
     setScriptureDay(getDailyScripture(liveNow, scriptureOffset));
     setDailyHabits(loadDailyHabits(liveKey));
+    setIsIndianMarketOpen(checkIndianMarketHours());
 
     try {
       const savedIcs = localStorage.getItem("lifehub_gcal_ics");
       if (savedIcs) {
         setGcalIcsUrl(savedIcs);
         syncGCal(savedIcs);
+      }
+      const savedSyncTime = localStorage.getItem("lifehub_gcal_synced_at");
+      if (savedSyncTime) {
+        setGcalLastSynced(savedSyncTime);
       }
       const savedCustom = localStorage.getItem("lifehub_custom_activities");
       if (savedCustom) {
@@ -211,6 +439,15 @@ export default function GlanceDashboard({
     try {
       localStorage.setItem("lifehub_custom_activities", JSON.stringify(updated));
     } catch {}
+
+    // If also selected to add to Google Calendar, launch 1-click GCal event creation
+    if (newActAlsoGCal) {
+      try {
+        const gcalUrl = getGoogleCalendarAddUrl(newAct, selectedDateObj);
+        window.open(gcalUrl, "_blank", "noopener,noreferrer");
+      } catch {}
+    }
+
     setNewActTitle("");
     setShowAddActivityForm(false);
   };
@@ -346,9 +583,35 @@ export default function GlanceDashboard({
     return selectedDateKey === getDateKey(todayDate);
   }, [selectedDateKey, todayDate]);
 
-  const plannedActivities = useMemo(() => {
+  const rawPlannedActivities = useMemo(() => {
     return getPlannedActivitiesForDate(selectedDateObj, customActivities);
   }, [selectedDateObj, customActivities]);
+
+  const gcalCountForDate = useMemo(() => {
+    return rawPlannedActivities.filter(
+      (a) => a.source === "google-calendar" || a.category === "Google-Calendar"
+    ).length;
+  }, [rawPlannedActivities]);
+
+  const routineCountForDate = useMemo(() => {
+    return rawPlannedActivities.filter(
+      (a) => a.source !== "google-calendar" && a.category !== "Google-Calendar"
+    ).length;
+  }, [rawPlannedActivities]);
+
+  const plannedActivities = useMemo(() => {
+    if (calendarFilter === "gcal") {
+      return rawPlannedActivities.filter(
+        (a) => a.source === "google-calendar" || a.category === "Google-Calendar"
+      );
+    }
+    if (calendarFilter === "routine") {
+      return rawPlannedActivities.filter(
+        (a) => a.source !== "google-calendar" && a.category !== "Google-Calendar"
+      );
+    }
+    return rawPlannedActivities;
+  }, [rawPlannedActivities, calendarFilter]);
 
   return (
     <div className="w-full text-neutral-200 space-y-6 animate-in fade-in duration-500 font-sans">
@@ -449,26 +712,97 @@ export default function GlanceDashboard({
                   PLANNED ACTIVITIES
                 </span>
                 <div className="flex items-center gap-1.5 text-[10px] font-mono">
-                  <button
-                    onClick={() => setShowGCalModal(true)}
-                    className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 transition-colors font-semibold"
-                    title="Link Google Calendar feed"
-                  >
-                    <Link2 className="w-3 h-3 text-amber-400" />
-                    <span>Link GCal</span>
-                  </button>
+                  {gcalLastSynced ? (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => syncGCal(gcalIcsUrl)}
+                        disabled={gcalLoading}
+                        className="p-1 hover:text-white text-neutral-400 transition-colors"
+                        title="Re-sync Google Calendar"
+                      >
+                        <RefreshCw className={`w-3 h-3 text-emerald-400 ${gcalLoading ? "animate-spin" : ""}`} />
+                      </button>
+                      <button
+                        onClick={() => setShowGCalModal(true)}
+                        className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors font-semibold"
+                        title={`Synced at ${gcalLastSynced}. Click for settings.`}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>GCal Synced</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowGCalModal(true)}
+                      className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 transition-colors font-semibold"
+                      title="Link Google Calendar feed"
+                    >
+                      <Link2 className="w-3 h-3 text-blue-400" />
+                      <span>Link GCal</span>
+                    </button>
+                  )}
                   <a
-                    href="https://calendar.google.com/calendar/r"
+                    href="https://calendar.google.com/calendar/u/0/r"
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-0.5 text-neutral-400 hover:text-white transition-colors"
-                    title="Open Google Calendar"
+                    title="Open Google Calendar web"
                   >
                     <span>GCal</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               </div>
+
+              {/* Activity Category / Source Filter Pills */}
+              <div className="flex items-center gap-1 text-[10px] font-mono">
+                <button
+                  onClick={() => setCalendarFilter("all")}
+                  className={`px-2 py-0.5 rounded transition-colors font-medium ${
+                    calendarFilter === "all"
+                      ? "bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold"
+                      : "text-neutral-400 hover:text-white bg-neutral-900/60"
+                  }`}
+                >
+                  All ({rawPlannedActivities.length})
+                </button>
+                <button
+                  onClick={() => setCalendarFilter("gcal")}
+                  className={`px-2 py-0.5 rounded transition-colors flex items-center gap-1 font-medium ${
+                    calendarFilter === "gcal"
+                      ? "bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold"
+                      : "text-neutral-400 hover:text-white bg-neutral-900/60"
+                  }`}
+                >
+                  <span>Google Cal</span>
+                  <span className="text-[9px] opacity-80">({gcalCountForDate})</span>
+                </button>
+                <button
+                  onClick={() => setCalendarFilter("routine")}
+                  className={`px-2 py-0.5 rounded transition-colors font-medium ${
+                    calendarFilter === "routine"
+                      ? "bg-neutral-700 text-white border border-neutral-600 font-bold"
+                      : "text-neutral-400 hover:text-white bg-neutral-900/60"
+                  }`}
+                >
+                  Routines ({routineCountForDate})
+                </button>
+              </div>
+
+              {/* Unlinked Google Calendar Prompt Banner */}
+              {!gcalLastSynced && (
+                <div className="p-2.5 rounded-lg bg-sky-950/30 border border-sky-800/40 flex items-center justify-between text-xs font-mono">
+                  <div className="text-sky-200 text-[11px] leading-tight">
+                    <span className="font-bold text-sky-100">Connect Google Calendar:</span> Sync meetings & ERP agenda live.
+                  </div>
+                  <button
+                    onClick={() => setShowGCalModal(true)}
+                    className="px-2 py-0.5 rounded bg-sky-500 text-neutral-950 font-bold hover:bg-sky-400 shrink-0 text-[10px] ml-2 transition-colors"
+                  >
+                    Connect
+                  </button>
+                </div>
+              )}
 
               {/* Selected Date Header + Quick Add Button */}
               <div className="flex items-center justify-between text-xs font-mono bg-[#1a1b23] p-2.5 rounded-lg border border-[#282a37]">
@@ -495,7 +829,7 @@ export default function GlanceDashboard({
               {showAddActivityForm && (
                 <form
                   onSubmit={handleAddActivity}
-                  className="p-2.5 rounded-lg bg-[#1a1b23] border border-neutral-700 space-y-2 animate-in fade-in duration-200"
+                  className="p-2.5 rounded-lg bg-[#1a1b23] border border-neutral-700 space-y-2.5 animate-in fade-in duration-200"
                 >
                   <input
                     type="text"
@@ -526,6 +860,15 @@ export default function GlanceDashboard({
                       <option value="Personal">Personal</option>
                     </select>
                   </div>
+                  <label className="flex items-center gap-2 text-[11px] font-mono text-neutral-300 cursor-pointer pt-0.5 select-none">
+                    <input
+                      type="checkbox"
+                      checked={newActAlsoGCal}
+                      onChange={(e) => setNewActAlsoGCal(e.target.checked)}
+                      className="rounded accent-amber-500"
+                    />
+                    <span>Open & save in Google Calendar</span>
+                  </label>
                   <div className="flex items-center justify-end gap-2 pt-1 font-mono text-[11px]">
                     <button
                       type="button"
@@ -548,11 +891,16 @@ export default function GlanceDashboard({
               <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1 no-scrollbar">
                 {plannedActivities.length === 0 ? (
                   <div className="p-3 text-center text-xs font-mono text-neutral-400 bg-[#181920]/60 rounded-lg border border-dashed border-[#282a37]">
-                    No activities scheduled for this date.
+                    {calendarFilter === "gcal"
+                      ? "No Google Calendar events for this date."
+                      : calendarFilter === "routine"
+                      ? "No routines for this date."
+                      : "No activities scheduled for this date."}
                   </div>
                 ) : (
                   plannedActivities.map((act) => {
                     const isDone = Boolean(completedActivityIds && typeof completedActivityIds === "object" && completedActivityIds[act.id]);
+                    const isGCal = act.source === "google-calendar" || act.category === "Google-Calendar";
                     const gcalAddLink = getGoogleCalendarAddUrl(act, selectedDateObj);
 
                     return (
@@ -561,6 +909,8 @@ export default function GlanceDashboard({
                         className={`p-2.5 rounded-lg border transition-all flex items-start justify-between gap-2 group ${
                           isDone
                             ? "bg-[#111216]/60 border-[#202129] opacity-60"
+                            : isGCal
+                            ? "bg-[#151824] hover:bg-[#1b2030] border-sky-900/40 hover:border-sky-600/60"
                             : "bg-[#181920] hover:bg-[#20222a] border-[#262834] hover:border-neutral-600"
                         }`}
                       >
@@ -580,9 +930,16 @@ export default function GlanceDashboard({
                               <span className="text-[10px] font-mono text-amber-400 font-bold shrink-0">
                                 {act.time}
                               </span>
-                              <span className="text-[9px] font-mono px-1 rounded bg-white/[0.08] text-neutral-300 border border-white/[0.08] shrink-0">
-                                {act.category}
-                              </span>
+                              {isGCal ? (
+                                <span className="text-[9px] font-mono px-1 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 shrink-0 font-semibold flex items-center gap-0.5">
+                                  <CalendarIcon className="w-2.5 h-2.5 text-sky-400" />
+                                  GCal
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-mono px-1 rounded bg-white/[0.08] text-neutral-300 border border-white/[0.08] shrink-0">
+                                  {act.category}
+                                </span>
+                              )}
                             </div>
                             <p
                               className={`text-xs mt-0.5 leading-snug line-clamp-2 transition-colors font-medium ${
@@ -591,16 +948,21 @@ export default function GlanceDashboard({
                             >
                               {act.title}
                             </p>
+                            {act.location && (
+                              <div className="text-[10px] font-mono text-neutral-400 truncate mt-0.5">
+                                📍 {act.location}
+                              </div>
+                            )}
                           </div>
                         </div>
 
-                        {/* Quick Add to Google Calendar Icon */}
+                        {/* Quick 1-Click Action to Google Calendar */}
                         <a
                           href={gcalAddLink}
                           target="_blank"
                           rel="noreferrer"
                           className="shrink-0 p-1 text-neutral-400 hover:text-amber-400 transition-colors opacity-0 group-hover:opacity-100"
-                          title="Add this activity directly to Google Calendar"
+                          title={isGCal ? "Open event in Google Calendar" : "Add this activity directly to Google Calendar"}
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>
@@ -1779,143 +2141,166 @@ export default function GlanceDashboard({
             )}
           </div>
 
-          {/* 3.3 MARKETS WIDGET CARD (Glance Parity + Jaison's Portfolio) */}
+          {/* 3.3 INDIAN MARKETS WIDGET CARD (Groww App Integration) */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3">
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-[#8b91a0] uppercase font-bold">
-              <span className="flex items-center gap-1.5 text-white">
-                <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
-                MARKETS
-              </span>
-              <span className="text-[10px] font-mono text-[#8b91a0] font-semibold">Live Feed</span>
+              <div className="flex items-center gap-1.5 text-white">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                <span>INDIAN MARKETS</span>
+                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#00d09c]/15 text-[#00d09c] border border-[#00d09c]/30">
+                  GROWW
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {isIndianMarketOpen ? (
+                  <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-400 font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    LIVE
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-[10px] font-mono text-neutral-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-500" />
+                    CLOSED
+                  </span>
+                )}
+                <button
+                  onClick={handleRefreshMarkets}
+                  disabled={marketRefreshing}
+                  className="p-0.5 hover:text-white text-neutral-400 transition-colors"
+                  title="Refresh market quotes"
+                >
+                  <RefreshCw className={`w-3 h-3 text-neutral-400 hover:text-emerald-400 transition-colors ${marketRefreshing ? "animate-spin text-emerald-400" : ""}`} />
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              {/* Ticker 1: BTC-USD (Glance Screenshot) */}
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-white font-mono text-sm">BTC-USD</div>
-                  <div className="text-[11px] text-[#8b91a0] font-mono">Bitcoin</div>
-                </div>
-                {/* SVG Sparkline (Red Down, Glance style) */}
-                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
-                  <path
-                    d="M2 4 L14 6 L26 5 L38 11 L50 12 L62 17"
-                    stroke="#f87171"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="text-right font-mono">
-                  <div className="text-rose-400 font-bold">-4.80%</div>
-                  <div className="text-neutral-200 text-[11px] font-semibold">$53,464.86</div>
-                </div>
+            {/* Filter Sub-Tabs */}
+            <div className="flex items-center justify-between text-[10px] font-mono border-b border-[#232530] pb-2">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setMarketFilter("all")}
+                  className={`px-2 py-0.5 rounded transition-colors font-medium ${
+                    marketFilter === "all"
+                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  All ({indianMarketData.length})
+                </button>
+                <button
+                  onClick={() => setMarketFilter("indices")}
+                  className={`px-2 py-0.5 rounded transition-colors font-medium ${
+                    marketFilter === "indices"
+                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  Indices
+                </button>
+                <button
+                  onClick={() => setMarketFilter("stocks")}
+                  className={`px-2 py-0.5 rounded transition-colors font-medium ${
+                    marketFilter === "stocks"
+                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  Groww Stocks
+                </button>
               </div>
+              <span className="text-[9px] text-neutral-500 font-mono hidden sm:inline">
+                {marketLastUpdated}
+              </span>
+            </div>
 
-              {/* Ticker 2: AMD (Glance Screenshot) */}
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-white font-mono text-sm">AMD</div>
-                  <div className="text-[11px] text-[#8b91a0] font-mono">AMD</div>
-                </div>
-                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
-                  <path
-                    d="M2 5 L14 7 L26 6 L38 13 L50 14 L62 18"
-                    stroke="#f87171"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="text-right font-mono">
-                  <div className="text-rose-400 font-bold">-4.27%</div>
-                  <div className="text-neutral-200 text-[11px] font-semibold">$133.48</div>
-                </div>
-              </div>
+            {/* Market Tickers List */}
+            <div className="space-y-2.5">
+              {filteredMarketData.map((item) => {
+                const isPos = item.isPositive === true;
+                const isNeg = item.isPositive === false;
 
-              {/* Ticker 3: NVDA (Glance Screenshot) */}
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-white font-mono text-sm">NVDA</div>
-                  <div className="text-[11px] text-[#8b91a0] font-mono">NVIDIA</div>
-                </div>
-                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
-                  <path
-                    d="M2 6 L14 8 L26 7 L38 14 L50 13 L62 17"
-                    stroke="#f87171"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="text-right font-mono">
-                  <div className="text-rose-400 font-bold">-4.12%</div>
-                  <div className="text-neutral-200 text-[11px] font-semibold">$102.79</div>
-                </div>
-              </div>
+                return (
+                  <a
+                    key={item.symbol}
+                    href={item.growwUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`flex items-center justify-between p-2 rounded-lg border transition-all group select-none ${
+                      (item as any).highlight
+                        ? "bg-[#181922] border-amber-500/40 hover:border-amber-400 hover:bg-[#1f212d]"
+                        : "bg-[#181920]/60 hover:bg-[#1f2029] border-[#262834] hover:border-neutral-600"
+                    }`}
+                  >
+                    <div className="min-w-0 pr-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-white font-mono text-xs group-hover:text-emerald-400 transition-colors">
+                          {item.symbol}
+                        </span>
+                        {item.tag && (
+                          <span
+                            className={`text-[9px] font-mono px-1 py-0.2 rounded font-semibold ${
+                              (item as any).highlight
+                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                : "bg-neutral-800 text-neutral-400"
+                            }`}
+                          >
+                            {item.tag}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-[#8b91a0] font-mono truncate">
+                        {item.name}
+                      </div>
+                    </div>
 
-              {/* Ticker 4: GOOGL (Glance Screenshot) */}
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-white font-mono text-sm">GOOGL</div>
-                  <div className="text-[11px] text-[#8b91a0] font-mono">Alphabet</div>
-                </div>
-                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
-                  <path
-                    d="M2 5 L14 6 L26 8 L38 12 L50 13 L62 16"
-                    stroke="#f87171"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="text-right font-mono">
-                  <div className="text-rose-400 font-bold">-3.46%</div>
-                  <div className="text-neutral-200 text-[11px] font-semibold">$151.84</div>
-                </div>
-              </div>
+                    {/* SVG Sparkline */}
+                    <div className="shrink-0 px-1">
+                      <svg className="w-14 h-4.5" viewBox="0 0 64 20" fill="none">
+                        <path
+                          d={item.sparkline}
+                          stroke={isPos ? "#00d09c" : isNeg ? "#f87171" : "#94a3b8"}
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
 
-              {/* Ticker 5: Schneider Electric (Jaison's Core) */}
-              <div className="flex items-center justify-between text-xs pt-1 border-t border-[#232530]">
-                <div>
-                  <div className="font-bold text-white font-mono text-sm">SE.PA</div>
-                  <div className="text-[11px] text-[#8b91a0] font-mono">Schneider Electric</div>
-                </div>
-                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
-                  <path
-                    d="M2 14 L12 12 L22 15 L32 9 L42 11 L52 5 L62 3"
-                    stroke="#10b981"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="text-right font-mono">
-                  <div className="text-emerald-400 font-bold">+1.45%</div>
-                  <div className="text-neutral-200 text-[11px] font-semibold">€242.80</div>
-                </div>
-              </div>
+                    {/* Price and Delta */}
+                    <div className="text-right font-mono shrink-0 pl-1">
+                      <div
+                        className={`text-xs font-bold ${
+                          isPos
+                            ? "text-[#00d09c]"
+                            : isNeg
+                            ? "text-rose-400"
+                            : "text-neutral-300"
+                        }`}
+                      >
+                        {item.change}
+                      </div>
+                      <div className="text-neutral-200 text-[11px] font-semibold flex items-center justify-end gap-1">
+                        <span>{item.price}</span>
+                        <ArrowUpRight className="w-2.5 h-2.5 text-neutral-500 group-hover:text-emerald-400 transition-colors" />
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
 
-              {/* Ticker 6: USD/INR */}
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-white font-mono text-sm">USD/INR</div>
-                  <div className="text-[11px] text-[#8b91a0] font-mono">Rupee Rate</div>
-                </div>
-                <svg className="w-16 h-5" viewBox="0 0 64 20" fill="none">
-                  <path
-                    d="M2 10 L14 11 L26 9 L38 10 L50 9 L62 10"
-                    stroke="#94a3b8"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="text-right font-mono">
-                  <div className="text-neutral-300 font-bold">+0.04%</div>
-                  <div className="text-neutral-200 text-[11px] font-semibold">₹84.42</div>
-                </div>
-              </div>
+            {/* Groww Quick Action Footer */}
+            <div className="pt-2 border-t border-[#232530] flex items-center justify-between text-[11px] font-mono">
+              <span className="text-neutral-400">Trade on Groww</span>
+              <a
+                href="https://groww.in/dashboard/explore/stocks"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 text-[#00d09c] hover:text-[#2ae2b1] font-semibold transition-colors"
+              >
+                <span>Open Groww App</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
             </div>
           </div>
 
@@ -1991,31 +2376,54 @@ export default function GlanceDashboard({
         </div>
       </div>
 
-      {/* GOOGLE CALENDAR LINK MODAL */}
+      {/* GOOGLE CALENDAR LINK & SYNC MODAL */}
       {showGCalModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-2xl bg-[#111215] border border-neutral-700/80 p-5 sm:p-6 space-y-4 shadow-2xl">
+          <div className="w-full max-w-lg rounded-2xl bg-[#111215] border border-neutral-700/80 p-5 sm:p-6 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
               <div className="flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5 text-amber-400" />
-                <h3 className="font-bold text-white text-base">Link Google Calendar</h3>
+                <CalendarIcon className="w-5 h-5 text-sky-400" />
+                <h3 className="font-bold text-white text-base">Google Calendar Integration</h3>
               </div>
               <button
                 onClick={() => setShowGCalModal(false)}
-                className="text-neutral-400 hover:text-white text-sm font-mono"
+                className="text-neutral-400 hover:text-white text-sm font-mono p-1"
               >
                 ✕
               </button>
             </div>
 
-            <p className="text-xs text-neutral-300 leading-relaxed">
-              Sync your live Google Calendar agenda directly into your Glance dashboard using your private iCal link.
+            <p className="text-xs text-neutral-300 leading-relaxed font-sans">
+              Sync your live Google Calendar agenda into your Glance dashboard to view your meetings, sprint reviews, and day-to-day commitments alongside your executive routines.
             </p>
 
-            <div className="space-y-2">
-              <label className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block font-semibold">
-                Google Calendar Secret iCal Address
-              </label>
+            {/* Connection Status Banner (if connected) */}
+            {gcalLastSynced && (
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs font-mono">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-emerald-300 font-semibold">
+                    Synced at {gcalLastSynced}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDisconnectGCal}
+                  className="text-[11px] text-rose-400 hover:text-rose-300 font-bold underline"
+                >
+                  Disconnect
+                </button>
+              </div>
+            )}
+
+            {/* Option 1: Live iCal URL Sync */}
+            <div className="space-y-2 p-3.5 rounded-xl bg-[#171821] border border-[#262834]">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-mono uppercase tracking-wider text-amber-300 font-bold flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5 text-amber-400" />
+                  Option 1: Live iCal Link (Auto-Sync)
+                </label>
+              </div>
               <input
                 type="text"
                 placeholder="https://calendar.google.com/calendar/ical/.../basic.ics"
@@ -2023,37 +2431,59 @@ export default function GlanceDashboard({
                 onChange={(e) => setGcalIcsUrl(e.target.value)}
                 className="w-full text-xs font-mono px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400"
               />
-              <div className="p-2.5 rounded-lg bg-neutral-900/60 border border-neutral-800 text-[11px] font-mono text-neutral-400 space-y-1">
-                <div className="text-neutral-300 font-semibold">How to get your private iCal link:</div>
-                <div>1. Open <a href="https://calendar.google.com" target="_blank" rel="noreferrer" className="text-amber-400 underline">calendar.google.com</a> in your browser.</div>
-                <div>2. Go to <strong>Settings</strong> &gt; Click your primary calendar on the left.</div>
-                <div>3. Scroll to <strong>Integrate calendar</strong> &gt; Copy <strong>"Secret address in iCal format"</strong>.</div>
-                <div>4. Paste it above and click Sync.</div>
+              <div className="p-2.5 rounded-lg bg-neutral-900/70 border border-neutral-800 text-[11px] font-mono text-neutral-400 space-y-1">
+                <div className="text-neutral-200 font-semibold">Quick setup steps:</div>
+                <div>1. Open <a href="https://calendar.google.com/calendar/u/0/r/settings" target="_blank" rel="noreferrer" className="text-amber-400 underline font-semibold">Google Calendar Settings ↗</a></div>
+                <div>2. Under <strong>Settings for my calendars</strong>, click your calendar on the left.</div>
+                <div>3. Scroll to <strong>Integrate calendar</strong> &gt; copy <strong>"Secret address in iCal format"</strong>.</div>
+                <div>4. Paste it above and click "Save & Sync Feed".</div>
               </div>
             </div>
 
+            {/* Option 2: Instant .ics File Upload */}
+            <div className="p-3.5 rounded-xl bg-[#171821] border border-[#262834] space-y-2">
+              <label className="text-[11px] font-mono uppercase tracking-wider text-sky-300 font-bold flex items-center gap-1.5">
+                <Upload className="w-3.5 h-3.5 text-sky-400" />
+                Option 2: Import .ics Export File
+              </label>
+              <p className="text-[11px] text-neutral-400 leading-relaxed font-sans">
+                Export your calendar (.ics) from Google Calendar and upload it directly. It will be parsed instantly in your browser without sharing secret URLs.
+              </p>
+              <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold bg-neutral-800 hover:bg-neutral-700 text-neutral-200 cursor-pointer border border-neutral-700 transition-colors">
+                <Upload className="w-3.5 h-3.5 text-sky-400" />
+                <span>Choose .ics file from Mac</span>
+                <input
+                  type="file"
+                  accept=".ics,text/calendar"
+                  onChange={handleIcsFileUpload}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {/* Status message */}
             {gcalStatus && (
-              <div className="text-xs font-mono p-2 rounded bg-neutral-900 text-amber-300 border border-neutral-800">
+              <div className="text-xs font-mono p-2.5 rounded-xl bg-neutral-900 text-amber-300 border border-neutral-800">
                 {gcalStatus}
               </div>
             )}
 
             <div className="flex items-center justify-between pt-2">
               <a
-                href="https://calendar.google.com/calendar/r"
+                href="https://calendar.google.com/calendar/u/0/r"
                 target="_blank"
                 rel="noreferrer"
                 className="text-xs font-mono text-neutral-400 hover:text-white flex items-center gap-1"
               >
-                <span>Open GCal Web</span>
-                <ExternalLink className="w-3 h-3" />
+                <span>Open Google Calendar Web</span>
+                <ExternalLink className="w-3 h-3 text-neutral-400" />
               </a>
 
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setShowGCalModal(false)}
-                  className="px-3 py-1.5 rounded-xl text-xs font-mono text-neutral-400 hover:text-white"
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-mono text-neutral-400 hover:text-white transition-colors"
                 >
                   Close
                 </button>
@@ -2061,9 +2491,10 @@ export default function GlanceDashboard({
                   type="button"
                   onClick={() => syncGCal(gcalIcsUrl)}
                   disabled={gcalLoading || !gcalIcsUrl.trim()}
-                  className="px-4 py-1.5 rounded-xl text-xs font-mono font-bold bg-amber-500 text-neutral-950 hover:bg-amber-400 transition-colors disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-xl text-xs font-mono font-bold bg-amber-500 text-neutral-950 hover:bg-amber-400 transition-colors disabled:opacity-50 flex items-center gap-1.5"
                 >
-                  {gcalLoading ? "Syncing..." : "Save & Sync"}
+                  {gcalLoading && <RefreshCw className="w-3 h-3 animate-spin" />}
+                  <span>{gcalLoading ? "Syncing..." : "Save & Sync Feed"}</span>
                 </button>
               </div>
             </div>

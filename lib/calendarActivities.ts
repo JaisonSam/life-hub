@@ -3,11 +3,12 @@ export interface PlannedActivity {
   title: string;
   time: string; // e.g. "07:30 AM"
   endTime?: string; // e.g. "08:15 AM"
-  category: "Spiritual" | "Career" | "GMAT" | "Agri-Tech" | "Health" | "Personal";
+  category: "Spiritual" | "Career" | "GMAT" | "Agri-Tech" | "Health" | "Personal" | "Google-Calendar";
   date?: string; // "YYYY-MM-DD"
   dayOfWeek?: number; // 0-6 (Sunday=0, Monday=1, etc.)
   completed?: boolean;
   notes?: string;
+  location?: string;
   source?: "local" | "google-calendar";
   gcalLink?: string;
 }
@@ -134,7 +135,22 @@ export const SUNDAY_SCHEDULE: PlannedActivity[] = [
 ];
 
 /**
- * Returns planned activities for any given calendar date.
+ * Helper to convert 12-hour or 24-hour time string into minutes for sorting
+ */
+function timeToMinutes(timeStr: string): number {
+  if (!timeStr || timeStr === "All Day") return 0;
+  const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+  if (!match) return 999;
+  let h = parseInt(match[1], 10);
+  const m = parseInt(match[2], 10);
+  const ampm = match[3]?.toUpperCase();
+  if (ampm === "PM" && h < 12) h += 12;
+  if (ampm === "AM" && h === 12) h = 0;
+  return h * 60 + m;
+}
+
+/**
+ * Returns planned activities for any given calendar date, sorted chronologically.
  */
 export function getPlannedActivitiesForDate(
   targetDate: Date,
@@ -150,7 +166,7 @@ export function getPlannedActivitiesForDate(
     const dateKey = `${y}-${m}-${d}`;
     const dayOfWeek = safeDate.getDay(); // 0 = Sun, 6 = Sat
 
-    // First check if there are specific date-bound activities
+    // First check if there are specific date-bound activities (custom or synced from Google Calendar)
     const dateSpecific = safeCustom.filter((a) => a && a.date === dateKey);
 
     // Default recurring base schedule for this day of week
@@ -164,11 +180,134 @@ export function getPlannedActivitiesForDate(
     }
 
     // Merge date-specific custom activities with base routine
-    return [...dateSpecific, ...base];
+    const combined = [...dateSpecific, ...base];
+
+    // Sort chronologically by start time
+    return combined.sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
   } catch (err) {
     console.error("Error in getPlannedActivitiesForDate:", err);
     return DEFAULT_WEEKLY_SCHEDULE;
   }
+}
+
+/**
+ * Robust ICS Parser usable both client-side and server-side.
+ * Handles unfolded lines, UTC to local Asia/Kolkata (IST), and extracts clean titles/notes.
+ */
+export function parseICSContent(icsText: string): PlannedActivity[] {
+  const events: PlannedActivity[] = [];
+  if (!icsText || typeof icsText !== "string") return events;
+
+  // Unfold lines (RFC 5545)
+  const unfolded = icsText.replace(/\r\n[ \t]/g, "").replace(/\n[ \t]/g, "");
+  const lines = unfolded.split(/\r\n|\n|\r/);
+  let cur: any = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith("BEGIN:VEVENT")) {
+      cur = {};
+    } else if (line.startsWith("END:VEVENT") && cur) {
+      if (cur.summary && cur.dtstart) {
+        try {
+          const rawStart = cur.dtstart.replace(/^[^:]*:/, "").trim();
+          let eventDate = "";
+          let eventTime = "All Day";
+
+          if (rawStart.includes("T")) {
+            const isUtc = rawStart.endsWith("Z");
+            const y = parseInt(rawStart.slice(0, 4), 10);
+            const m = parseInt(rawStart.slice(4, 6), 10);
+            const d = parseInt(rawStart.slice(6, 8), 10);
+            const hh = parseInt(rawStart.slice(9, 11), 10);
+            const mm = parseInt(rawStart.slice(11, 13), 10);
+            const ss = parseInt(rawStart.slice(13, 15) || "0", 10);
+
+            if (isUtc) {
+              // Convert UTC to local IST (Asia/Kolkata)
+              const utcDate = new Date(Date.UTC(y, m - 1, d, hh, mm, ss));
+              const istDateStr = utcDate.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // "YYYY-MM-DD"
+              const istTimeStr = utcDate.toLocaleTimeString("en-US", {
+                timeZone: "Asia/Kolkata",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              });
+              eventDate = istDateStr;
+              eventTime = istTimeStr;
+            } else {
+              // Local time directly specified in iCal
+              eventDate = `${String(y).padStart(4, "0")}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+              const ampm = hh >= 12 ? "PM" : "AM";
+              const displayHours = hh % 12 || 12;
+              eventTime = `${String(displayHours).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${ampm}`;
+            }
+          } else {
+            // Full-day event (YYYYMMDD)
+            const y = rawStart.slice(0, 4);
+            const m = rawStart.slice(4, 6);
+            const d = rawStart.slice(6, 8);
+            eventDate = `${y}-${m}-${d}`;
+            eventTime = "All Day";
+          }
+
+          // Category inference based on keywords
+          const textToScan = `${cur.summary} ${cur.description || ""}`.toLowerCase();
+          let category: PlannedActivity["category"] = "Google-Calendar";
+          if (textToScan.includes("schneider") || textToScan.includes("erp") || textToScan.includes("standup") || textToScan.includes("sync")) {
+            category = "Career";
+          } else if (textToScan.includes("gmat") || textToScan.includes("quant") || textToScan.includes("verbal") || textToScan.includes("mock")) {
+            category = "GMAT";
+          } else if (textToScan.includes("farm") || textToScan.includes("irrigation") || textToScan.includes("guava") || textToScan.includes("soil")) {
+            category = "Agri-Tech";
+          } else if (textToScan.includes("church") || textToScan.includes("prayer") || textToScan.includes("bible") || textToScan.includes("worship")) {
+            category = "Spiritual";
+          } else if (textToScan.includes("gym") || textToScan.includes("workout") || textToScan.includes("run") || textToScan.includes("health")) {
+            category = "Health";
+          }
+
+          // Unescape ICS escaped characters
+          const cleanSummary = (cur.summary || "Untitled Event")
+            .replace(/\\,/g, ",")
+            .replace(/\\;/g, ";")
+            .replace(/\\n/g, " ");
+
+          const cleanDesc = (cur.description || "")
+            .replace(/\\,/g, ",")
+            .replace(/\\;/g, ";")
+            .replace(/\\n/g, "\n");
+
+          events.push({
+            id: cur.uid || `gcal-${events.length}-${Date.now()}`,
+            title: cleanSummary,
+            time: eventTime,
+            date: eventDate,
+            category,
+            source: "google-calendar",
+            notes: cleanDesc,
+            location: cur.location ? cur.location.replace(/\\,/g, ",") : undefined,
+          });
+        } catch {}
+      }
+      cur = null;
+    } else if (cur) {
+      if (line.startsWith("SUMMARY:")) {
+        cur.summary = line.substring(8);
+      } else if (line.startsWith("DTSTART")) {
+        cur.dtstart = line;
+      } else if (line.startsWith("DTEND")) {
+        cur.dtend = line;
+      } else if (line.startsWith("UID:")) {
+        cur.uid = line.substring(4);
+      } else if (line.startsWith("DESCRIPTION:")) {
+        cur.description = line.substring(12);
+      } else if (line.startsWith("LOCATION:")) {
+        cur.location = line.substring(9);
+      }
+    }
+  }
+
+  return events;
 }
 
 /**
@@ -179,7 +318,7 @@ export function getGoogleCalendarAddUrl(
   targetDate: Date
 ): string {
   try {
-    if (!activity) return "https://calendar.google.com";
+    if (!activity) return "https://calendar.google.com/calendar/u/0/r";
     const safeDate = targetDate instanceof Date && !isNaN(targetDate.getTime()) ? targetDate : new Date();
 
     const y = safeDate.getFullYear();
@@ -214,6 +353,6 @@ export function getGoogleCalendarAddUrl(
 
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}`;
   } catch (e) {
-    return "https://calendar.google.com";
+    return "https://calendar.google.com/calendar/u/0/r";
   }
 }
