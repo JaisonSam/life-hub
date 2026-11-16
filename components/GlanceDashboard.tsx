@@ -43,6 +43,8 @@ import {
   RefreshCw,
   Wallet,
   PieChart,
+  MapPin,
+  Navigation,
 } from "lucide-react";
 import { getDailyScripture, ScriptureDay } from "@/lib/dailyScripture";
 import { DynamicHabit, DEFAULT_HABITS, loadDailyHabits, toggleDailyHabitStorage, getDateKey } from "@/lib/dailyHabits";
@@ -128,6 +130,101 @@ export default function GlanceDashboard({
   const [newHoldingAvgPrice, setNewHoldingAvgPrice] = useState<string>("500");
   const [newHoldingCurrentPrice, setNewHoldingCurrentPrice] = useState<string>("520");
   const [portfolioImportStatus, setPortfolioImportStatus] = useState<string>("");
+
+  // 7. Device GPS & Live Weather State
+  const [weatherLocation, setWeatherLocation] = useState<"gps" | "blr" | "farm">("gps");
+  const [gpsStatus, setGpsStatus] = useState<"locating" | "synced" | "denied" | "unsupported">("locating");
+  const [gpsCoords, setGpsCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState<boolean>(false);
+  const [liveWeather, setLiveWeather] = useState<{
+    locationName: string;
+    locality: string;
+    temp: number;
+    feelsLike: number;
+    condition: string;
+    humidity: number;
+    windSpeed: string;
+    isDay: boolean;
+    hourly: Array<{ time: string; temp: number; isPeak: boolean }>;
+    maxTemp: number;
+    source: "gps" | "default";
+  }>({
+    locationName: "Bengaluru",
+    locality: "Electronic City",
+    temp: 24,
+    feelsLike: 24,
+    condition: "Partly Cloudy",
+    humidity: 58,
+    windSpeed: "11 km/h",
+    isDay: true,
+    hourly: [
+      { time: "6am", temp: 21, isPeak: false },
+      { time: "10am", temp: 24, isPeak: false },
+      { time: "2pm", temp: 26, isPeak: true },
+      { time: "6pm", temp: 25, isPeak: false },
+      { time: "10pm", temp: 22, isPeak: false },
+    ],
+    maxTemp: 27,
+    source: "default",
+  });
+
+  const fetchWeatherForCoords = async (lat: number, lon: number, isFromGps = false) => {
+    setWeatherLoading(true);
+    try {
+      const res = await fetch(`/api/weather/live?lat=${lat}&lon=${lon}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setLiveWeather({
+            locationName: data.locationName,
+            locality: data.locality,
+            temp: data.temp,
+            feelsLike: data.feelsLike,
+            condition: data.condition,
+            humidity: data.humidity,
+            windSpeed: data.windSpeed,
+            isDay: data.isDay,
+            hourly: data.hourly || [],
+            maxTemp: data.maxTemp || 30,
+            source: isFromGps ? "gps" : "default",
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Weather fetch failed:", e);
+    } finally {
+      setWeatherLoading(false);
+    }
+  };
+
+  const requestDeviceGPS = () => {
+    if (typeof window === "undefined" || !("geolocation" in navigator)) {
+      setGpsStatus("unsupported");
+      return;
+    }
+    setGpsStatus("locating");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setGpsCoords({ lat: latitude, lon: longitude });
+        setGpsStatus("synced");
+        setWeatherLocation("gps");
+        fetchWeatherForCoords(latitude, longitude, true);
+        try {
+          localStorage.setItem(
+            "lifehub_last_gps",
+            JSON.stringify({ lat: latitude, lon: longitude })
+          );
+        } catch {}
+      },
+      (err) => {
+        console.warn("Geolocation permission denied or timed out:", err.message);
+        setGpsStatus("denied");
+        fetchWeatherForCoords(12.9716, 77.5946, false);
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+    );
+  };
 
   useEffect(() => {
     let t: any = null;
@@ -513,6 +610,45 @@ export default function GlanceDashboard({
           }
         } catch {}
       }
+
+      // Auto-sync device GPS location on mount
+      if (typeof window !== "undefined" && "geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            setGpsCoords({ lat: latitude, lon: longitude });
+            setGpsStatus("synced");
+            setWeatherLocation("gps");
+            fetchWeatherForCoords(latitude, longitude, true);
+            try {
+              localStorage.setItem(
+                "lifehub_last_gps",
+                JSON.stringify({ lat: latitude, lon: longitude })
+              );
+            } catch {}
+          },
+          (err) => {
+            setGpsStatus("denied");
+            const cachedGps = localStorage.getItem("lifehub_last_gps");
+            if (cachedGps) {
+              try {
+                const parsed = JSON.parse(cachedGps);
+                if (parsed.lat && parsed.lon) {
+                  fetchWeatherForCoords(parsed.lat, parsed.lon, true);
+                  setGpsStatus("synced");
+                  setWeatherLocation("gps");
+                  return;
+                }
+              } catch {}
+            }
+            fetchWeatherForCoords(12.9716, 77.5946, false);
+          },
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+        );
+      } else {
+        setGpsStatus("unsupported");
+        fetchWeatherForCoords(12.9716, 77.5946, false);
+      }
     } catch {}
   }, [scriptureOffset]);
 
@@ -578,9 +714,6 @@ export default function GlanceDashboard({
 
   // 5. Community Feed Sub-Tabs
   const [communityTab, setCommunityTab] = useState<"erp" | "agri" | "gmat">("erp");
-
-  // 6. Weather Location Toggle
-  const [weatherLocation, setWeatherLocation] = useState<"blr" | "farm">("blr");
 
   // 7. Repository Toggle (Glance screenshot parity)
   const [repoTab, setRepoTab] = useState<"glance" | "lifehub">("glance");
@@ -1990,17 +2123,41 @@ export default function GlanceDashboard({
         {/* COLUMN 3: RIGHT (Weather, Repository, Markets, Farm IoT)  */}
         {/* ========================================================= */}
         <div className="lg:col-span-3 space-y-5">
-          {/* 3.1 WEATHER WIDGET CARD */}
+          {/* 3.1 WEATHER WIDGET CARD (Synced to Device GPS) */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3">
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-neutral-300 uppercase font-bold">
-              <span className="flex items-center gap-1.5 text-white">
+              <div className="flex items-center gap-1.5 text-white">
                 <CloudSun className="w-3.5 h-3.5 text-amber-400" />
-                WEATHER
-              </span>
-              <div className="flex items-center gap-1.5 text-[10px] font-mono font-semibold">
+                <span>WEATHER</span>
+                {weatherLocation === "gps" && gpsStatus === "synced" && (
+                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                    <Navigation className="w-2.5 h-2.5 text-emerald-400 animate-pulse" />
+                    <span>GPS SYNC</span>
+                  </span>
+                )}
+                {weatherLoading && (
+                  <RefreshCw className="w-2.5 h-2.5 text-neutral-400 animate-spin ml-1" />
+                )}
+              </div>
+              <div className="flex items-center gap-1 text-[10px] font-mono font-semibold">
                 <button
-                  onClick={() => setWeatherLocation("blr")}
-                  className={`px-2 py-0.5 rounded transition-colors ${
+                  onClick={requestDeviceGPS}
+                  className={`px-1.5 py-0.5 rounded transition-colors flex items-center gap-0.5 ${
+                    weatherLocation === "gps"
+                      ? "bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                  title="Sync live weather to your device GPS location"
+                >
+                  <MapPin className="w-2.5 h-2.5" />
+                  <span>GPS</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setWeatherLocation("blr");
+                    fetchWeatherForCoords(12.9716, 77.5946, false);
+                  }}
+                  className={`px-1.5 py-0.5 rounded transition-colors ${
                     weatherLocation === "blr"
                       ? "bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30"
                       : "text-neutral-400 hover:text-white"
@@ -2010,65 +2167,20 @@ export default function GlanceDashboard({
                 </button>
                 <button
                   onClick={() => setWeatherLocation("farm")}
-                  className={`px-2 py-0.5 rounded transition-colors ${
+                  className={`px-1.5 py-0.5 rounded transition-colors ${
                     weatherLocation === "farm"
                       ? "bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
-                  Tirunelveli
+                  Farm
                 </button>
               </div>
             </div>
 
             {/* Weather Main Display */}
-            {weatherLocation === "blr" ? (
-              <div className="space-y-2.5">
-                <div className="flex items-baseline justify-between">
-                  <div>
-                    <div className="text-sm font-bold text-white">Bengaluru (Electronic City)</div>
-                    <div className="text-xs text-neutral-300 font-medium">Partly Cloudy · Feels like 24°C</div>
-                  </div>
-                  <div className="text-2xl font-bold font-mono text-white">24°C</div>
-                </div>
-
-                {/* Glance Temperature Bar Chart */}
-                <div className="pt-2">
-                  <div className="flex items-end justify-between h-14 gap-1 px-1">
-                    <div className="flex flex-col items-center gap-1 flex-1">
-                      <div className="w-full bg-[#1e202a] rounded-t h-5" />
-                      <span className="text-[10px] font-mono text-neutral-400 font-semibold">6am</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 flex-1">
-                      <div className="w-full bg-[#1e202a] rounded-t h-8" />
-                      <span className="text-[10px] font-mono text-neutral-400 font-semibold">10am</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 flex-1">
-                      <div className="w-full bg-amber-400 rounded-t h-12 relative shadow-md">
-                        <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-amber-300 font-bold">
-                          26°
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-mono text-amber-300 font-bold">2pm</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 flex-1">
-                      <div className="w-full bg-[#1e202a] rounded-t h-9" />
-                      <span className="text-[10px] font-mono text-neutral-400 font-semibold">6pm</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 flex-1">
-                      <div className="w-full bg-[#1e202a] rounded-t h-6" />
-                      <span className="text-[10px] font-mono text-neutral-400 font-semibold">10pm</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] font-mono text-neutral-300 pt-1 border-t border-[#232530]">
-                  <span>Humidity: <strong className="text-white">58%</strong></span>
-                  <span>Wind: <strong className="text-white">11 km/h ENE</strong></span>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
+            {weatherLocation === "farm" ? (
+              <div className="space-y-2.5 animate-in fade-in duration-200">
                 <div className="flex items-baseline justify-between">
                   <div>
                     <div className="text-sm font-bold text-white">Veerakeralapudur Farm</div>
@@ -2110,6 +2222,81 @@ export default function GlanceDashboard({
                 <div className="flex items-center justify-between text-[11px] font-mono text-neutral-300 pt-1 border-t border-[#232530]">
                   <span>Soil Moisture: <strong className="text-emerald-400 font-bold">42%</strong></span>
                   <span>Solar Pump: <strong className="text-white font-bold">Active</strong></span>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2.5 animate-in fade-in duration-200">
+                <div className="flex items-baseline justify-between">
+                  <div className="min-w-0 pr-2">
+                    <div className="text-sm font-bold text-white truncate flex items-center gap-1.5">
+                      <span>{weatherLocation === "blr" ? "Bengaluru (Electronic City)" : `${liveWeather.locationName} (${liveWeather.locality})`}</span>
+                    </div>
+                    <div className="text-xs text-neutral-300 font-medium">
+                      {liveWeather.condition} · Feels like {liveWeather.feelsLike}°C
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold font-mono text-white shrink-0">
+                    {liveWeather.temp}°C
+                  </div>
+                </div>
+
+                {/* Glance Dynamic Temperature Bar Chart */}
+                <div className="pt-2">
+                  <div className="flex items-end justify-between h-14 gap-1 px-1">
+                    {liveWeather.hourly.map((slot, idx) => {
+                      const maxT = liveWeather.maxTemp || 32;
+                      const heightPx = Math.max(18, Math.min(50, Math.round((slot.temp / maxT) * 48)));
+
+                      return (
+                        <div key={idx} className="flex flex-col items-center gap-1 flex-1">
+                          {slot.isPeak ? (
+                            <div
+                              className="w-full bg-amber-400 rounded-t relative shadow-md transition-all"
+                              style={{ height: `${heightPx}px` }}
+                            >
+                              <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-amber-300 font-bold">
+                                {slot.temp}°
+                              </span>
+                            </div>
+                          ) : (
+                            <div
+                              className="w-full bg-[#1e202a] hover:bg-[#282a38] rounded-t transition-all"
+                              style={{ height: `${heightPx}px` }}
+                              title={`${slot.temp}°C at ${slot.time}`}
+                            />
+                          )}
+                          <span
+                            className={`text-[10px] font-mono ${
+                              slot.isPeak ? "text-amber-300 font-bold" : "text-neutral-400 font-semibold"
+                            }`}
+                          >
+                            {slot.time}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Humidity, Wind & GPS status footer */}
+                <div className="flex items-center justify-between text-[11px] font-mono text-neutral-300 pt-1 border-t border-[#232530]">
+                  <span>
+                    Humidity: <strong className="text-white">{liveWeather.humidity}%</strong>
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span>
+                      Wind: <strong className="text-white">{liveWeather.windSpeed}</strong>
+                    </span>
+                    {weatherLocation === "gps" && (
+                      <button
+                        onClick={requestDeviceGPS}
+                        className="p-0.5 text-neutral-400 hover:text-emerald-400 transition-colors"
+                        title="Re-ping GPS"
+                      >
+                        <RefreshCw className="w-2.5 h-2.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
