@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   BookOpen,
   CheckCircle2,
@@ -486,7 +486,31 @@ const initialStrategicBooks: StrategicBook[] = [
 export default function LifeHub() {
   // Intro & Homescreen visibility (Tron background integration)
   const [homescreenVisible, setHomescreenVisible] = useState<boolean>(false);
-  const [unlockAudioTrigger, setUnlockAudioTrigger] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const sectionVideoRef = useRef<HTMLVideoElement>(null);
+
+  const handleToggleSound = useCallback(() => {
+    setIsMuted((prev) => {
+      const next = !prev;
+      if (sectionVideoRef.current) {
+        sectionVideoRef.current.muted = next;
+        sectionVideoRef.current.volume = 0.85;
+        if (!next) {
+          sectionVideoRef.current.play().catch(() => {});
+        }
+      }
+      return next;
+    });
+  }, []);
+
+  const handleUnlockAudio = useCallback(() => {
+    setIsMuted(false);
+    if (sectionVideoRef.current) {
+      sectionVideoRef.current.muted = false;
+      sectionVideoRef.current.volume = 0.85;
+      sectionVideoRef.current.play().catch(() => {});
+    }
+  }, []);
 
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "bible" | "habits" | "projects" | "music">("all");
@@ -1360,13 +1384,14 @@ export default function LifeHub() {
       {/* Tron Motorcycle Ambient Video (0:09 - 1:35) */}
       <TronBackgroundVideo
         isHomescreenVisible={homescreenVisible}
-        triggerUnlockAudio={unlockAudioTrigger}
+        isMuted={isMuted}
+        onToggleSound={handleToggleSound}
       />
 
       {/* Intro Sequence: Black Greeting -> 5s Video Solo -> Homescreen Reveal */}
       <WelcomeIntro
         onRevealHomescreen={() => setHomescreenVisible(true)}
-        onUserGesture={() => setUnlockAudioTrigger(true)}
+        onUserGesture={handleUnlockAudio}
       />
 
       {/* Homescreen Layer: Fades in smoothly overlapping the video */}
@@ -1450,27 +1475,41 @@ export default function LifeHub() {
 
       {/* SEPARATE TRON VIDEO SHOWCASE SECTION (Below Main Top Tab, Over Homescreen Content) */}
       <section className="max-w-7xl mx-auto px-2 sm:px-4">
-        <div className="relative rounded-2xl overflow-hidden border border-cyan-500/40 shadow-[0_0_35px_rgba(6,182,212,0.25)] h-[300px] sm:h-[400px] md:h-[460px] bg-transparent flex flex-col justify-end items-center p-6 sm:p-8">
+        <div className="relative rounded-2xl overflow-hidden border border-cyan-500/40 shadow-[0_0_35px_rgba(6,182,212,0.25)] h-[300px] sm:h-[400px] md:h-[460px] bg-black flex flex-col justify-end items-center p-6 sm:p-8">
+          {/* Native Video Playing INSIDE the Section */}
+          <video
+            ref={sectionVideoRef}
+            src="/videos/tron-intro.mp4"
+            autoPlay
+            loop
+            muted={isMuted}
+            playsInline
+            preload="auto"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+
           {/* Subtle cyan corner tech accents */}
-          <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-cyan-400/50 pointer-events-none" />
-          <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-cyan-400/50 pointer-events-none" />
-          <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-cyan-400/50 pointer-events-none" />
-          <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-cyan-400/50 pointer-events-none" />
+          <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-cyan-400/50 pointer-events-none z-10" />
+          <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-cyan-400/50 pointer-events-none z-10" />
+          <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-cyan-400/50 pointer-events-none z-10" />
+          <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-cyan-400/50 pointer-events-none z-10" />
 
           {/* Only the Scroll Down for Dashboard prompt is shown (No fullscreen options or other details) */}
-          <button
-            onClick={() => {
-              const el = document.getElementById("dashboard-contents");
-              if (el) el.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-black/75 hover:bg-black/90 border border-cyan-500/50 hover:border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.4)] backdrop-blur-md transition-all hover:scale-105 active:scale-95 group cursor-pointer"
-          >
-            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 animate-bounce group-hover:text-cyan-300 transition-colors" />
-            <span className="text-xs sm:text-sm font-mono font-bold tracking-widest text-cyan-200 group-hover:text-white uppercase">
-              Scroll Down for Dashboard
-            </span>
-            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 animate-bounce group-hover:text-cyan-300 transition-colors" />
-          </button>
+          <div className="relative z-20">
+            <button
+              onClick={() => {
+                const el = document.getElementById("dashboard-contents");
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-black/80 hover:bg-black/95 border border-cyan-500/50 hover:border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.45)] backdrop-blur-md transition-all hover:scale-105 active:scale-95 group cursor-pointer"
+            >
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 animate-bounce group-hover:text-cyan-300 transition-colors" />
+              <span className="text-xs sm:text-sm font-mono font-bold tracking-widest text-cyan-200 group-hover:text-white uppercase">
+                Scroll Down for Dashboard
+              </span>
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 animate-bounce group-hover:text-cyan-300 transition-colors" />
+            </button>
+          </div>
         </div>
       </section>
 
