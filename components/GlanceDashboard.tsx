@@ -440,17 +440,25 @@ export default function GlanceDashboard({
           setGrowwHoldings(parsed);
           saveStoredGrowwHoldings(parsed);
           setPortfolioImportStatus(`✓ Imported ${parsed.length} holdings from ${file.name}!`);
-          setTimeout(() => setPortfolioImportStatus(""), 4000);
+          setTimeout(() => setPortfolioImportStatus(""), 5000);
         } else {
           setPortfolioImportStatus("Could not find valid holdings in CSV.");
-          setTimeout(() => setPortfolioImportStatus(""), 4000);
+          setTimeout(() => setPortfolioImportStatus(""), 5000);
         }
       } catch (err: any) {
-        setPortfolioImportStatus(`Import failed: ${err.message}`);
-        setTimeout(() => setPortfolioImportStatus(""), 4000);
+        setPortfolioImportStatus(`⚠️ ${err.message || "Import failed"}`);
+        setTimeout(() => setPortfolioImportStatus(""), 7000);
       }
     };
     reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const handleResetToMyHoldings = () => {
+    setGrowwHoldings(DEFAULT_GROWW_HOLDINGS);
+    saveStoredGrowwHoldings(DEFAULT_GROWW_HOLDINGS);
+    setPortfolioImportStatus("✓ Restored Jaison's official Groww portfolio (19 stocks)");
+    setTimeout(() => setPortfolioImportStatus(""), 4000);
   };
 
   // Indian Market Instruments on Groww
@@ -606,7 +614,13 @@ export default function GlanceDashboard({
         try {
           const parsed = JSON.parse(savedHoldings);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setGrowwHoldings(parsed);
+            // Auto-upgrade dummy 4-stock portfolio to Jaison's actual 19 Groww holdings
+            if (parsed.length === 4 && parsed[0]?.id === "h-schneider") {
+              setGrowwHoldings(DEFAULT_GROWW_HOLDINGS);
+              localStorage.setItem("lifehub_groww_portfolio", JSON.stringify(DEFAULT_GROWW_HOLDINGS));
+            } else {
+              setGrowwHoldings(parsed);
+            }
           }
         } catch {}
       }
@@ -2685,7 +2699,7 @@ export default function GlanceDashboard({
 
                 {/* Action Bar: Add Holding + Import CSV */}
                 <div className="flex items-center justify-between text-[11px] font-mono">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <button
                       onClick={() => setShowAddHoldingForm(!showAddHoldingForm)}
                       className="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-[#00d09c] border border-emerald-500/30 transition-colors font-semibold"
@@ -2704,6 +2718,15 @@ export default function GlanceDashboard({
                         className="hidden"
                       />
                     </label>
+
+                    <button
+                      onClick={handleResetToMyHoldings}
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white border border-neutral-700 transition-colors"
+                      title="Reload Jaison's 19 official Groww holdings"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>Reload (19)</span>
+                    </button>
                   </div>
 
                   <a
@@ -2713,8 +2736,24 @@ export default function GlanceDashboard({
                     className="flex items-center gap-1 text-neutral-400 hover:text-white transition-colors"
                     title="Open your holdings in Groww app"
                   >
-                    <span>Groww Holdings</span>
+                    <span>Groww App</span>
                     <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+
+                {/* Helper Banner for File Selection */}
+                <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400 bg-[#121319] px-2.5 py-1.5 rounded-lg border border-[#232530]">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <span className="text-[#00d09c] font-bold">Target File:</span>
+                    <span className="text-neutral-300 truncate font-semibold">Stocks_Holdings_Statement_...csv</span>
+                  </div>
+                  <a
+                    href="/groww-holdings-statement.csv"
+                    download="Stocks_Holdings_Statement_8287432555_2026-11-15.csv"
+                    className="text-neutral-400 hover:text-white transition-colors underline shrink-0 pl-1"
+                    title="Download clean holdings CSV file"
+                  >
+                    Download CSV
                   </a>
                 </div>
 
