@@ -6,11 +6,13 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 interface WelcomeIntroProps {
   onRevealHomescreen: () => void;
   onUserGesture?: () => void;
+  onGreetingAppear?: () => void;
 }
 
 export default function WelcomeIntro({
   onRevealHomescreen,
   onUserGesture,
+  onGreetingAppear,
 }: WelcomeIntroProps) {
   // Stages:
   // "greeting_start": Pure black for 1 second (0 - 1.0s)
@@ -47,9 +49,14 @@ export default function WelcomeIntro({
       document.body.style.overflow = "hidden";
     } catch {}
 
-    // 1. "Hi, Jaison" shows up after 1 sec (stays pure black for 1000ms)
+    // 1. "Hi, Jaison" shows up after 1 sec: START AUDIO RIGHT HERE!
     const enterTimer = setTimeout(() => {
       setStage("greeting_enter");
+      if (onGreetingAppear) {
+        onGreetingAppear();
+      } else {
+        handleUserInteraction();
+      }
     }, 1000);
 
     // 2. Slow animation: let it linger elegantly until 3.2s

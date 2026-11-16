@@ -503,6 +503,24 @@ export default function LifeHub() {
     }
   }, []);
 
+  const handleGreetingAppear = useCallback(() => {
+    setIsMuted(false);
+    const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
+    if (bg) {
+      bg.currentTime = 0;
+      bg.muted = false;
+      bg.volume = 0.85;
+      const playPromise = bg.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // If browser restricts unmuted autoplay, start muted initially until gesture
+          bg.muted = true;
+          bg.play().catch(() => {});
+        });
+      }
+    }
+  }, []);
+
   // Section Video Manager:
   // - Keeps section video actively playing at all times (never freezes when scrolling down or up)
   // - Syncs timestamp continuously with the background video
@@ -1467,6 +1485,7 @@ export default function LifeHub() {
       <WelcomeIntro
         onRevealHomescreen={() => setHomescreenVisible(true)}
         onUserGesture={handleUnlockAudio}
+        onGreetingAppear={handleGreetingAppear}
       />
 
       {/* Homescreen Layer: Fades in smoothly overlapping the video */}
