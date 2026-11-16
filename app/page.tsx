@@ -490,6 +490,10 @@ export default function LifeHub() {
   const handleStopVideoAndShowScripture = useCallback(() => {
     setHasVideoEnded(true);
     setIsMuted(true);
+    setHomescreenVisible(true);
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = "";
+    }
 
     // Stop background video and release audio stream immediately
     const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
@@ -1439,11 +1443,14 @@ export default function LifeHub() {
       />
 
       {/* Intro Sequence: Black Greeting -> 5s Video Solo -> Homescreen Reveal */}
-      <WelcomeIntro
-        onRevealHomescreen={() => setHomescreenVisible(true)}
-        onUserGesture={handleUnlockAudio}
-        onGreetingAppear={handleGreetingAppear}
-      />
+      {!homescreenVisible && !hasVideoEnded && (
+        <WelcomeIntro
+          onRevealHomescreen={() => setHomescreenVisible(true)}
+          onUserGesture={handleUnlockAudio}
+          onGreetingAppear={handleGreetingAppear}
+          hasVideoEnded={hasVideoEnded}
+        />
+      )}
 
       {/* Homescreen Layer: Fades in smoothly overlapping the video */}
       <div

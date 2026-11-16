@@ -16,9 +16,6 @@ interface TronBackgroundVideoProps {
 }
 
 const TARGET_VOLUME = 0.85;
-const FADE_START = 4.0; // Audio fade-in starts at 4.0s
-const FADE_END = 6.0;   // Audio reaches full volume at 6.0s
-const BASE_VOLUME = 0.05; // Subtle ambient volume before 4.0s
 
 export default function TronBackgroundVideo({
   isHomescreenVisible,
@@ -41,22 +38,25 @@ export default function TronBackgroundVideo({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Compute smooth volume fade-in from 4.0s to 6.0s
+  // Compute smooth progressive volume fade-in with a softer beginning
   const applyFadeInVolume = useCallback((video: HTMLVideoElement) => {
     if (isMuted) {
       video.muted = true;
       return;
     }
     const t = video.currentTime;
-    if (t < FADE_START) {
-      // Very gentle, subtle ambient sound before 4.0 seconds
-      video.volume = BASE_VOLUME;
-    } else if (t >= FADE_START && t < FADE_END) {
-      // Smooth fade-in between 4.0s and 6.0s
-      const progress = Math.max(0, Math.min((t - FADE_START) / (FADE_END - FADE_START), 1.0));
-      // Smooth ease-out quad curve
-      const currentVol = BASE_VOLUME + (TARGET_VOLUME - BASE_VOLUME) * (progress * (2 - progress));
-      video.volume = Math.max(0.01, Math.min(TARGET_VOLUME, Number(currentVol.toFixed(3))));
+    if (t <= 0) {
+      video.volume = 0.001;
+    } else if (t <= 3.0) {
+      // Whisper-soft gentle beginning fade-in from 0.001 to 0.12 (smooth quadratic curve)
+      const p = t / 3.0;
+      const vol = 0.001 + (0.12 - 0.001) * Math.pow(p, 2.0);
+      video.volume = Math.max(0.001, Math.min(TARGET_VOLUME, Number(vol.toFixed(3))));
+    } else if (t < 6.0) {
+      // Smooth swell from 0.12 up to TARGET_VOLUME (0.85)
+      const p2 = (t - 3.0) / 3.0;
+      const vol = 0.12 + (TARGET_VOLUME - 0.12) * (p2 * (2 - p2));
+      video.volume = Math.max(0.01, Math.min(TARGET_VOLUME, Number(vol.toFixed(3))));
     } else {
       video.volume = TARGET_VOLUME;
     }
@@ -189,7 +189,7 @@ export default function TronBackgroundVideo({
 
     let audioAllowed = false;
 
-    // Audio starts 2 seconds later (exactly when "Hi, Jaison" appears)
+    // Audio starts 1 second later (decreased by 1s, matching "Hi, Jaison" entrance)
     const audioDelayTimer = setTimeout(() => {
       if (hasVideoEnded || video.ended) return;
       audioAllowed = true;
@@ -199,10 +199,10 @@ export default function TronBackgroundVideo({
         applyFadeInVolume(video);
         video.play().catch(() => {});
       }
-    }, 2000);
+    }, 1000);
 
     // Audio Unlocker: On the very first user interaction anywhere on the window or document
-    // Only unlocks once the initial 2-second black screen has passed and video has not ended
+    // Only unlocks once the initial 1-second black screen has passed and video has not ended
     const unlockMasterAudio = () => {
       if (hasVideoEnded || video.ended) return;
       if (audioAllowed && video && !isMuted) {
@@ -253,7 +253,7 @@ export default function TronBackgroundVideo({
       */}
       <div
         className={`fixed inset-0 w-full h-full z-0 overflow-hidden bg-black pointer-events-none select-none transition-opacity duration-1000 ease-out ${
-          !isHomescreenVisible
+          !isHomescreenVisible && !hasVideoEnded
             ? "opacity-100"
             : scrollY > 120
             ? "opacity-40"
