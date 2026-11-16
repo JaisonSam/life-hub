@@ -64,7 +64,6 @@ import ExecutiveBentoDeck from "@/components/ExecutiveBentoDeck";
 import ExecutiveViewCarousel from "@/components/ExecutiveViewCarousel";
 import GlanceDashboard from "@/components/GlanceDashboard";
 import GlanceErrorBoundary from "@/components/GlanceErrorBoundary";
-import AnimatedCosmicBackground from "@/components/AnimatedCosmicBackground";
 import AOSInit from "@/components/AOSInit";
 import { getDailyScripture } from "@/lib/dailyScripture";
 import { loadDailyHabits, toggleDailyHabitStorage, getDateKey } from "@/lib/dailyHabits";
@@ -1350,16 +1349,13 @@ export default function LifeHub() {
   });
 
   return (
-    <div className="min-h-screen bg-[#030014] text-neutral-100 font-sans selection:bg-amber-500/30 selection:text-amber-200 relative pb-16">
-      {/* EkiZR-inspired Ambient Cosmic Background with domain orbs & technical grid */}
-      <AnimatedCosmicBackground />
-
+    <div className="min-h-screen bg-[#0c0d12] text-neutral-100 font-sans selection:bg-amber-500/30 selection:text-amber-200 relative pb-16">
       {/* AOS Scroll Animation Engine for Mobile & Desktop */}
       <AOSInit />
 
       {/* GLANCE TOP NAVIGATION BAR (Authentic glanceapp/glance style) */}
       <header className="sticky top-2.5 z-50 max-w-7xl mx-auto px-2 sm:px-4 mb-5">
-        <div className="bg-[#111215] border border-neutral-800/90 rounded-2xl px-3 sm:px-4 py-2 flex items-center justify-between shadow-2xl backdrop-blur-xl">
+        <div className="bg-[#14151a] border border-[#23252d] rounded-2xl px-3 sm:px-4 py-2 flex items-center justify-between shadow-2xl">
           {/* Left: Glance Monogram Logo + Tab Navigation */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {/* Minimalist Monogram 'G' (Glance Style) */}
