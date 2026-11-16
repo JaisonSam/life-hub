@@ -78,6 +78,11 @@ A personal life operating system and daily sanctuary combining:
       - Column 2: Daily Scripture (Primary Centerpiece), Career Radar, YouTube Music Catalog.
       - Column 3: GPS Weather, Indian Markets & Groww Portfolio (19 Stocks).
 
+15. **Cinematic "Hi, Jaison" Welcome Intro Animation** (`components/WelcomeIntro.tsx`):
+    - Full-screen pitch-black canvas on site launch with scroll-locking.
+    - "Hi, Jaison" pops up smoothly from the bottom to the middle with easing (`cubic-bezier(0.16, 1, 0.3, 1)`), accompanied by a warm amber pulse indicator.
+    - After 2.0 seconds, the black veil smoothly fades out (`opacity-0 duration-700 ease-out`), seamlessly fading in the homescreen.
+
 ## 🛠️ Tech Stack & Locations
 * **Location**: `/Users/jaisappi/Developer/life-hub`
 * **Framework**: Next.js 16 (App Router), React 19, Tailwind CSS v4, Lucide React, Bun.
