@@ -3,12 +3,16 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
+import YouVersionVerse from "./YouVersionVerse";
+
 interface TronBackgroundVideoProps {
   isHomescreenVisible: boolean;
   isMuted: boolean;
   onToggleSound: () => void;
   onVideoReady?: () => void;
   triggerUnlockAudio?: boolean;
+  hasVideoEnded: boolean;
+  onVideoEnded: () => void;
 }
 
 const TARGET_VOLUME = 0.85;
@@ -22,6 +26,8 @@ export default function TronBackgroundVideo({
   onToggleSound,
   onVideoReady,
   triggerUnlockAudio,
+  hasVideoEnded,
+  onVideoEnded,
 }: TronBackgroundVideoProps) {
   const bgVideoRef = useRef<HTMLVideoElement>(null);
   const [scrollY, setScrollY] = useState(0);
@@ -113,10 +119,11 @@ export default function TronBackgroundVideo({
       video.addEventListener("canplay", startVideoInstant, { once: true });
     }
 
-    // Keep background video playing smoothly on continuous loop
+    // Video plays only once: trigger completion callback when it finishes
     const handleEnded = () => {
-      video.currentTime = 0;
-      video.play().catch(() => {});
+      if (onVideoEnded) {
+        onVideoEnded();
+      }
     };
     video.addEventListener("ended", handleEnded);
 
@@ -181,12 +188,9 @@ export default function TronBackgroundVideo({
   return (
     <>
       {/* 
-        AMBIENT BACKGROUND VIDEO LAYER
-        - Permanent master video and soundtrack provider (id="tron-bg-video")
-        - During Intro (!isHomescreenVisible): Full-screen solo video view
-        - On Homescreen: Fades in behind dashboard contents as the user scrolls down (scrollY > 120)
-        - When at the top of homescreen (scrollY <= 120): Hidden (opacity-0) so video displays in showcase section
-        - Audio plays through smoothly with zero handoffs or pauses!
+        AMBIENT BACKGROUND LAYER (Video or Scripture Verse)
+        - When video is active (!hasVideoEnded): Plays video once
+        - When video has finished (hasVideoEnded): Displays YouVersion Scripture Verse in the background on scroll!
       */}
       <div
         className={`fixed inset-0 w-full h-full z-0 overflow-hidden bg-black pointer-events-none select-none transition-opacity duration-1000 ease-out ${
@@ -198,17 +202,22 @@ export default function TronBackgroundVideo({
         }`}
         aria-hidden="true"
       >
-        <video
-          ref={bgVideoRef}
-          id="tron-bg-video"
-          src="/videos/tron-intro.mp4"
-          autoPlay
-          loop
-          muted={isMuted}
-          playsInline
-          preload="auto"
-          className="w-full h-full object-cover"
-        />
+        {!hasVideoEnded ? (
+          <video
+            ref={bgVideoRef}
+            id="tron-bg-video"
+            src="/videos/tron-intro.mp4"
+            autoPlay
+            muted={isMuted}
+            playsInline
+            preload="auto"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-[#090a0f]">
+            <YouVersionVerse variant="ambient" />
+          </div>
+        )}
       </div>
 
       {/* AMBIENT DARK OVERLAY WHEN SCROLLED DOWN IN DASHBOARD */}

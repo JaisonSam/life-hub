@@ -68,6 +68,7 @@ import GlanceErrorBoundary from "@/components/GlanceErrorBoundary";
 import AOSInit from "@/components/AOSInit";
 import WelcomeIntro from "@/components/WelcomeIntro";
 import TronBackgroundVideo from "@/components/TronBackgroundVideo";
+import YouVersionVerse from "@/components/YouVersionVerse";
 import { getDailyScripture } from "@/lib/dailyScripture";
 import { loadDailyHabits, toggleDailyHabitStorage, getDateKey } from "@/lib/dailyHabits";
 
@@ -487,6 +488,7 @@ export default function LifeHub() {
   // Intro & Homescreen visibility (Tron background integration)
   const [homescreenVisible, setHomescreenVisible] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [hasVideoEnded, setHasVideoEnded] = useState<boolean>(false);
   const sectionVideoRef = useRef<HTMLVideoElement>(null);
 
   const handleToggleSound = useCallback(() => {
@@ -1472,11 +1474,13 @@ export default function LifeHub() {
 
   return (
     <div className="min-h-screen text-neutral-100 font-sans selection:bg-amber-500/30 selection:text-amber-200 relative pb-16">
-      {/* Tron Motorcycle Ambient Video (0:09 - 1:35) */}
+      {/* Tron Motorcycle Ambient Video (0:09 - 1:35) or Ambient Scripture Verse */}
       <TronBackgroundVideo
         isHomescreenVisible={homescreenVisible}
         isMuted={isMuted}
         onToggleSound={handleToggleSound}
+        hasVideoEnded={hasVideoEnded}
+        onVideoEnded={() => setHasVideoEnded(true)}
       />
 
       {/* Intro Sequence: Black Greeting -> 5s Video Solo -> Homescreen Reveal */}
@@ -1565,20 +1569,56 @@ export default function LifeHub() {
         </div>
       </header>
 
-      {/* SEPARATE TRON VIDEO SHOWCASE SECTION (Below Main Top Tab, Clean & Frameless) */}
+      {/* SEPARATE VIDEO OR YOUVERSION SCRIPTURE SHOWCASE SECTION (Below Main Top Tab, Clean & Frameless) */}
       <section className="max-w-7xl mx-auto px-2 sm:px-4">
-        <div className="relative rounded-2xl overflow-hidden h-[300px] sm:h-[400px] md:h-[480px] bg-black shadow-2xl">
-          {/* Native Video Playing INSIDE the Section */}
-          <video
-            ref={sectionVideoRef}
-            src="/videos/tron-intro.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            className="w-full h-full object-cover"
-          />
+        <div className="relative rounded-2xl overflow-hidden min-h-[300px] sm:min-h-[380px] md:min-h-[440px] bg-black shadow-2xl">
+          {!hasVideoEnded ? (
+            <>
+              {/* Native Video Playing INSIDE the Section (Plays only once) */}
+              <video
+                ref={sectionVideoRef}
+                src="/videos/tron-intro.mp4"
+                autoPlay
+                muted
+                playsInline
+                preload="auto"
+                onEnded={() => setHasVideoEnded(true)}
+                className="w-full h-full object-cover"
+              />
+              {/* Subtle button to switch to scripture verse directly */}
+              <div className="absolute top-3 right-3 z-10">
+                <button
+                  onClick={() => setHasVideoEnded(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/75 hover:bg-black/95 text-neutral-300 hover:text-white border border-white/10 text-xs font-sans backdrop-blur-md transition-all shadow-lg"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Scripture Verse</span>
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="w-full h-full relative">
+              <YouVersionVerse variant="showcase" />
+              {/* Subtle replay video control */}
+              <div className="absolute top-3 right-3 z-10">
+                <button
+                  onClick={() => {
+                    setHasVideoEnded(false);
+                    const bg = document.getElementById("tron-bg-video") as HTMLVideoElement | null;
+                    if (bg) {
+                      bg.currentTime = 0;
+                      bg.play().catch(() => {});
+                    }
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/85 text-neutral-400 hover:text-white border border-white/10 text-xs font-sans backdrop-blur-md transition-all"
+                  title="Replay Video"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="hidden sm:inline">Replay Video</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
