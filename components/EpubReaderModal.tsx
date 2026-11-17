@@ -479,7 +479,7 @@ export default function EpubReaderModal({
       {/* Floating Quote Capture Action Pill */}
       {selectedText && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-30 bg-neutral-950 text-white border border-indigo-500/50 shadow-2xl rounded-2xl px-4 py-2.5 flex items-center gap-3 animate-in slide-in-from-bottom duration-200">
-          <Sparkles className="w-4 h-4 text-amber-400" />
+          <Sparkles className="w-4 h-4 text-white" />
           <span className="text-xs font-semibold max-w-xs truncate">
             "{selectedText}"
           </span>

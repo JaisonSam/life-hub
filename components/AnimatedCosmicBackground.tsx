@@ -35,10 +35,10 @@ export default function AnimatedCosmicBackground() {
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#030014]">
       {/* Ambient Parallax Orbs (EkiZR style customized for Life Hub domains) */}
       <div className="absolute inset-0">
-        {/* Amber / Gold Orb: Scripture & Daily Zen Sanctuary (Top Left) */}
+        {/* Sleek Monochrome Orb: Scripture & Daily Sanctuary (Top Left) */}
         <div
           ref={(el) => { blobRefs.current[0] = el; }}
-          className="absolute -top-24 -left-16 w-80 h-80 sm:w-[480px] sm:h-[480px] bg-amber-500/15 rounded-full blur-[140px] mix-blend-screen"
+          className="absolute -top-24 -left-16 w-80 h-80 sm:w-[480px] sm:h-[480px] bg-white/5 rounded-full blur-[140px] mix-blend-screen"
         />
 
         {/* Indigo / Violet Orb: GMAT Sprint & Career (Top Right) */}

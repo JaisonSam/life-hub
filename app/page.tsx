@@ -61,8 +61,6 @@ import KoboHighlightsModal, { ExtractedHighlight } from "@/components/KoboHighli
 import DailyRecommendationsDeck from "@/components/DailyRecommendationsDeck";
 import GoogleDriveBookshelf from "@/components/GoogleDriveBookshelf";
 import CareerBrandHub from "@/components/CareerBrandHub";
-import ExecutiveBentoDeck from "@/components/ExecutiveBentoDeck";
-import ExecutiveViewCarousel from "@/components/ExecutiveViewCarousel";
 import GlanceDashboard from "@/components/GlanceDashboard";
 import GlanceErrorBoundary from "@/components/GlanceErrorBoundary";
 import AOSInit from "@/components/AOSInit";
@@ -244,148 +242,7 @@ const curatedAlbums: CuratedAlbum[] = [
   },
 ];
 
-// VEERAKERALAPUDUR AGRIBUSINESS MODELER DATA
-interface AgriCapexItem {
-  id: string;
-  category: "Infrastructure" | "Irrigation" | "Planting Material" | "Soil & Prep";
-  name: string;
-  budget: number;
-  spent: number;
-  status: "Planned" | "In Progress" | "Completed";
-  notes?: string;
-}
 
-interface CropModel {
-  id: string;
-  name: string;
-  subtitle: string;
-  plantsOrUnits: string;
-  spacing: string;
-  initialCapex: number;
-  annualOpex: number;
-  gestationMonths: number;
-  expectedAnnualYield: string;
-  expectedPricePerUnit: string;
-  grossRevenuePerYear: number;
-  netProfitPerYear: number;
-  paybackPeriodMonths: number;
-  annualRoiPercent: number;
-  laborIntensity: "Low" | "Medium" | "High";
-  waterDemand: "Low" | "Medium" | "Moderate";
-  advantages: string[];
-  risks: string[];
-}
-
-const cropModelsList: CropModel[] = [
-  {
-    id: "guava",
-    name: "High-Density Guava (Taiwan Pink)",
-    subtitle: "High-Value Horticulture • Bi-Annual Harvest",
-    plantsOrUnits: "140 Saplings",
-    spacing: "8 x 8 ft grid",
-    initialCapex: 45000,
-    annualOpex: 12000,
-    gestationMonths: 14,
-    expectedAnnualYield: "3,000 kg / year",
-    expectedPricePerUnit: "₹35 / kg (wholesale)",
-    grossRevenuePerYear: 105000,
-    netProfitPerYear: 93000,
-    paybackPeriodMonths: 18,
-    annualRoiPercent: 206,
-    laborIntensity: "Low",
-    waterDemand: "Medium",
-    advantages: [
-      "Consistent demand across Tenkasi & Tirunelveli wholesale mandis",
-      "Hardy crop once established; responds vigorously to drip irrigation",
-      "Two harvest flushes per year with long 15-year commercial tree life",
-    ],
-    risks: [
-      "Fruit fly sensitivity during heavy monsoons (requires fruit bagging)",
-      "Pruning discipline required twice a year to maintain canopy density",
-    ],
-  },
-  {
-    id: "moringa",
-    name: "Perennial Drumstick (PKM-1 / ODC3)",
-    subtitle: "Fast Cash-Flow • High Drought Resistance",
-    plantsOrUnits: "180 Trees",
-    spacing: "6 x 8 ft spacing",
-    initialCapex: 28000,
-    annualOpex: 8000,
-    gestationMonths: 6,
-    expectedAnnualYield: "3,500 kg pods / year",
-    expectedPricePerUnit: "₹28 / kg average",
-    grossRevenuePerYear: 98000,
-    netProfitPerYear: 90000,
-    paybackPeriodMonths: 9,
-    annualRoiPercent: 321,
-    laborIntensity: "Low",
-    waterDemand: "Low",
-    advantages: [
-      "Rapid break-even: first harvest ready in just 6 months from planting",
-      "Thrives in hot, dry climate with low water footprint (drip friendly)",
-      "High-value byproduct: moringa leaf powder has booming health export demand",
-    ],
-    risks: [
-      "Price volatility during peak harvest season (ranges ₹15 to ₹80/kg)",
-      "High wind vulnerability (requires topping trunk at 3-4 feet height)",
-    ],
-  },
-  {
-    id: "poultry",
-    name: "Free-Range Country Chicken (Nattu Kozhi)",
-    subtitle: "High Turnaround • Synergistic Soil Manure",
-    plantsOrUnits: "250 Birds / Batch (3 Batches/yr)",
-    spacing: "300 sq ft shed + 0.20 acre run",
-    initialCapex: 62000,
-    annualOpex: 165000,
-    gestationMonths: 4,
-    expectedAnnualYield: "700 birds (~1,050 kg live weight)",
-    expectedPricePerUnit: "₹320 / kg live weight",
-    grossRevenuePerYear: 336000,
-    netProfitPerYear: 109000,
-    paybackPeriodMonths: 14,
-    annualRoiPercent: 175,
-    laborIntensity: "Medium",
-    waterDemand: "Low",
-    advantages: [
-      "Huge premium for authentic free-range country chicken in South Tamil Nadu",
-      "High cash liquidity: turnaround every 100-110 days per batch",
-      "Organic chicken manure dramatically boosts soil microbial health for intercrops",
-    ],
-    risks: [
-      "Predator risk (stray dogs, predatory birds) requires chainlink fencing",
-      "Requires daily 30-minute feeding and water sanitation routine",
-    ],
-  },
-  {
-    id: "syntropic",
-    name: "Syntropic Agroforestry (Coconut + Banana + Pepper)",
-    subtitle: "Multi-Tier Regenerative Canopy • Wealth Compounding",
-    plantsOrUnits: "16 Dwarf Palms + 80 G9 Bananas + Pepper",
-    spacing: "Border perimeter + inner alleys",
-    initialCapex: 54000,
-    annualOpex: 14000,
-    gestationMonths: 10,
-    expectedAnnualYield: "80 Banana Bunches + 1,600 Coconuts/yr",
-    expectedPricePerUnit: "₹250/bunch + ₹20/coconut",
-    grossRevenuePerYear: 110000,
-    netProfitPerYear: 96000,
-    paybackPeriodMonths: 24,
-    annualRoiPercent: 177,
-    laborIntensity: "Low",
-    waterDemand: "Medium",
-    advantages: [
-      "Tiered cash flows: bananas start in month 10, coconuts compound in year 3.5+",
-      "Natural shade and heavy biomass mulch conserve 50% more soil moisture",
-      "Self-sustaining perennial ecosystem with high asset value appreciation",
-    ],
-    risks: [
-      "Longer gestation period for coconut palms (3 to 4 years)",
-      "Banana plants require wind staking during South-West monsoon",
-    ],
-  },
-];
 
 // STRATEGIC BOOKSHELF DATA
 interface StrategicBook {
@@ -639,70 +496,8 @@ export default function LifeHub() {
   }, [homescreenVisible, hasVideoEnded]);
 
   // Navigation tabs
-  const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "career" | "gmat" | "books" | "habits" | "projects" | "music">("all");
   const [homeViewMode, setHomeViewMode] = useState<"glance" | "carousel" | "bento">("glance");
-
-  // Veerakeralapudur Agribusiness State
-  const [activeAgriModelId, setActiveAgriModelId] = useState("guava");
-  const [agriCapex, setAgriCapex] = useState<AgriCapexItem[]>([
-    {
-      id: "c-1",
-      category: "Infrastructure",
-      name: "Perimeter Fencing (Chainlink + Stone Posts)",
-      budget: 35000,
-      spent: 0,
-      status: "Planned",
-      notes: "Crucial for stray cattle and poultry biosecurity.",
-    },
-    {
-      id: "c-2",
-      category: "Irrigation",
-      name: "Borewell Tie-in & Drip Automation Lines",
-      budget: 22000,
-      spent: 6000,
-      status: "In Progress",
-      notes: "Main 1-inch line + lateral drippers for 0.25 acre.",
-    },
-    {
-      id: "c-3",
-      category: "Soil & Prep",
-      name: "Soil Conditioning (4 Tons FYM & Biochar)",
-      budget: 10000,
-      spent: 0,
-      status: "Planned",
-      notes: "Enriches red sandy loam for high microbial activity.",
-    },
-    {
-      id: "c-4",
-      category: "Planting Material",
-      name: "Certified High-Density Saplings Stock",
-      budget: 15000,
-      spent: 0,
-      status: "Planned",
-      notes: "140 Taiwan Pink / PKM-1 stock from certified nursery.",
-    },
-    {
-      id: "c-5",
-      category: "Infrastructure",
-      name: "Tool Locker & Weatherproof Storage Shed",
-      budget: 8000,
-      spent: 3500,
-      status: "Completed",
-      notes: "Secure lockable cabinet for tools, drip spares, and organic inputs.",
-    },
-  ]);
-  const [showAddCapex, setShowAddCapex] = useState(false);
-  const [newCapexName, setNewCapexName] = useState("");
-  const [newCapexCategory, setNewCapexCategory] = useState<AgriCapexItem["category"]>("Infrastructure");
-  const [newCapexBudget, setNewCapexBudget] = useState(15000);
-  const [newCapexSpent, setNewCapexSpent] = useState(0);
-  const [newCapexNotes, setNewCapexNotes] = useState("");
-
-  // Interactive ROI Simulator State
-  const [simCapex, setSimCapex] = useState(45000);
-  const [simOpex, setSimOpex] = useState(12000);
-  const [simYield, setSimYield] = useState(3000);
-  const [simPrice, setSimPrice] = useState(35);
 
   // Strategic Bookshelf State
   const [bookshelf, setBookshelf] = useState<StrategicBook[]>(initialStrategicBooks);
@@ -804,11 +599,11 @@ export default function LifeHub() {
     },
     {
       id: "2",
-      name: "Veerakeralapudur Farm Model (0.25 Acre)",
-      category: "Entrepreneurship",
-      progress: 25,
-      status: "Planning",
-      deadline: "2027",
+      name: "Senior ERP Business Analyst Advancement",
+      category: "Career & Leadership",
+      progress: 75,
+      status: "In Progress",
+      deadline: "2026-2027",
     },
     {
       id: "3",
@@ -920,8 +715,6 @@ export default function LifeHub() {
       const savedLastFmKey = localStorage.getItem("lifehub_lastfm_key");
       if (savedLastFmKey) setLastFmApiKey(savedLastFmKey);
 
-      const savedCapex = localStorage.getItem("lifehub_agri_capex");
-      if (savedCapex) setAgriCapex(JSON.parse(savedCapex));
 
       const savedBooks = localStorage.getItem("lifehub_bookshelf");
       if (savedBooks) setBookshelf(JSON.parse(savedBooks));
@@ -978,7 +771,7 @@ export default function LifeHub() {
   }, [gmatTimerRunning, gmatTimerSeconds, habits]);
 
   // Handle tab selection for desktop and smooth scrolling on mobile
-  const handleSelectTab = (tabId: "all" | "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music") => {
+  const handleSelectTab = (tabId: "all" | "career" | "gmat" | "books" | "habits" | "projects" | "music") => {
     setActiveTab(tabId);
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       if (tabId === "all") {
@@ -1006,11 +799,10 @@ export default function LifeHub() {
       // Only run scroll-spy on mobile screens (< 768px)
       if (typeof window === "undefined" || window.innerWidth >= 768) return;
 
-      const sectionIds: Array<{ id: "all" | "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music"; elId: string }> = [
+      const sectionIds: Array<{ id: "all" | "career" | "gmat" | "books" | "habits" | "projects" | "music"; elId: string }> = [
         { id: "all", elId: "module-all" },
         { id: "career", elId: "module-career" },
         { id: "gmat", elId: "module-gmat" },
-        { id: "farm", elId: "module-farm" },
         { id: "books", elId: "module-books" },
         { id: "habits", elId: "module-habits" },
         { id: "projects", elId: "module-projects" },
@@ -1018,7 +810,7 @@ export default function LifeHub() {
       ];
 
       const scrollPos = window.scrollY + 140;
-      let currentTab: "all" | "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music" = "all";
+      let currentTab: "all" | "career" | "gmat" | "books" | "habits" | "projects" | "music" = "all";
 
       for (const item of sectionIds) {
         const el = document.getElementById(item.elId);
@@ -1123,41 +915,7 @@ export default function LifeHub() {
       .finally(() => setIsFetchingNowPlaying(false));
   };
 
-  // Agribusiness CapEx Handlers
-  const saveCapex = (updated: AgriCapexItem[]) => {
-    setAgriCapex(updated);
-    try {
-      localStorage.setItem("lifehub_agri_capex", JSON.stringify(updated));
-    } catch {}
-  };
 
-  const handleAddCapex = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCapexName.trim()) return;
-    const newItem: AgriCapexItem = {
-      id: Date.now().toString(),
-      name: newCapexName.trim(),
-      category: newCapexCategory,
-      budget: Number(newCapexBudget) || 10000,
-      spent: Number(newCapexSpent) || 0,
-      status: Number(newCapexSpent) >= Number(newCapexBudget) && Number(newCapexBudget) > 0
-        ? "Completed"
-        : Number(newCapexSpent) > 0
-        ? "In Progress"
-        : "Planned",
-      notes: newCapexNotes.trim(),
-    };
-    const updated = [newItem, ...agriCapex];
-    saveCapex(updated);
-    setShowAddCapex(false);
-    setNewCapexName("");
-    setNewCapexNotes("");
-  };
-
-  const deleteCapex = (id: string) => {
-    const updated = agriCapex.filter((c) => c.id !== id);
-    saveCapex(updated);
-  };
 
   // Strategic Bookshelf Handlers
   const saveBookshelf = (updated: StrategicBook[]) => {
@@ -1411,14 +1169,7 @@ export default function LifeHub() {
 
   const completedHabitsCount = habits.filter((h) => h.completedToday).length;
 
-  // Computed variables for Agribusiness
-  const selectedModel = cropModelsList.find((m) => m.id === activeAgriModelId) || cropModelsList[0];
-  const totalAgriBudget = agriCapex.reduce((acc, item) => acc + item.budget, 0);
-  const totalAgriSpent = agriCapex.reduce((acc, item) => acc + item.spent, 0);
-  const simGross = Math.max(0, simYield * simPrice);
-  const simNet = Math.max(0, simGross - simOpex);
-  const simRoi = simCapex > 0 ? Math.round((simNet / simCapex) * 100) : 0;
-  const simPayback = simNet > 0 ? (simCapex / (simNet / 12)).toFixed(1) : "N/A";
+
 
   // Computed variables for Bookshelf
   const booksCompleted = bookshelf.filter((b) => b.status === "Completed").length;
@@ -1432,7 +1183,7 @@ export default function LifeHub() {
   });
 
   return (
-    <div className="min-h-screen text-neutral-100 font-sans selection:bg-amber-500/30 selection:text-amber-200 relative pb-16">
+    <div className="min-h-screen text-neutral-100 font-sans selection:bg-neutral-800 selection:text-white relative pb-16">
       {/* Tron Motorcycle Ambient Video (0:09 - 1:35) or Ambient Scripture Verse */}
       <TronBackgroundVideo
         isHomescreenVisible={homescreenVisible}
@@ -1471,7 +1222,6 @@ export default function LifeHub() {
                 { id: "all", label: "Home" },
                 { id: "career", label: "Career" },
                 { id: "gmat", label: "GMAT" },
-                { id: "farm", label: "Farm" },
                 { id: "books", label: "Books" },
                 { id: "habits", label: "Habits" },
                 { id: "projects", label: "Projects" },
@@ -1484,7 +1234,7 @@ export default function LifeHub() {
                     onClick={() => handleSelectTab(tab.id as any)}
                     className={`relative text-xs sm:text-sm font-medium px-2.5 sm:px-3 md:px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap ${
                       isActive
-                        ? "text-white font-semibold bg-neutral-800/80 shadow-sm after:absolute after:-bottom-[11px] after:left-2.5 after:right-2.5 after:h-[2px] after:bg-amber-400"
+                        ? "text-white font-semibold bg-neutral-800/80 shadow-sm after:absolute after:-bottom-[11px] after:left-2.5 after:right-2.5 after:h-[2px] after:bg-white"
                         : "text-neutral-400 hover:text-neutral-100 hover:bg-neutral-900/60"
                     }`}
                   >
@@ -1503,7 +1253,7 @@ export default function LifeHub() {
                 className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white transition-colors"
                 title="Return to Home"
               >
-                <ChevronLeft className="w-3 h-3 text-amber-400" />
+                <ChevronLeft className="w-3 h-3 text-white" />
                 <span>Home</span>
               </button>
             )}
@@ -1552,7 +1302,7 @@ export default function LifeHub() {
                   onClick={handleStopVideoAndShowScripture}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/75 hover:bg-black/95 text-neutral-300 hover:text-white border border-white/10 text-xs font-sans backdrop-blur-md transition-all shadow-lg"
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                  <BookOpen className="w-3.5 h-3.5 text-white" />
                   <span>Scripture Passage</span>
                 </button>
               </div>
@@ -1577,12 +1327,12 @@ export default function LifeHub() {
               onClick={() => handleSelectTab("all")}
               className="flex items-center gap-1.5 text-neutral-300 hover:text-white transition-colors group"
             >
-              <ChevronLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
+              <ChevronLeft className="w-4 h-4 text-white group-hover:-translate-x-0.5 transition-transform" />
               <span>← Back to Home</span>
             </button>
             <div className="flex items-center gap-2 text-neutral-400 uppercase tracking-wider text-[11px]">
               <span>Viewing:</span>
-              <span className="text-amber-400 font-bold">{activeTab} Deck</span>
+              <span className="text-white font-bold">{activeTab} Deck</span>
             </div>
           </div>
         )}
@@ -1616,28 +1366,28 @@ export default function LifeHub() {
           data-aos-duration="700"
           data-aos-offset="80"
         >
-          <section className="p-6 sm:p-8 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-6">
+          <section className="p-6 sm:p-8 rounded-2xl bg-[#0a0a0c] border border-neutral-800 shadow-xl space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-[#181920] text-amber-400 border border-[#262834] shadow-sm">
-                  <Target className="w-5 h-5 text-amber-400" />
+                <div className="p-2.5 rounded-xl bg-[#121318] text-white border border-neutral-800 shadow-sm">
+                  <Target className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <h2 className="font-extrabold text-lg text-white flex items-center gap-2">
                     GMAT Focus Edition Sprint
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/20 font-semibold font-mono">
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-neutral-800 text-neutral-200 border border-neutral-700 font-semibold font-mono">
                       Target: 715+ (99th %ile)
                     </span>
                   </h2>
                   <p className="text-xs text-neutral-400">
-                    Exam Target: <span className="text-[#e5c07b] font-semibold">December 2026</span> • ~45 Days Runway • 1 Hour Daily Compounding
+                    Exam Target: <span className="text-white font-semibold">December 2026</span> • ~45 Days Runway • 1 Hour Daily Compounding
                   </p>
                 </div>
               </div>
 
               {/* 60-Minute Focus Session Stopwatch / Countdown */}
-              <div className="flex items-center gap-3 p-2 px-3 rounded-xl border border-[#262834] bg-[#181920]">
-                <Timer className="w-4 h-4 text-amber-400 animate-pulse" />
+              <div className="flex items-center gap-3 p-2 px-3 rounded-xl border border-neutral-800 bg-[#121318]">
+                <Timer className="w-4 h-4 text-white animate-pulse" />
                 <div className="text-sm font-mono font-bold text-white">
                   {Math.floor(gmatTimerSeconds / 60)
                     .toString()
@@ -1648,8 +1398,8 @@ export default function LifeHub() {
                   onClick={() => setGmatTimerRunning(!gmatTimerRunning)}
                   className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${
                     gmatTimerRunning
-                      ? "bg-amber-500 text-neutral-950 font-bold"
-                      : "bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold"
+                      ? "bg-white text-black font-bold"
+                      : "bg-white hover:bg-neutral-200 text-black font-bold"
                   }`}
                   title={gmatTimerRunning ? "Pause Focus Hour" : "Start 60m Focus Hour"}
                 >
@@ -1669,12 +1419,12 @@ export default function LifeHub() {
             </div>
 
             {/* MBA.COM OFFICIAL MOCK TRACKER & TRAJECTORY CHART */}
-            <div className="space-y-4 p-5 rounded-xl border border-[#262834] bg-[#181920]">
+            <div className="space-y-4 p-5 rounded-xl border border-neutral-800 bg-[#101115]">
               {/* Header & mba.com Action Bar */}
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-[#14151b] text-amber-400 border border-[#262834]">
-                    <TrendingUp className="w-4 h-4 text-amber-400" />
+                  <div className="p-2 rounded-xl bg-[#0a0a0c] text-white border border-neutral-800">
+                    <TrendingUp className="w-4 h-4 text-white" />
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-white flex items-center gap-2">
@@ -1702,7 +1452,7 @@ export default function LifeHub() {
                   </a>
                   <button
                     onClick={() => setShowAddMock(!showAddMock)}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold transition-all shadow-sm"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black text-xs font-bold transition-all shadow-sm"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     {showAddMock ? "Close Form" : "Log Mock Score"}
@@ -1716,7 +1466,7 @@ export default function LifeHub() {
                 <div className="p-3.5 rounded-xl border border-[#262834] bg-[#14151b] space-y-1">
                   <div className="text-[10px] font-mono uppercase tracking-wider text-[#8b91a0] font-semibold flex items-center justify-between">
                     <span>Latest Mock</span>
-                    <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 font-mono text-[9px] font-bold">
+                    <span className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-200 font-mono text-[9px] font-bold border border-neutral-700">
                       {currentPercentile}th %ile
                     </span>
                   </div>
@@ -1762,14 +1512,14 @@ export default function LifeHub() {
                 </div>
 
                 {/* Target Runway */}
-                <div className="p-3.5 rounded-xl border border-[#262834] bg-[#14151b] space-y-1">
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-[#e5c07b] font-semibold flex items-center justify-between">
+                <div className="p-3.5 rounded-xl border border-neutral-800 bg-[#0a0a0c] space-y-1">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-300 font-semibold flex items-center justify-between">
                     <span>December Goal</span>
-                    <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 font-mono text-[9px] font-bold">
+                    <span className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-200 border border-neutral-700 font-mono text-[9px] font-bold">
                       99th %ile
                     </span>
                   </div>
-                  <div className="text-2xl font-extrabold text-[#e5c07b] font-mono tracking-tight">
+                  <div className="text-2xl font-extrabold text-white font-mono tracking-tight">
                     715+
                   </div>
                   <div className="text-[11px] text-neutral-400 font-medium">
@@ -1779,18 +1529,18 @@ export default function LifeHub() {
               </div>
 
               {/* Visual Trajectory Chart (SVG) */}
-              <div className="p-4 rounded-xl border border-[#262834] bg-[#14151b] relative overflow-hidden">
+              <div className="p-4 rounded-xl border border-neutral-800 bg-[#0a0a0c] relative overflow-hidden">
                 <div className="flex items-center justify-between text-[11px] text-neutral-400 mb-2 font-mono">
-                  <span className="font-semibold text-neutral-300 flex items-center gap-1.5">
-                    <LineChart className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="font-semibold text-white flex items-center gap-1.5">
+                    <LineChart className="w-3.5 h-3.5 text-white" />
                     Official Mock Progression to 715+
                   </span>
                   <div className="flex items-center gap-3 text-[10px]">
-                    <span className="flex items-center gap-1 text-[#e5c07b] font-medium">
-                      <span className="w-2 h-2 rounded-full bg-[#e5c07b]" /> Official Mocks
+                    <span className="flex items-center gap-1 text-white font-medium">
+                      <span className="w-2 h-2 rounded-full bg-white" /> Official Mocks
                     </span>
-                    <span className="flex items-center gap-1 text-amber-400 font-medium">
-                      <span className="w-2 h-0.5 bg-amber-400" /> 715+ Target (99th %ile)
+                    <span className="flex items-center gap-1 text-neutral-300 font-medium">
+                      <span className="w-2 h-0.5 bg-neutral-300" /> 715+ Target (99th %ile)
                     </span>
                   </div>
                 </div>
@@ -1802,8 +1552,8 @@ export default function LifeHub() {
                   >
                     <defs>
                       <linearGradient id="gmatGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#e5c07b" stopOpacity="0.30" />
-                        <stop offset="100%" stopColor="#e5c07b" stopOpacity="0.0" />
+                        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
                       </linearGradient>
                       <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                         <feGaussianBlur stdDeviation="3" result="blur" />
@@ -1839,14 +1589,14 @@ export default function LifeHub() {
                       );
                     })}
 
-                    {/* 715 Target Line (Gold Dashed) */}
+                    {/* 715 Target Line (White Dashed) */}
                     <g>
                       <line
                         x1={chartPadLeft}
                         y1={getSvgY(715)}
                         x2={chartPadLeft + chartUsableWidth}
                         y2={getSvgY(715)}
-                        stroke="#f59e0b"
+                        stroke="#ffffff"
                         strokeDasharray="4 4"
                         strokeWidth="1.5"
                         strokeOpacity="0.8"
@@ -1854,7 +1604,7 @@ export default function LifeHub() {
                       <text
                         x={chartPadLeft + 10}
                         y={getSvgY(715) - 6}
-                        fill="#f59e0b"
+                        fill="#ffffff"
                         fontSize="9"
                         fontWeight="bold"
                         fontFamily="monospace"
@@ -1871,7 +1621,7 @@ export default function LifeHub() {
                       <polyline
                         points={mockPlotPoints.map((p) => `${p.x},${p.y}`).join(" ")}
                         fill="none"
-                        stroke="#e5c07b"
+                        stroke="#ffffff"
                         strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -1885,7 +1635,7 @@ export default function LifeHub() {
                         y1={lastMockPoint.y}
                         x2={targetPlotPoint.x}
                         y2={targetPlotPoint.y}
-                        stroke="#f59e0b"
+                        stroke="#ffffff"
                         strokeDasharray="4 4"
                         strokeWidth="2"
                         strokeOpacity="0.7"
@@ -1900,7 +1650,7 @@ export default function LifeHub() {
                           cx={pt.x}
                           cy={pt.y}
                           r="7"
-                          fill="#e5c07b"
+                          fill="#ffffff"
                           fillOpacity="0.25"
                           filter="url(#glow)"
                         />
@@ -1909,8 +1659,8 @@ export default function LifeHub() {
                           cx={pt.x}
                           cy={pt.y}
                           r="4.5"
-                          fill="#e5c07b"
-                          stroke="#ffffff"
+                          fill="#ffffff"
+                          stroke="#0a0a0c"
                           strokeWidth="2"
                         />
                         {/* Score Tag Above Node */}
@@ -1921,7 +1671,7 @@ export default function LifeHub() {
                           height="18"
                           rx="5"
                           fill="#181920"
-                          stroke="#e5c07b"
+                          stroke="#ffffff"
                           strokeWidth="1"
                         />
                         <text
@@ -2031,7 +1781,7 @@ export default function LifeHub() {
                 >
                   <div className="flex items-center justify-between border-b border-[#262834] pb-2 font-mono">
                     <div className="flex items-center gap-2 text-xs font-bold text-white">
-                      <Award className="w-4 h-4 text-amber-400" />
+                      <Award className="w-4 h-4 text-white" />
                       Log mba.com Practice Exam Score (Takes ~10 Seconds)
                     </div>
                     <span className="text-[10px] text-[#8b91a0]">GMAT Focus Edition (205 - 805)</span>
@@ -2046,7 +1796,7 @@ export default function LifeHub() {
                       <select
                         value={newMockName}
                         onChange={(e) => setNewMockName(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-amber-400 font-sans"
+                        className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-white font-sans"
                       >
                         <option value="Official Practice Exam 1 (Free)">Official Practice Exam 1 (Free)</option>
                         <option value="Official Practice Exam 2 (Free)">Official Practice Exam 2 (Free)</option>
@@ -2069,13 +1819,13 @@ export default function LifeHub() {
                         placeholder="e.g. Nov 15"
                         value={newMockDate}
                         onChange={(e) => setNewMockDate(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-amber-400 font-sans"
+                        className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-white font-sans"
                       />
                     </div>
 
                     {/* Total Score */}
                     <div className="sm:col-span-2 space-y-1">
-                      <label className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold font-mono">
+                      <label className="text-[10px] uppercase tracking-wider text-neutral-200 font-semibold font-mono">
                         Total Score
                       </label>
                       <input
@@ -2085,7 +1835,7 @@ export default function LifeHub() {
                         step={10}
                         value={newMockTotal}
                         onChange={(e) => setNewMockTotal(Number(e.target.value))}
-                        className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-amber-400/40 text-xs font-bold text-amber-300 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-neutral-700 text-xs font-bold text-white focus:outline-none focus:border-white font-mono"
                       />
                     </div>
 
@@ -2100,7 +1850,7 @@ export default function LifeHub() {
                         max={90}
                         value={newMockQuant}
                         onChange={(e) => setNewMockQuant(Number(e.target.value))}
-                        className="w-full px-2 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs font-bold text-emerald-400 focus:outline-none focus:border-amber-400 font-mono text-center"
+                        className="w-full px-2 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs font-bold text-emerald-400 focus:outline-none focus:border-white font-mono text-center"
                       />
                     </div>
 
@@ -2115,13 +1865,13 @@ export default function LifeHub() {
                         max={90}
                         value={newMockDI}
                         onChange={(e) => setNewMockDI(Number(e.target.value))}
-                        className="w-full px-2 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs font-bold text-sky-400 focus:outline-none focus:border-amber-400 font-mono text-center"
+                        className="w-full px-2 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs font-bold text-sky-400 focus:outline-none focus:border-white font-mono text-center"
                       />
                     </div>
 
                     {/* Verbal (60-90) */}
                     <div className="sm:col-span-1 space-y-1">
-                      <label className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold text-center block font-mono">
+                      <label className="text-[10px] uppercase tracking-wider text-neutral-200 font-semibold text-center block font-mono">
                         Verbal
                       </label>
                       <input
@@ -2130,7 +1880,7 @@ export default function LifeHub() {
                         max={90}
                         value={newMockVerbal}
                         onChange={(e) => setNewMockVerbal(Number(e.target.value))}
-                        className="w-full px-2 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-400 font-mono text-center"
+                        className="w-full px-2 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs font-bold text-white focus:outline-none focus:border-white font-mono text-center"
                       />
                     </div>
 
@@ -2138,7 +1888,7 @@ export default function LifeHub() {
                     <div className="sm:col-span-1 flex items-end">
                       <button
                         type="submit"
-                        className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 rounded-xl text-xs font-bold shadow-md transition-colors"
+                        className="w-full py-2 bg-white hover:bg-neutral-200 text-black rounded-xl text-xs font-bold shadow-md transition-colors"
                       >
                         Save
                       </button>
@@ -2152,7 +1902,7 @@ export default function LifeHub() {
                       placeholder="Key takeaway / pacing observations (e.g., DI table analysis felt fast; spent too long on Q#14 in Quant)..."
                       value={newMockNotes}
                       onChange={(e) => setNewMockNotes(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
+                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
                     />
                   </div>
                 </form>
@@ -2162,7 +1912,7 @@ export default function LifeHub() {
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between text-xs text-neutral-400 font-mono">
                   <span className="font-semibold text-neutral-300 flex items-center gap-1.5">
-                    <BarChart3 className="w-3.5 h-3.5 text-amber-400" />
+                    <BarChart3 className="w-3.5 h-3.5 text-white" />
                     Logged Official Practice Exams ({mockScores.length})
                   </span>
                   <span className="text-[11px] text-[#8b91a0]">Official algorithm simulation</span>
@@ -2179,17 +1929,17 @@ export default function LifeHub() {
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-xs text-[#e5c07b]">{mock.name}</span>
-                              <span className="text-[10px] text-[#8b91a0] font-mono">{mock.date}</span>
+                              <span className="font-bold text-xs text-white">{mock.name}</span>
+                              <span className="text-[10px] text-neutral-400 font-mono">{mock.date}</span>
                             </div>
                             <div className="flex items-center gap-1.5 mt-1 text-[11px]">
-                              <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono font-bold border border-emerald-500/20">
+                              <span className="px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-200 font-mono font-bold border border-neutral-700">
                                 Q{mock.quant}
                               </span>
-                              <span className="px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 font-mono font-bold border border-sky-500/20">
+                              <span className="px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-200 font-mono font-bold border border-neutral-700">
                                 DI{mock.di}
                               </span>
-                              <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-mono font-bold border border-amber-500/20">
+                              <span className="px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-200 font-mono font-bold border border-neutral-700">
                                 V{mock.verbal}
                               </span>
                             </div>
@@ -2200,7 +1950,7 @@ export default function LifeHub() {
                               <div className="font-extrabold text-base text-white font-mono leading-tight">
                                 {mock.total}
                               </div>
-                              <div className="text-[10px] font-semibold text-amber-400 font-mono">
+                              <div className="text-[10px] font-semibold text-neutral-300 font-mono">
                                 {pct}th %ile
                               </div>
                             </div>
@@ -2274,14 +2024,14 @@ export default function LifeHub() {
               <div className="p-4 rounded-xl border border-[#262834] bg-[#181920] space-y-2.5">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-bold text-white flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                    <span className="w-2 h-2 rounded-full bg-white" />
                     Verbal Reasoning
                   </span>
-                  <span className="font-mono text-amber-400 font-semibold">V{latestMock.verbal} → V84</span>
+                  <span className="font-mono text-white font-semibold">V{latestMock.verbal} → V84</span>
                 </div>
                 <div className="w-full bg-[#101116] h-2 rounded-full overflow-hidden border border-[#282a38]">
                   <div
-                    className="bg-amber-500 h-full rounded-full transition-all duration-500"
+                    className="bg-white h-full rounded-full transition-all duration-500"
                     style={{ width: `${Math.min(100, Math.max(15, ((latestMock.verbal - 60) / 30) * 100))}%` }}
                   />
                 </div>
@@ -2295,7 +2045,7 @@ export default function LifeHub() {
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="font-bold text-neutral-300 flex items-center gap-1.5">
-                  <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                  <AlertCircle className="w-3.5 h-3.5 text-white" />
                   Trap & Error Diagnosis Notebook ({gmatErrors.length} Logged)
                 </span>
                 <span className="text-[11px] text-[#8b91a0]">Every error understood is +5 points</span>
@@ -2308,12 +2058,12 @@ export default function LifeHub() {
                   placeholder="Question / Source (e.g. OG Quant PS #45)..."
                   value={newErrorQ}
                   onChange={(e) => setNewErrorQ(e.target.value)}
-                  className="sm:col-span-3 px-3 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
+                  className="sm:col-span-3 px-3 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
                 />
                 <select
                   value={newErrorSection}
                   onChange={(e: any) => setNewErrorSection(e.target.value)}
-                  className="sm:col-span-2 px-2.5 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-neutral-300 focus:outline-none focus:border-amber-400 font-sans"
+                  className="sm:col-span-2 px-2.5 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-neutral-300 focus:outline-none focus:border-white font-sans"
                 >
                   <option value="Quant">Quant</option>
                   <option value="Data Insights">Data Insights</option>
@@ -2322,7 +2072,7 @@ export default function LifeHub() {
                 <select
                   value={newErrorTrap}
                   onChange={(e: any) => setNewErrorTrap(e.target.value)}
-                  className="sm:col-span-2 px-2.5 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-neutral-300 focus:outline-none focus:border-amber-400 font-sans"
+                  className="sm:col-span-2 px-2.5 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-neutral-300 focus:outline-none focus:border-white font-sans"
                 >
                   <option value="Math Trap">Math Trap</option>
                   <option value="RC Scope Shift">RC Scope Shift</option>
@@ -2334,11 +2084,11 @@ export default function LifeHub() {
                   placeholder="What was the trap & takeaway rule?..."
                   value={newErrorTakeaway}
                   onChange={(e) => setNewErrorTakeaway(e.target.value)}
-                  className="sm:col-span-4 px-3 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
+                  className="sm:col-span-4 px-3 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
                 />
                 <button
                   type="submit"
-                  className="sm:col-span-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 rounded-lg text-xs font-bold transition-colors"
+                  className="sm:col-span-1 px-3 py-1.5 bg-white hover:bg-neutral-200 text-black rounded-lg text-xs font-bold transition-colors"
                 >
                   Log
                 </button>
@@ -2347,445 +2097,16 @@ export default function LifeHub() {
               {/* Error Log Entries */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-36 overflow-y-auto pr-1">
                 {gmatErrors.map((err) => (
-                  <div key={err.id} className="p-3 rounded-xl border border-[#262834] bg-[#14151b] text-xs space-y-1">
+                  <div key={err.id} className="p-3 rounded-xl border border-neutral-800 bg-[#0a0a0c] text-xs space-y-1">
                     <div className="flex justify-between items-center text-[10px]">
-                      <span className="font-bold text-[#e5c07b]">{err.question}</span>
-                      <span className="px-2 py-0.5 rounded bg-[#181920] text-amber-400 font-semibold font-mono border border-[#262834]">{err.trapType}</span>
+                      <span className="font-bold text-white">{err.question}</span>
+                      <span className="px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 font-semibold font-mono border border-neutral-700">{err.trapType}</span>
                     </div>
                     <p className="text-neutral-300 text-[11px] leading-relaxed">
                       💡 {err.takeaway}
                     </p>
                   </div>
                 ))}
-              </div>
-            </div>
-          </section>
-        </div>
-
-        {/* VEERAKERALAPUDUR 0.25-ACRE AGRIBUSINESS MODELER */}
-        <div
-          id="module-farm"
-          className={getModuleVisibilityClass("farm")}
-          data-aos="fade-up"
-          data-aos-duration="700"
-          data-aos-offset="80"
-        >
-          <section className="p-6 sm:p-8 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-6">
-            {/* Top Header & Overview */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#262834]">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-emerald-400 shadow-sm">
-                  <Sprout className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-extrabold text-lg text-white tracking-tight">
-                      Veerakeralapudur Agribusiness Modeler
-                    </h2>
-                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold font-mono">
-                      0.25 Acre (11 Cents)
-                    </span>
-                  </div>
-                  <p className="text-xs text-neutral-400">
-                    Tenkasi District, Tamil Nadu • High-Density Horticulture & Cash Flow Engineering
-                  </p>
-                </div>
-              </div>
-
-              {/* CapEx Summary Badges */}
-              <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-                <div className="px-3 py-1.5 rounded-xl bg-[#181920] border border-[#262834] flex items-center gap-2">
-                  <span className="text-[#8b91a0]">CapEx Budget:</span>
-                  <span className="font-bold text-white">₹{totalAgriBudget.toLocaleString("en-IN")}</span>
-                </div>
-                <div className="px-3 py-1.5 rounded-xl bg-[#181920] border border-[#262834] flex items-center gap-2">
-                  <span className="text-[#8b91a0]">Spent:</span>
-                  <span className="font-bold text-emerald-400">₹{totalAgriSpent.toLocaleString("en-IN")}</span>
-                </div>
-                <button
-                  onClick={() => setShowAddCapex(!showAddCapex)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold transition-all text-xs shadow-sm"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  {showAddCapex ? "Close" : "Add CapEx Item"}
-                </button>
-              </div>
-            </div>
-
-            {/* ADD CAPEX FORM DRAWER */}
-            {showAddCapex && (
-              <form
-                onSubmit={handleAddCapex}
-                className="p-4 rounded-xl bg-[#181920] border border-[#262834] space-y-3 shadow-xl animate-in fade-in duration-200"
-              >
-                <div className="flex items-center justify-between border-b border-[#262834] pb-2 font-mono">
-                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <Coins className="w-4 h-4 text-amber-400" />
-                    Record Capital Investment Item (CapEx)
-                  </span>
-                  <span className="text-[10px] text-[#8b91a0]">Veerakeralapudur 0.25 Acre Site</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
-                  <div className="sm:col-span-4 space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider text-[#8b91a0] font-semibold font-mono">
-                      Item Description
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Solar Drip Automation Timer..."
-                      value={newCapexName}
-                      onChange={(e) => setNewCapexName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-amber-400 font-sans"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-3 space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider text-[#8b91a0] font-semibold font-mono">
-                      Category
-                    </label>
-                    <select
-                      value={newCapexCategory}
-                      onChange={(e: any) => setNewCapexCategory(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-amber-400 font-sans"
-                    >
-                      <option value="Infrastructure">Infrastructure (Fencing, Shed)</option>
-                      <option value="Irrigation">Irrigation (Drip, Piping)</option>
-                      <option value="Planting Material">Planting Material (Saplings)</option>
-                      <option value="Soil & Prep">Soil & Prep (FYM, Biochar)</option>
-                    </select>
-                  </div>
-
-                  <div className="sm:col-span-2 space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider text-[#8b91a0] font-semibold font-mono">
-                      Budget (₹)
-                    </label>
-                    <input
-                      type="number"
-                      step={500}
-                      value={newCapexBudget}
-                      onChange={(e) => setNewCapexBudget(Number(e.target.value))}
-                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-amber-400 font-mono"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2 space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider text-[#8b91a0] font-semibold font-mono">
-                      Spent (₹)
-                    </label>
-                    <input
-                      type="number"
-                      step={500}
-                      value={newCapexSpent}
-                      onChange={(e) => setNewCapexSpent(Number(e.target.value))}
-                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-amber-400 font-mono"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-1 flex items-end">
-                    <button
-                      type="submit"
-                      className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 rounded-xl text-xs font-bold shadow-md transition-colors"
-                    >
-                      Save
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Vendor / specifications / timing notes..."
-                    value={newCapexNotes}
-                    onChange={(e) => setNewCapexNotes(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
-                  />
-                </div>
-              </form>
-            )}
-
-            {/* CROP MODEL BENCHMARK SELECTION (4 MODELS FOR 0.25 ACRE) */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="font-bold text-white flex items-center gap-1.5">
-                  <Trees className="w-4 h-4 text-emerald-400" />
-                  Select Agribusiness Prototype Model for 0.25 Acre
-                </span>
-                <span className="text-[11px] text-[#8b91a0]">Click a model to load live ROI simulation</span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
-                {cropModelsList.map((model) => {
-                  const isSelected = activeAgriModelId === model.id;
-                  return (
-                    <div
-                      key={model.id}
-                      onClick={() => {
-                        setActiveAgriModelId(model.id);
-                        setSimCapex(model.initialCapex);
-                        setSimOpex(model.annualOpex);
-                        const yVal = parseInt(model.expectedAnnualYield.replace(/\D/g, "")) || 3000;
-                        setSimYield(yVal);
-                        const pVal = parseInt(model.expectedPricePerUnit.replace(/\D/g, "")) || 35;
-                        setSimPrice(pVal);
-                      }}
-                      className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 group ${
-                        isSelected
-                          ? "bg-[#181920] border-amber-400 shadow-lg ring-1 ring-amber-400/40"
-                          : "bg-[#181920] border-[#262834] hover:border-neutral-500"
-                      }`}
-                    >
-                      <div>
-                        <div className="flex justify-between items-start gap-2">
-                          <span
-                            className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                              isSelected
-                                ? "bg-amber-400 text-neutral-950 font-mono font-bold"
-                                : "bg-[#14151b] text-[#8b91a0] font-mono border border-[#262834]"
-                            }`}
-                          >
-                            {model.plantsOrUnits}
-                          </span>
-                          <span className="text-[11px] font-mono text-emerald-400 font-bold">
-                            ROI: {model.annualRoiPercent}%
-                          </span>
-                        </div>
-
-                        <h4 className="font-bold text-sm text-white mt-2 group-hover:text-[#e5c07b] transition-colors">
-                          {model.name}
-                        </h4>
-                        <p className="text-[11px] text-[#8b91a0] mt-0.5">{model.subtitle}</p>
-                      </div>
-
-                      {/* Financial Metrics */}
-                      <div className="p-2.5 rounded-xl bg-[#14151b] border border-[#262834] space-y-1 text-xs">
-                        <div className="flex justify-between text-[11px]">
-                          <span className="text-[#8b91a0]">Est. Net Profit:</span>
-                          <span className="font-bold text-emerald-400 font-mono">
-                            ₹{model.netProfitPerYear.toLocaleString("en-IN")}/yr
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-[11px]">
-                          <span className="text-[#8b91a0]">Payback Period:</span>
-                          <span className="font-mono text-white font-semibold">{model.paybackPeriodMonths} Months</span>
-                        </div>
-                        <div className="flex justify-between text-[11px]">
-                          <span className="text-[#8b91a0]">Labor Demand:</span>
-                          <span className="font-semibold text-neutral-300">{model.laborIntensity}</span>
-                        </div>
-                      </div>
-
-                      {/* Advantages pill list */}
-                      <div className="space-y-1 text-[11px] text-[#8b91a0]">
-                        <p className="line-clamp-2">✓ {model.advantages[0]}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 2-COLUMN: INTERACTIVE ROI SIMULATOR & CAPEX EXPENDITURE MATRIX */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
-              {/* INTERACTIVE FINANCIAL SIMULATOR (7 COLS) */}
-              <div className="lg:col-span-7 p-5 rounded-xl border border-[#262834] bg-[#181920] space-y-4">
-                <div className="flex items-center justify-between border-b border-[#262834] pb-3">
-                  <div className="flex items-center gap-2">
-                    <Calculator className="w-4 h-4 text-amber-400" />
-                    <h3 className="font-bold text-sm text-white">Live ROI & Financial Simulator</h3>
-                  </div>
-                  <span className="text-[10px] text-[#8b91a0] font-mono">Active: {selectedModel.name}</span>
-                </div>
-
-                {/* 4 Interactive Input Sliders/Fields */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="p-3 rounded-xl bg-[#14151b] border border-[#262834] space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider text-[#8b91a0] font-semibold block font-mono">
-                      CapEx (₹)
-                    </label>
-                    <input
-                      type="number"
-                      step={1000}
-                      value={simCapex}
-                      onChange={(e) => setSimCapex(Number(e.target.value))}
-                      className="w-full bg-transparent font-bold text-sm text-white font-mono focus:outline-none border-b border-[#282a38] focus:border-amber-400"
-                    />
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-[#14151b] border border-[#262834] space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider text-[#8b91a0] font-semibold block font-mono">
-                      Annual OpEx (₹)
-                    </label>
-                    <input
-                      type="number"
-                      step={500}
-                      value={simOpex}
-                      onChange={(e) => setSimOpex(Number(e.target.value))}
-                      className="w-full bg-transparent font-bold text-sm text-white font-mono focus:outline-none border-b border-[#282a38] focus:border-amber-400"
-                    />
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-[#14151b] border border-[#262834] space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider text-[#8b91a0] font-semibold block font-mono">
-                      Yield (kg/units)
-                    </label>
-                    <input
-                      type="number"
-                      step={100}
-                      value={simYield}
-                      onChange={(e) => setSimYield(Number(e.target.value))}
-                      className="w-full bg-transparent font-bold text-sm text-white font-mono focus:outline-none border-b border-[#282a38] focus:border-amber-400"
-                    />
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-[#14151b] border border-[#262834] space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider text-[#8b91a0] font-semibold block font-mono">
-                      Price / Unit (₹)
-                    </label>
-                    <input
-                      type="number"
-                      step={1}
-                      value={simPrice}
-                      onChange={(e) => setSimPrice(Number(e.target.value))}
-                      className="w-full bg-transparent font-bold text-sm text-emerald-400 font-mono focus:outline-none border-b border-[#282a38] focus:border-amber-400"
-                    />
-                  </div>
-                </div>
-
-                {/* Real-Time Computed Returns Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-                  <div className="p-3.5 rounded-xl border border-[#262834] bg-[#14151b] space-y-0.5">
-                    <div className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold font-mono">
-                      Net Profit / Year
-                    </div>
-                    <div className="text-xl font-extrabold text-emerald-400 font-mono">
-                      ₹{simNet.toLocaleString("en-IN")}
-                    </div>
-                    <div className="text-[10px] text-[#8b91a0] font-mono">
-                      ₹{Math.round(simNet / 12).toLocaleString("en-IN")}/mo
-                    </div>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl border border-[#262834] bg-[#14151b] space-y-0.5">
-                    <div className="text-[10px] uppercase tracking-wider text-[#8b91a0] font-semibold font-mono">
-                      Gross Revenue
-                    </div>
-                    <div className="text-xl font-extrabold text-white font-mono">
-                      ₹{simGross.toLocaleString("en-IN")}
-                    </div>
-                    <div className="text-[10px] text-[#8b91a0] font-mono">From {simYield} units</div>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl border border-[#262834] bg-[#14151b] space-y-0.5">
-                    <div className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold font-mono">
-                      Payback Period
-                    </div>
-                    <div className="text-xl font-extrabold text-amber-400 font-mono">
-                      {simPayback} mos
-                    </div>
-                    <div className="text-[10px] text-[#8b91a0] font-mono">To recover CapEx</div>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl border border-[#262834] bg-[#14151b] space-y-0.5">
-                    <div className="text-[10px] uppercase tracking-wider text-teal-400 font-semibold font-mono">
-                      Return on CapEx
-                    </div>
-                    <div className="text-xl font-extrabold text-teal-400 font-mono">
-                      {simRoi}%
-                    </div>
-                    <div className="text-[10px] text-[#8b91a0] font-mono">Annualized yield</div>
-                  </div>
-                </div>
-
-                {/* Model Details Briefing */}
-                <div className="p-3.5 rounded-xl bg-[#14151b] border border-[#262834] text-xs space-y-1.5">
-                  <div className="font-bold text-neutral-300 flex items-center justify-between">
-                    <span className="text-[#e5c07b]">💡 Model Highlights for {selectedModel.name}</span>
-                    <span className="text-[10px] text-[#8b91a0] font-mono">Water: {selectedModel.waterDemand}</span>
-                  </div>
-                  <ul className="space-y-1 text-[11px] text-neutral-300">
-                    {selectedModel.advantages.map((adv, idx) => (
-                      <li key={idx} className="flex items-start gap-1.5">
-                        <span className="text-emerald-400">✔</span> {adv}
-                      </li>
-                    ))}
-                    <li className="flex items-start gap-1.5 text-amber-400/90">
-                      <span>⚠</span> Risk Mitigation: {selectedModel.risks[0]}
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* CAPEX BUDGET & EXPENDITURE MATRIX (5 COLS) */}
-              <div className="lg:col-span-5 p-5 rounded-xl border border-[#262834] bg-[#181920] space-y-4">
-                <div className="flex items-center justify-between border-b border-[#262834] pb-3">
-                  <div className="flex items-center gap-2">
-                    <Coins className="w-4 h-4 text-amber-400" />
-                    <h3 className="font-bold text-sm text-white">CapEx Expenditure Tracker</h3>
-                  </div>
-                  <span className="text-[11px] text-[#8b91a0] font-mono">
-                    {Math.round((totalAgriSpent / (totalAgriBudget || 1)) * 100)}% Deployed
-                  </span>
-                </div>
-
-                {/* CapEx Budget Progress Bar */}
-                <div className="space-y-1.5 font-mono">
-                  <div className="flex justify-between text-xs text-neutral-400">
-                    <span>Deployed: ₹{totalAgriSpent.toLocaleString("en-IN")}</span>
-                    <span>Budget: ₹{totalAgriBudget.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="w-full bg-[#101116] h-2.5 rounded-full overflow-hidden border border-[#282a38]">
-                    <div
-                      className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, (totalAgriSpent / (totalAgriBudget || 1)) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Items List */}
-                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                  {agriCapex.map((item) => (
-                    <div
-                      key={item.id}
-                      className="p-3 rounded-xl border border-[#262834] bg-[#14151b] flex items-start justify-between gap-3 text-xs"
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-white text-xs">{item.name}</span>
-                          <span
-                            className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold font-mono ${
-                              item.status === "Completed"
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                : item.status === "In Progress"
-                                ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                : "bg-[#181920] text-[#8b91a0] border border-[#262834]"
-                            }`}
-                          >
-                            {item.status}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-[#8b91a0]">{item.notes}</p>
-                      </div>
-
-                      <div className="text-right flex-shrink-0 font-mono">
-                        <div className="font-bold text-emerald-400">
-                          ₹{item.spent.toLocaleString("en-IN")}
-                        </div>
-                        <div className="text-[10px] text-[#8b91a0]">
-                          of ₹{item.budget.toLocaleString("en-IN")}
-                        </div>
-                        {agriCapex.length > 1 && (
-                          <button
-                            onClick={() => deleteCapex(item.id)}
-                            className="text-[10px] text-[#8b91a0] hover:text-rose-400 transition-colors mt-1"
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           </section>
@@ -2803,15 +2124,15 @@ export default function LifeHub() {
             {/* Top Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#262834]">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-amber-400 shadow-sm">
-                  <Library className="w-5 h-5 text-amber-400" />
+                <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-white shadow-sm">
+                  <Library className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="font-extrabold text-lg text-white tracking-tight">
                       Kobo E-Reader & Intellectual Hub
                     </h2>
-                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-semibold font-mono">
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-neutral-800 text-neutral-200 border border-neutral-700 font-semibold font-mono">
                       Google Drive Synced • Daily Digest
                     </span>
                   </div>
@@ -2834,7 +2155,7 @@ export default function LifeHub() {
                       onClick={() => setBookFilter(btn.id as any)}
                       className={`px-3 py-1 rounded-lg font-semibold transition-all ${
                         bookFilter === btn.id
-                          ? "bg-amber-500 text-neutral-950 font-bold shadow-sm"
+                          ? "bg-white text-black font-bold shadow-sm"
                           : "text-neutral-400 hover:text-white"
                       }`}
                     >
@@ -2847,13 +2168,13 @@ export default function LifeHub() {
                   onClick={() => setShowKoboHighlightsModal(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#181920] hover:bg-[#222430] text-neutral-200 hover:text-white border border-[#262834] text-xs font-semibold transition-all"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-white" />
                   <span>Kobo Notes</span>
                 </button>
 
                 <button
                   onClick={() => setShowAddBook(!showAddBook)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold shadow-sm transition-all text-xs"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold shadow-sm transition-all text-xs"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   {showAddBook ? "Close" : "Log Note"}
@@ -2869,7 +2190,7 @@ export default function LifeHub() {
               >
                 <div className="flex items-center justify-between border-b border-[#262834] pb-2 font-mono">
                   <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <BookMarked className="w-4 h-4 text-amber-400" />
+                    <BookMarked className="w-4 h-4 text-white" />
                     Log Strategic Takeaway to Commonplace
                   </span>
                   <span className="text-[10px] text-[#8b91a0]">Synthesize deep insights</span>
@@ -2883,7 +2204,7 @@ export default function LifeHub() {
                       placeholder="e.g. Chip War or Essay title..."
                       value={newBookTitle}
                       onChange={(e) => setNewBookTitle(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-amber-400 font-sans"
+                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-white font-sans"
                     />
                   </div>
 
@@ -2894,7 +2215,7 @@ export default function LifeHub() {
                       placeholder="e.g. Chris Miller / Paul Graham..."
                       value={newBookAuthor}
                       onChange={(e) => setNewBookAuthor(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-amber-400 font-sans"
+                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-white font-sans"
                     />
                   </div>
 
@@ -2903,7 +2224,7 @@ export default function LifeHub() {
                     <select
                       value={newBookCategory}
                       onChange={(e: any) => setNewBookCategory(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-amber-400 font-sans"
+                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-white font-sans"
                     >
                       <option value="Geopolitics & Tech">Geopolitics & Tech</option>
                       <option value="Systems Thinking">Systems Thinking</option>
@@ -2916,7 +2237,7 @@ export default function LifeHub() {
                   <div className="sm:col-span-2 flex items-end">
                     <button
                       type="submit"
-                      className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 rounded-xl text-xs font-bold shadow-md transition-colors"
+                      className="w-full py-2 bg-white hover:bg-neutral-200 text-black rounded-xl text-xs font-bold shadow-md transition-colors"
                     >
                       Save Note
                     </button>
@@ -2929,14 +2250,14 @@ export default function LifeHub() {
                     placeholder="Core Mental Model (e.g. Chokepoint Moats, Second-Order Thinking)..."
                     value={newBookModel}
                     onChange={(e) => setNewBookModel(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
+                    className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
                   />
                   <input
                     type="text"
                     placeholder="Actionable strategic takeaway for operations..."
                     value={newBookTakeaway}
                     onChange={(e) => setNewBookTakeaway(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
+                    className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
                   />
                 </div>
               </form>
@@ -2958,7 +2279,7 @@ export default function LifeHub() {
               <div className="p-6 rounded-2xl bg-[#181920] border border-[#262834] space-y-4">
                 <div className="flex items-center justify-between border-b border-[#262834] pb-3 font-mono">
                   <div className="flex items-center gap-2">
-                    <BookmarkPlus className="w-4 h-4 text-amber-400" />
+                    <BookmarkPlus className="w-4 h-4 text-white" />
                     <h3 className="font-extrabold text-sm text-white">
                       Strategic Commonplace Notebook ({bookshelf.length} Synthesized Notes)
                     </h3>
@@ -2976,23 +2297,23 @@ export default function LifeHub() {
                     >
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between text-[10px] font-mono">
-                          <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold uppercase">
+                          <span className="px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700 font-bold uppercase">
                             {item.category}
                           </span>
-                          <span className="text-[#8b91a0]">{item.pagesOrTime}</span>
+                          <span className="text-neutral-400">{item.pagesOrTime}</span>
                         </div>
-                        <h4 className="font-bold text-xs text-[#e5c07b] leading-snug">{item.title}</h4>
+                        <h4 className="font-bold text-xs text-white leading-snug">{item.title}</h4>
                         {item.author && (
-                          <p className="text-[10px] text-[#8b91a0]">by {item.author}</p>
+                          <p className="text-[10px] text-neutral-400">by {item.author}</p>
                         )}
                         {item.keyMentalModel && (
-                          <div className="text-[10px] text-amber-300 font-semibold flex items-center gap-1 font-mono">
-                            <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+                          <div className="text-[10px] text-neutral-300 font-semibold flex items-center gap-1 font-mono">
+                            <Lightbulb className="w-3.5 h-3.5 text-white" />
                             {item.keyMentalModel}
                           </div>
                         )}
                         {item.keyQuote && (
-                          <blockquote className="text-[11px] text-neutral-300 italic border-l-2 border-amber-400/50 pl-2.5 leading-relaxed line-clamp-3">
+                          <blockquote className="text-[11px] text-neutral-300 italic border-l-2 border-neutral-600 pl-2.5 leading-relaxed line-clamp-3">
                             "{item.keyQuote}"
                           </blockquote>
                         )}
@@ -3031,8 +2352,8 @@ export default function LifeHub() {
           <section className="p-6 sm:p-8 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-[#262834]">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-amber-400 shadow-sm">
-                  <Flame className="w-5 h-5 text-amber-400" />
+                <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-white shadow-sm">
+                  <Flame className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <h2 className="font-extrabold text-base text-white">Daily Habit Tracker</h2>
@@ -3040,7 +2361,7 @@ export default function LifeHub() {
                 </div>
               </div>
               <div className="text-xs font-mono text-neutral-400">
-                <span className="text-amber-400 font-bold">{completedHabitsCount}</span> of {habits.length} Completed
+                <span className="text-white font-bold">{completedHabitsCount}</span> of {habits.length} Completed
               </div>
             </div>
 
@@ -3052,13 +2373,13 @@ export default function LifeHub() {
                   onClick={() => toggleHabit(h.id)}
                   className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${
                     h.completedToday
-                      ? "bg-[#181920] border-amber-400/40 text-white"
+                      ? "bg-[#181920] border-white/40 text-white"
                       : "bg-[#181920] border-[#262834] hover:border-neutral-500 text-neutral-300"
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     {h.completedToday ? (
-                      <CheckCircle2 className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                      <CheckCircle2 className="w-5 h-5 text-white flex-shrink-0" />
                     ) : (
                       <Circle className="w-5 h-5 text-neutral-500 flex-shrink-0" />
                     )}
@@ -3072,8 +2393,8 @@ export default function LifeHub() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#14151b] border border-[#262834] text-xs font-mono text-amber-400">
-                    <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#14151b] border border-[#262834] text-xs font-mono text-white">
+                    <Flame className="w-3.5 h-3.5 fill-white text-white" />
                     {h.streak}d
                   </div>
                 </div>
@@ -3093,8 +2414,8 @@ export default function LifeHub() {
           <section className="p-6 sm:p-8 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-[#262834]">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-amber-400 shadow-sm">
-                  <FolderKanban className="w-5 h-5 text-amber-400" />
+                <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-white shadow-sm">
+                  <FolderKanban className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <h2 className="font-extrabold text-base text-white">Active Projects Tracker</h2>
@@ -3104,7 +2425,7 @@ export default function LifeHub() {
 
               <button
                 onClick={() => setShowNewProject(!showNewProject)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold transition-all shadow-sm font-mono"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black text-xs font-bold transition-all shadow-sm font-mono"
               >
                 <Plus className="w-3.5 h-3.5" />
                 {showNewProject ? "Close" : "New Project"}
@@ -3114,25 +2435,25 @@ export default function LifeHub() {
             {/* New Project Form Modal */}
             {showNewProject && (
               <form onSubmit={addProject} className="p-4 rounded-xl border border-[#262834] bg-[#181920] space-y-3 shadow-xl">
-                <div className="text-xs font-semibold text-amber-300 font-mono">Add New Project</div>
+                <div className="text-xs font-semibold text-white font-mono">Add New Project</div>
                 <div className="flex flex-wrap gap-2">
                   <input
                     type="text"
                     placeholder="Project Name..."
                     value={newProjName}
                     onChange={(e) => setNewProjName(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
+                    className="flex-1 px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
                   />
                   <input
                     type="text"
                     placeholder="Category (e.g. Life, Tech, Spiritual)..."
                     value={newProjCategory}
                     onChange={(e) => setNewProjCategory(e.target.value)}
-                    className="w-48 px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
+                    className="w-48 px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold rounded-xl text-xs transition-colors font-mono"
+                    className="px-4 py-2 bg-white hover:bg-neutral-200 text-black font-bold rounded-xl text-xs transition-colors font-mono"
                   >
                     Create
                   </button>
@@ -3149,18 +2470,18 @@ export default function LifeHub() {
                 >
                   <div>
                     <div className="flex items-center justify-between text-[11px] mb-2 font-mono">
-                      <span className="text-[#8b91a0] font-medium">{proj.category}</span>
+                      <span className="text-neutral-400 font-medium">{proj.category}</span>
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
                           proj.status === "Completed"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                            ? "bg-neutral-800 text-neutral-200 border border-neutral-700"
+                            : "bg-neutral-800 text-neutral-300 border border-neutral-700"
                         }`}
                       >
                         {proj.status}
                       </span>
                     </div>
-                    <h3 className="font-bold text-sm text-[#e5c07b]">{proj.name}</h3>
+                    <h3 className="font-bold text-sm text-white">{proj.name}</h3>
                   </div>
 
                   <div className="space-y-1.5 font-mono">
@@ -3170,7 +2491,7 @@ export default function LifeHub() {
                     </div>
                     <div className="w-full bg-[#101116] h-2 rounded-full overflow-hidden border border-[#282a38]">
                       <div
-                        className="bg-amber-500 h-full rounded-full transition-all"
+                        className="bg-white h-full rounded-full transition-all"
                         style={{ width: `${proj.progress}%` }}
                       />
                     </div>
@@ -3193,8 +2514,8 @@ export default function LifeHub() {
             {/* Top Header & Account Sync Controls */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#262834]">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-amber-400 shadow-sm">
-                  <Headphones className="w-5 h-5 text-amber-400" />
+                <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-white shadow-sm">
+                  <Headphones className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -3224,12 +2545,12 @@ export default function LifeHub() {
                   onClick={() => setShowLastFmConfig(!showLastFmConfig)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
                     lastFmUser
-                      ? "bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
+                      ? "bg-white/10 border-white/20 text-white hover:bg-white/15"
                       : "bg-[#181920] border-[#262834] hover:border-neutral-500 text-neutral-300"
                   }`}
                   title="Configure Android YouTube Music Live Mirror"
                 >
-                  <Radio className="w-3.5 h-3.5 text-amber-400" />
+                  <Radio className="w-3.5 h-3.5 text-white" />
                   <span>{lastFmUser ? `Synced: @${lastFmUser}` : "Android Mirror Setup"}</span>
                   <Settings className="w-3 h-3 text-neutral-400 ml-1" />
                 </button>
@@ -3244,7 +2565,7 @@ export default function LifeHub() {
                 ) : (
                   <a
                     href="/api/auth/youtube/login"
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold shadow-sm transition-all"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold shadow-sm transition-all"
                   >
                     <Music className="w-3.5 h-3.5" />
                     <span>Connect Google</span>
@@ -3261,7 +2582,7 @@ export default function LifeHub() {
               >
                 <div className="flex items-center justify-between border-b border-[#262834] pb-2.5 font-mono">
                   <div className="flex items-center gap-2 text-xs font-bold text-white">
-                    <Radio className="w-4 h-4 text-amber-400 animate-pulse" />
+                    <Radio className="w-4 h-4 text-white animate-pulse" />
                     Android YouTube Music Live Mirror Setup (via Last.fm)
                   </div>
                   <span className="text-[10px] text-[#8b91a0]">100% Free • Works in background on Android</span>
@@ -3269,8 +2590,8 @@ export default function LifeHub() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                   <div className="p-3 rounded-xl bg-[#14151b] border border-[#262834] space-y-1">
-                    <div className="font-bold text-[#e5c07b] flex items-center gap-1.5 font-mono">
-                      <span className="w-4 h-4 rounded-full bg-[#181920] text-amber-400 border border-[#262834] flex items-center justify-center text-[10px]">1</span>
+                    <div className="font-bold text-white flex items-center gap-1.5 font-mono">
+                      <span className="w-4 h-4 rounded-full bg-[#181920] text-white border border-[#262834] flex items-center justify-center text-[10px]">1</span>
                       Install Pano Scrobbler
                     </div>
                     <p className="text-[11px] text-neutral-300 leading-relaxed">
@@ -3279,8 +2600,8 @@ export default function LifeHub() {
                   </div>
 
                   <div className="p-3 rounded-xl bg-[#14151b] border border-[#262834] space-y-1">
-                    <div className="font-bold text-[#e5c07b] flex items-center gap-1.5 font-mono">
-                      <span className="w-4 h-4 rounded-full bg-[#181920] text-amber-400 border border-[#262834] flex items-center justify-center text-[10px]">2</span>
+                    <div className="font-bold text-white flex items-center gap-1.5 font-mono">
+                      <span className="w-4 h-4 rounded-full bg-[#181920] text-white border border-[#262834] flex items-center justify-center text-[10px]">2</span>
                       Free Last.fm Account
                     </div>
                     <p className="text-[11px] text-neutral-300 leading-relaxed">
@@ -3289,8 +2610,8 @@ export default function LifeHub() {
                   </div>
 
                   <div className="p-3 rounded-xl bg-[#14151b] border border-[#262834] space-y-1">
-                    <div className="font-bold text-[#e5c07b] flex items-center gap-1.5 font-mono">
-                      <span className="w-4 h-4 rounded-full bg-[#181920] text-amber-400 border border-[#262834] flex items-center justify-center text-[10px]">3</span>
+                    <div className="font-bold text-white flex items-center gap-1.5 font-mono">
+                      <span className="w-4 h-4 rounded-full bg-[#181920] text-white border border-[#262834] flex items-center justify-center text-[10px]">3</span>
                       Enter Credentials Below
                     </div>
                     <p className="text-[11px] text-neutral-300 leading-relaxed">
@@ -3309,7 +2630,7 @@ export default function LifeHub() {
                       placeholder="e.g. jaisonsam"
                       value={lastFmUser}
                       onChange={(e) => setLastFmUser(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-amber-400 font-sans"
+                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-white font-sans"
                     />
                   </div>
 
@@ -3322,14 +2643,14 @@ export default function LifeHub() {
                       placeholder="e.g. 4a9f5581a9cd..."
                       value={lastFmApiKey}
                       onChange={(e) => setLastFmApiKey(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-amber-400 font-mono"
+                      className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white focus:outline-none focus:border-white font-mono"
                     />
                   </div>
 
                   <div className="sm:col-span-2 flex items-end">
                     <button
                       type="submit"
-                      className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold rounded-xl text-xs shadow-md transition-colors font-mono"
+                      className="w-full py-2 bg-white hover:bg-neutral-200 text-black font-bold rounded-xl text-xs shadow-md transition-colors font-mono"
                     >
                       Save Mirror
                     </button>
@@ -3366,18 +2687,18 @@ export default function LifeHub() {
                             src={displayTrack.albumArt}
                             alt={displayTrack.title}
                             className={`w-16 h-16 rounded-xl object-cover border border-[#282a38] shadow-md ${
-                              isLive ? "ring-2 ring-amber-400/50" : ""
+                              isLive ? "ring-2 ring-white/50" : ""
                             }`}
                           />
                         ) : (
-                          <div className="w-16 h-16 rounded-xl bg-[#14151b] border border-[#262834] flex items-center justify-center text-amber-400">
-                            <Disc className={`w-8 h-8 ${isLive ? "animate-spin text-amber-400" : "text-neutral-600"}`} />
+                          <div className="w-16 h-16 rounded-xl bg-[#14151b] border border-[#262834] flex items-center justify-center text-white">
+                            <Disc className={`w-8 h-8 ${isLive ? "animate-spin text-white" : "text-neutral-600"}`} />
                           </div>
                         )}
                         {isLive && (
                           <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-white" />
                           </span>
                         )}
                       </div>
@@ -3388,13 +2709,13 @@ export default function LifeHub() {
                           <span
                             className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 font-mono ${
                               isLive
-                                ? "bg-amber-500/10 text-amber-300 border border-amber-500/20"
+                                ? "bg-white/10 text-white border border-white/20"
                                 : "bg-[#14151b] text-[#8b91a0] border border-[#262834]"
                             }`}
                           >
                             {isLive ? (
                               <>
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                                 Live from Android • YouTube Music
                               </>
                             ) : (
@@ -3405,10 +2726,10 @@ export default function LifeHub() {
                           {/* Sound Equalizer Bars (When Active) */}
                           {isLive && (
                             <div className="flex items-end gap-0.5 h-3">
-                              <span className="w-0.5 bg-amber-500 rounded-full animate-pulse h-full" />
-                              <span className="w-0.5 bg-amber-400 rounded-full animate-bounce h-2/3" />
-                              <span className="w-0.5 bg-[#e5c07b] rounded-full animate-pulse h-5/6" />
-                              <span className="w-0.5 bg-amber-400 rounded-full animate-bounce h-1/2" />
+                              <span className="w-0.5 bg-white rounded-full animate-pulse h-full" />
+                              <span className="w-0.5 bg-white rounded-full animate-bounce h-2/3" />
+                              <span className="w-0.5 bg-white rounded-full animate-pulse h-5/6" />
+                              <span className="w-0.5 bg-white rounded-full animate-bounce h-1/2" />
                             </div>
                           )}
                         </div>
@@ -3433,11 +2754,11 @@ export default function LifeHub() {
                           href={displayTrack.ytMusicUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold shadow-sm transition-all"
+                          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold shadow-sm transition-all"
                         >
                           <Music className="w-3.5 h-3.5" />
                           <span>Open in YT Music</span>
-                          <ExternalLink className="w-3 h-3 text-neutral-950/80" />
+                          <ExternalLink className="w-3 h-3 text-black/80" />
                         </a>
                       )}
 
@@ -3448,7 +2769,7 @@ export default function LifeHub() {
                           className="p-2 rounded-xl bg-[#14151b] border border-[#262834] hover:border-neutral-500 text-neutral-300 hover:text-white transition-colors"
                           title="Refresh Now Playing Status"
                         >
-                          <RefreshCw className={`w-3.5 h-3.5 ${isFetchingNowPlaying ? "animate-spin text-amber-400" : ""}`} />
+                          <RefreshCw className={`w-3.5 h-3.5 ${isFetchingNowPlaying ? "animate-spin text-white" : ""}`} />
                         </button>
                       )}
 
@@ -3456,7 +2777,7 @@ export default function LifeHub() {
                         onClick={() => setDemoNowPlaying(!demoNowPlaying)}
                         className={`text-xs px-2.5 py-1.5 rounded-xl border transition-colors ${
                           demoNowPlaying
-                            ? "bg-amber-500/20 text-amber-300 border-amber-500/40 font-semibold"
+                            ? "bg-white/10 text-white border-white/20 font-semibold"
                             : "bg-[#14151b] border-[#262834] text-neutral-400 hover:text-white"
                         }`}
                         title="Toggle demo song playback state"
@@ -3473,7 +2794,7 @@ export default function LifeHub() {
             <div className="space-y-4 pt-2">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <Disc className="w-4 h-4 text-amber-400" />
+                  <Disc className="w-4 h-4 text-white" />
                   <h3 className="font-bold text-sm text-white">Curated Album & Playlist Deck</h3>
                 </div>
 
@@ -3491,7 +2812,7 @@ export default function LifeHub() {
                       onClick={() => setMusicDeckFilter(tab.id as any)}
                       className={`px-3 py-1 rounded-lg font-semibold transition-all ${
                         musicDeckFilter === tab.id
-                          ? "bg-amber-500 text-neutral-950 font-bold shadow-sm"
+                          ? "bg-white text-black font-bold shadow-sm"
                           : "text-neutral-400 hover:text-white"
                       }`}
                     >
@@ -3547,15 +2868,15 @@ export default function LifeHub() {
 
                         {/* Hover Play Button */}
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="w-12 h-12 rounded-full bg-amber-500 text-neutral-950 flex items-center justify-center shadow-lg scale-90 group-hover:scale-100 transition-transform">
-                            <Play className="w-5 h-5 ml-0.5 fill-neutral-950 text-neutral-950" />
+                          <div className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center shadow-lg scale-90 group-hover:scale-100 transition-transform">
+                            <Play className="w-5 h-5 ml-0.5 fill-black text-black" />
                           </div>
                         </div>
                       </div>
 
                       <div className="p-3.5 space-y-2">
                         <div>
-                          <h4 className="font-bold text-sm text-white truncate group-hover:text-[#e5c07b] transition-colors">
+                          <h4 className="font-bold text-sm text-white truncate group-hover:text-white transition-colors">
                             {pl.title}
                           </h4>
                           <p className="text-[11px] text-[#8b91a0] mt-0.5">Personal YouTube Playlist</p>
@@ -3568,7 +2889,7 @@ export default function LifeHub() {
                             target="_blank"
                             rel="noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="text-neutral-400 hover:text-[#e5c07b] flex items-center gap-1 transition-colors"
+                            className="text-neutral-400 hover:text-white flex items-center gap-1 transition-colors"
                           >
                             Open <ExternalLink className="w-3 h-3" />
                           </a>
@@ -3609,7 +2930,7 @@ export default function LifeHub() {
                           <span
                             className={`px-2 py-0.5 rounded-full font-semibold border ${
                               album.category === "worship"
-                                ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
+                                ? "bg-white/10 text-white border-white/20"
                                 : album.category === "focus"
                                 ? "bg-sky-500/10 text-sky-300 border-sky-500/30"
                                 : "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
@@ -3624,8 +2945,8 @@ export default function LifeHub() {
 
                         {/* Hover Play Button */}
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="w-12 h-12 rounded-full bg-amber-500 text-neutral-950 flex items-center justify-center shadow-lg scale-90 group-hover:scale-100 transition-transform">
-                            <Play className="w-5 h-5 ml-0.5 fill-neutral-950 text-neutral-950" />
+                          <div className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center shadow-lg scale-90 group-hover:scale-100 transition-transform">
+                            <Play className="w-5 h-5 ml-0.5 fill-black text-black" />
                           </div>
                         </div>
                       </div>
@@ -3633,7 +2954,7 @@ export default function LifeHub() {
                       {/* Content */}
                       <div className="p-3.5 space-y-2">
                         <div>
-                          <h4 className="font-bold text-sm text-white group-hover:text-[#e5c07b] transition-colors line-clamp-1">
+                          <h4 className="font-bold text-sm text-white group-hover:text-white transition-colors line-clamp-1">
                             {album.title}
                           </h4>
                           <p className="text-[11px] text-[#8b91a0] mt-0.5 line-clamp-1">{album.artist}</p>
@@ -3650,7 +2971,7 @@ export default function LifeHub() {
                             target="_blank"
                             rel="noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="text-neutral-400 hover:text-[#e5c07b] flex items-center gap-1 transition-colors"
+                            className="text-neutral-400 hover:text-white flex items-center gap-1 transition-colors"
                           >
                             Listen in YT Music <ExternalLink className="w-3 h-3" />
                           </a>
@@ -3672,11 +2993,11 @@ export default function LifeHub() {
                       className="w-12 h-12 rounded-xl object-cover border border-[#282a38] shadow-md"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-[#14151b] border border-[#262834] flex items-center justify-center text-amber-400">
+                    <div className="w-12 h-12 rounded-xl bg-[#14151b] border border-[#262834] flex items-center justify-center text-white">
                       <Volume2 className="w-6 h-6 animate-pulse" />
                     </div>
                   )}
-                  <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-amber-500 text-neutral-950">
+                  <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-white text-black">
                     <Music className="w-2.5 h-2.5" />
                   </div>
                 </div>
@@ -3684,7 +3005,7 @@ export default function LifeHub() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-white">{currentPlaylist.title}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium font-mono">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-200 border border-neutral-700 font-medium font-mono">
                       {currentPlaylist.tag || "Queued"}
                     </span>
                   </div>
@@ -3697,11 +3018,11 @@ export default function LifeHub() {
                   href={currentPlaylist.ytUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold shadow-md transition-all"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold shadow-md transition-all"
                 >
-                  <Play className="w-3.5 h-3.5 fill-neutral-950 text-neutral-950" />
+                  <Play className="w-3.5 h-3.5 fill-black text-black" />
                   <span>Launch in YouTube Music</span>
-                  <ExternalLink className="w-3 h-3 text-neutral-950/80" />
+                  <ExternalLink className="w-3 h-3 text-black/80" />
                 </a>
               </div>
             </div>

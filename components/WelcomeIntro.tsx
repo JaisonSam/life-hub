@@ -173,7 +173,7 @@ export default function WelcomeIntro({
         >
           {/* Subtle warm ambient backlight (slower, more luxurious expansion) */}
           <div
-            className={`absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-amber-400/10 blur-3xl pointer-events-none transition-all duration-[2200ms] ease-out ${
+            className={`absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-white/[0.06] blur-3xl pointer-events-none transition-all duration-[2200ms] ease-out ${
               stage === "greeting_enter" ? "opacity-100 scale-100" : "opacity-0 scale-75"
             }`}
           />
@@ -193,7 +193,7 @@ export default function WelcomeIntro({
           >
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white flex items-center justify-center drop-shadow-2xl">
               <span>Hi, Jaison</span>
-              <span className="inline-block w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full bg-amber-400 ml-2 animate-pulse shadow-[0_0_12px_rgba(245,158,11,0.8)]" />
+              <span className="inline-block w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full bg-white ml-2 animate-pulse shadow-[0_0_12px_rgba(255,255,255,0.8)]" />
             </h1>
 
             <p

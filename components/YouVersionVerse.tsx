@@ -75,7 +75,7 @@ export default function YouVersionVerse({
               </p>
             ))}
           </div>
-          <cite className="block font-sans not-italic text-xs sm:text-sm font-medium tracking-[0.3em] uppercase text-amber-400/70 pt-2">
+          <cite className="block font-sans not-italic text-xs sm:text-sm font-medium tracking-[0.3em] uppercase text-neutral-400 pt-2">
             {selectedPassage.reference}
           </cite>
         </div>
@@ -85,9 +85,9 @@ export default function YouVersionVerse({
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-6 sm:px-12 md:px-20 py-12 sm:py-16 bg-gradient-to-b from-[#090a0f] via-[#0d0e15] to-[#08090d] overflow-hidden select-none">
-      {/* Soft warm radial glow reminiscent of YouVersion verse displays */}
+      {/* Soft monochrome ambient backlight */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(ellipse_at_center,_rgba(245,158,11,0.13)_0%,_rgba(10,11,16,0)_70%)]"
+        className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.08)_0%,_rgba(10,11,16,0)_70%)]"
         aria-hidden="true"
       />
 
@@ -106,7 +106,7 @@ export default function YouVersionVerse({
 
         {/* Minimal clean reference badge - no devotion heading, no noise */}
         <div className="pt-2 flex items-center justify-center">
-          <span className="font-sans text-xs sm:text-sm font-semibold tracking-[0.32em] uppercase text-amber-400/90 drop-shadow-md">
+          <span className="font-sans text-xs sm:text-sm font-semibold tracking-[0.32em] uppercase text-neutral-300 drop-shadow-md">
             {selectedPassage.reference}
           </span>
         </div>

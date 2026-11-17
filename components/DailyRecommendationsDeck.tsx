@@ -76,8 +76,8 @@ export default function DailyRecommendationsDeck({
     <div className="space-y-4">
       {/* Toast Notification */}
       {savedToast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-[#181920] border border-amber-400/40 text-amber-300 px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 shadow-2xl animate-in zoom-in-95 duration-150 font-mono">
-          <Check className="w-4 h-4 text-amber-400" />
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-[#181920] border border-neutral-700 text-neutral-200 px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 shadow-2xl animate-in zoom-in-95 duration-150 font-mono">
+          <Check className="w-4 h-4 text-white" />
           {savedToast}
         </div>
       )}
@@ -91,7 +91,7 @@ export default function DailyRecommendationsDeck({
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 font-mono">
                 <span
-                  className="text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-[#181920] border border-[#262834] text-amber-400"
+                  className="text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-[#181920] border border-[#262834] text-white"
                 >
                   {currentRec.source}
                 </span>
@@ -101,8 +101,8 @@ export default function DailyRecommendationsDeck({
               </div>
 
               <div className="flex items-center gap-1.5 font-mono">
-                <span className="text-[10px] text-amber-400 font-semibold uppercase tracking-wider flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-amber-400" />
+                <span className="text-[10px] text-white font-semibold uppercase tracking-wider flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-white" />
                   Daily Strategic Read
                 </span>
                 <button
@@ -117,7 +117,7 @@ export default function DailyRecommendationsDeck({
 
             {/* Title & Author */}
             <div>
-              <h3 className="font-extrabold text-base sm:text-lg text-white group-hover:text-[#e5c07b] transition-colors leading-snug">
+              <h3 className="font-extrabold text-base sm:text-lg text-white group-hover:text-neutral-200 transition-colors leading-snug">
                 {currentRec.title}
               </h3>
               <p className="text-xs text-[#8b91a0] mt-0.5">by {currentRec.author}</p>
@@ -125,17 +125,17 @@ export default function DailyRecommendationsDeck({
 
             {/* Mental Model Ribbon */}
             <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-xs flex items-center gap-2">
-              <Lightbulb className="w-4 h-4 text-amber-400 shrink-0" />
+              <Lightbulb className="w-4 h-4 text-white shrink-0" />
               <div>
                 <span className="text-[10px] uppercase font-bold text-[#8b91a0] tracking-wider font-mono">
                   Core Model:{" "}
                 </span>
-                <span className="font-bold text-[#e5c07b] text-xs font-mono">{currentRec.mentalModel}</span>
+                <span className="font-bold text-white text-xs font-mono">{currentRec.mentalModel}</span>
               </div>
             </div>
 
             {/* Key Quote / Insight */}
-            <blockquote className="text-xs text-neutral-300 italic border-l-2 border-amber-400/50 pl-3 leading-relaxed">
+            <blockquote className="text-xs text-neutral-300 italic border-l-2 border-neutral-600 pl-3 leading-relaxed">
               "{currentRec.keyInsight}"
             </blockquote>
           </div>
@@ -147,7 +147,7 @@ export default function DailyRecommendationsDeck({
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#262834] bg-[#181920] hover:bg-[#222430] text-neutral-300 hover:text-white font-semibold transition-all shadow-sm"
               title="Save key insight to Commonplace Notebook"
             >
-              <BookmarkPlus className="w-3.5 h-3.5 text-amber-400" />
+              <BookmarkPlus className="w-3.5 h-3.5 text-white" />
               <span>Capture to Notes</span>
             </button>
 
@@ -155,7 +155,7 @@ export default function DailyRecommendationsDeck({
               href={currentRec.url}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-bold transition-all shadow-sm"
             >
               <span>Read Essay</span>
               <ExternalLink className="w-3 h-3" />
@@ -178,8 +178,8 @@ export default function DailyRecommendationsDeck({
               </div>
 
               <div className="flex items-center gap-1.5 font-mono">
-                <span className="text-[10px] text-amber-400 font-semibold uppercase tracking-wider flex items-center gap-1">
-                  <Compass className="w-3 h-3 text-amber-400" />
+                <span className="text-[10px] text-white font-semibold uppercase tracking-wider flex items-center gap-1">
+                  <Compass className="w-3 h-3 text-white" />
                   Philosophy Spotlight
                 </span>
                 <button
@@ -194,7 +194,7 @@ export default function DailyRecommendationsDeck({
 
             {/* Title & Author */}
             <div>
-              <h3 className="font-extrabold text-base sm:text-lg text-white group-hover:text-[#e5c07b] transition-colors leading-snug">
+              <h3 className="font-extrabold text-base sm:text-lg text-white group-hover:text-neutral-200 transition-colors leading-snug">
                 {currentAeon.title}
               </h3>
               <p className="text-xs text-[#8b91a0] mt-0.5">
@@ -205,7 +205,7 @@ export default function DailyRecommendationsDeck({
 
             {/* Core Philosophical Dilemma */}
             <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-xs flex items-center gap-2">
-              <Quote className="w-4 h-4 text-amber-400 shrink-0" />
+              <Quote className="w-4 h-4 text-white shrink-0" />
               <div>
                 <span className="text-[10px] uppercase font-bold text-[#8b91a0] tracking-wider font-mono">
                   The Inquiry:{" "}
@@ -215,7 +215,7 @@ export default function DailyRecommendationsDeck({
             </div>
 
             {/* Key Excerpt */}
-            <blockquote className="text-xs text-neutral-300 italic border-l-2 border-amber-400/50 pl-3 leading-relaxed line-clamp-3">
+            <blockquote className="text-xs text-neutral-300 italic border-l-2 border-neutral-600 pl-3 leading-relaxed line-clamp-3">
               "{currentAeon.keyExcerpt}"
             </blockquote>
           </div>
@@ -227,7 +227,7 @@ export default function DailyRecommendationsDeck({
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#262834] bg-[#181920] hover:bg-[#222430] text-neutral-300 hover:text-white font-semibold transition-all shadow-sm"
               title="Save philosophical insight to Commonplace Notebook"
             >
-              <BookmarkPlus className="w-3.5 h-3.5 text-amber-400" />
+              <BookmarkPlus className="w-3.5 h-3.5 text-white" />
               <span>Capture to Notes</span>
             </button>
 
@@ -235,7 +235,7 @@ export default function DailyRecommendationsDeck({
               href={currentAeon.url}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-bold transition-all shadow-sm"
             >
               <span>Read on Aeon</span>
               <ExternalLink className="w-3 h-3" />

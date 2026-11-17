@@ -141,7 +141,7 @@ export default function KoboDriveDeck({
       {/* Deck Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-800/80">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 text-white shadow-lg shadow-amber-500/20">
+          <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-neutral-800 to-neutral-700 text-white shadow-lg shadow-black/40">
             <FolderSync className="w-5 h-5" />
           </div>
           <div>
@@ -155,7 +155,7 @@ export default function KoboDriveDeck({
                   Drive Connected
                 </span>
               ) : (
-                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-semibold font-mono">
+                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-neutral-800 text-neutral-200 border border-neutral-700 font-semibold font-mono">
                   Cloud Ready
                 </span>
               )}
@@ -216,19 +216,19 @@ export default function KoboDriveDeck({
 
       {/* Google Drive API Enable Alert */}
       {needsApiEnable && (
-        <div className="p-4 rounded-2xl bg-amber-950/50 border border-amber-500/50 text-amber-200 text-xs space-y-2 animate-in fade-in duration-200">
-          <div className="flex items-center gap-2 font-bold text-amber-300">
-            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+        <div className="p-4 rounded-2xl bg-neutral-900 border border-neutral-700 text-neutral-200 text-xs space-y-2 animate-in fade-in duration-200">
+          <div className="flex items-center gap-2 font-bold text-white">
+            <AlertCircle className="w-4 h-4 shrink-0 text-white" />
             1-Click Setup: Enable Google Drive API for your Google Cloud Project
           </div>
-          <p className="text-[11px] text-amber-200/90 leading-relaxed">
+          <p className="text-[11px] text-neutral-300 leading-relaxed">
             Your Google Account signed in successfully! However, Google Drive access is disabled by default on new Google Cloud projects. Click below to toggle it on:
           </p>
           <a
             href={apiEnableUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs shadow-md shadow-amber-600/30 transition-all"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-200 text-neutral-950 font-semibold text-xs shadow-md transition-all"
           >
             <span>Enable Google Drive API</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -249,11 +249,11 @@ export default function KoboDriveDeck({
             onDrop={handleDrop}
             className={`p-6 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-center transition-all min-h-[180px] ${
               isDragging
-                ? "border-amber-500 bg-amber-500/10"
+                ? "border-white bg-white/10"
                 : "border-neutral-800 bg-neutral-900/50 hover:border-neutral-700"
             }`}
           >
-            <UploadCloud className="w-8 h-8 text-amber-400 mb-2" />
+            <UploadCloud className="w-8 h-8 text-neutral-300 mb-2" />
             <span className="text-xs font-bold text-white">Send to Kobo & Cloud</span>
             <p className="text-[11px] text-neutral-400 mt-1 max-w-[200px] leading-relaxed">
               Drop an <strong className="text-white">.epub</strong> file here to push into your Drive Kobo folder
@@ -261,7 +261,7 @@ export default function KoboDriveDeck({
 
             <div className="mt-3 flex items-center gap-2">
               <label className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 shadow-sm">
-                <Plus className="w-3 h-3 text-amber-400" />
+                <Plus className="w-3 h-3 text-neutral-300" />
                 Upload EPUB
                 <input
                   type="file"
@@ -301,7 +301,7 @@ export default function KoboDriveDeck({
         <div className="lg:col-span-8 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-white flex items-center gap-1.5">
-              <BookOpen className="w-4 h-4 text-amber-400" />
+              <BookOpen className="w-4 h-4 text-neutral-300" />
               {connected
                 ? `Kobo eReader Library (${files.length} Ebooks Found)`
                 : "Google Drive Kobo Preview"}
@@ -316,7 +316,7 @@ export default function KoboDriveDeck({
 
           {loading ? (
             <div className="p-12 flex flex-col items-center justify-center gap-3 text-neutral-400">
-              <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+              <Loader2 className="w-6 h-6 animate-spin text-neutral-300" />
               <p className="text-xs">Scanning Google Drive for Kobo EPUBs...</p>
             </div>
           ) : connected && files.length > 0 ? (
@@ -324,11 +324,11 @@ export default function KoboDriveDeck({
               {files.map((file) => (
                 <div
                   key={file.id}
-                  className="p-3.5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 hover:border-amber-500/40 transition-all flex flex-col justify-between space-y-3 group"
+                  className="p-3.5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 hover:border-neutral-600 transition-all flex flex-col justify-between space-y-3 group"
                 >
                   <div className="space-y-1">
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors line-clamp-2">
+                      <h4 className="text-xs font-bold text-white group-hover:text-neutral-200 transition-colors line-clamp-2">
                         {file.name}
                       </h4>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neutral-800 text-neutral-300 shrink-0">
@@ -343,7 +343,7 @@ export default function KoboDriveDeck({
                   <div className="flex items-center justify-between pt-2 border-t border-neutral-800/80 text-xs">
                     <button
                       onClick={() => onOpenReader(file.downloadUrl, file.name)}
-                      className="flex items-center gap-1 px-3 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 text-[11px] font-semibold transition-all shadow-sm"
+                      className="flex items-center gap-1 px-3 py-1 rounded-xl bg-neutral-800 text-white border border-neutral-700 hover:bg-neutral-700 text-[11px] font-semibold transition-all shadow-sm"
                     >
                       <BookOpen className="w-3 h-3" />
                       Read in LifeHub

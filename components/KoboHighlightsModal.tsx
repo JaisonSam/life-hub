@@ -176,13 +176,13 @@ export default function KoboHighlightsModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#262834] bg-[#181920]">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-[#14151b] border border-[#262834] text-amber-400">
-              <Sparkles className="w-5 h-5 text-amber-400" />
+            <div className="p-2.5 rounded-xl bg-[#14151b] border border-[#262834] text-white">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
               <h2 className="font-extrabold text-base text-white tracking-tight flex items-center gap-2">
                 Kobo Highlights & Notes Importer
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono font-normal">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-200 border border-neutral-700 font-mono font-normal">
                   Kobo eReader & Drive
                 </span>
               </h2>
@@ -206,22 +206,22 @@ export default function KoboHighlightsModal({
             onClick={() => setActiveTab("import")}
             className={`pb-2.5 px-3 font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
               activeTab === "import"
-                ? "border-amber-400 text-white font-bold"
+                ? "border-white text-white font-bold"
                 : "border-transparent text-[#8b91a0] hover:text-white"
             }`}
           >
-            <FileText className="w-3.5 h-3.5 text-amber-400" />
+            <FileText className="w-3.5 h-3.5 text-white" />
             Import Highlights
           </button>
           <button
             onClick={() => setActiveTab("guide")}
             className={`pb-2.5 px-3 font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
               activeTab === "guide"
-                ? "border-amber-400 text-white font-bold"
+                ? "border-white text-white font-bold"
                 : "border-transparent text-[#8b91a0] hover:text-white"
             }`}
           >
-            <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+            <HelpCircle className="w-3.5 h-3.5 text-white" />
             How to Export from Kobo
           </button>
         </div>
@@ -449,7 +449,7 @@ Note: Always look for feedback delays before altering system parameters.`;
                   <div>
                     <strong className="text-white">Add the export setting:</strong> Scroll to{" "}
                     <code className="text-indigo-300">[FeatureSettings]</code> and add:
-                    <pre className="mt-1.5 p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-amber-300 font-mono text-[11px]">
+                    <pre className="mt-1.5 p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-200 font-mono text-[11px]">
                       ExportHighlights=true
                     </pre>
                   </div>
@@ -494,7 +494,7 @@ Note: Always look for feedback delays before altering system parameters.`;
             <button
               onClick={handleImportSubmit}
               disabled={parsedItems.filter((i) => i.selected).length === 0}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-neutral-950 text-xs font-bold shadow-sm transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed text-neutral-950 text-xs font-bold shadow-sm transition-all"
             >
               <BookmarkPlus className="w-4 h-4" />
               Import to Bookshelf

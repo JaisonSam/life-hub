@@ -33,7 +33,7 @@ interface Habit {
 }
 
 interface ExecutiveBentoDeckProps {
-  onSelectTab: (tabId: "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music") => void;
+  onSelectTab: (tabId: "career" | "gmat" | "books" | "habits" | "projects" | "music") => void;
   completedHabitsCount: number;
   habits: Habit[];
   onToggleHabit: (id: string) => void;
@@ -107,12 +107,12 @@ export default function ExecutiveBentoDeck({
         data-aos-duration="800"
       >
         {/* EkiZR Floating Ambient Underlay */}
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/30 via-indigo-500/20 to-purple-600/30 rounded-3xl blur-xl opacity-40 group-hover:opacity-70 transition duration-1000 pointer-events-none" />
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-800 via-neutral-700 to-neutral-900 rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition duration-1000 pointer-events-none" />
 
         <div className="relative overflow-hidden rounded-3xl p-6 sm:p-10 bg-[#0b0c16]/85 backdrop-blur-2xl border border-white/[0.09] shadow-2xl">
           {/* Subtle Ambient Radial Glows */}
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none animate-subtle-pulse" />
-          <div className="absolute bottom-0 left-10 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none animate-subtle-pulse" />
+          <div className="absolute bottom-0 left-10 w-80 h-80 bg-neutral-800/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div className="space-y-3.5 max-w-2xl">
@@ -123,10 +123,10 @@ export default function ExecutiveBentoDeck({
                 data-aos-delay="100"
               >
                 <div className="relative group/badge inline-block">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-[#f59e0b] via-[#6366f1] to-[#10b981] rounded-full blur opacity-35 group-hover/badge:opacity-65 transition duration-500" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-600 via-neutral-500 to-neutral-700 rounded-full blur opacity-35 group-hover/badge:opacity-65 transition duration-500" />
                   <div className="relative px-3.5 py-1.5 rounded-full bg-[#030014]/90 backdrop-blur-xl border border-white/10 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-[10px] sm:text-[11px] font-mono tracking-widest uppercase bg-gradient-to-r from-amber-200 via-white to-indigo-200 bg-clip-text text-transparent font-semibold">
+                    <span className="text-[10px] sm:text-[11px] font-mono tracking-widest uppercase bg-gradient-to-r from-neutral-200 via-white to-neutral-300 bg-clip-text text-transparent font-semibold">
                       READY TO INNOVATE • BLR {currentTime}
                     </span>
                   </div>
@@ -144,7 +144,7 @@ export default function ExecutiveBentoDeck({
                 data-aos-delay="200"
               >
                 {greeting},{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 font-extrabold">
+                <span className="text-white font-extrabold">
                   Jaison.
                 </span>
               </h1>
@@ -155,20 +155,20 @@ export default function ExecutiveBentoDeck({
                 data-aos="fade-right"
                 data-aos-delay="300"
               >
-                <span className="text-xs sm:text-sm md:text-base font-mono bg-gradient-to-r from-indigo-200 via-purple-200 to-amber-200 bg-clip-text text-transparent font-medium">
+                <span className="text-xs sm:text-sm md:text-base font-mono text-neutral-300 font-medium">
                   {typedText}
                 </span>
-                <span className="w-[2px] h-4 bg-gradient-to-t from-amber-400 to-indigo-400 inline-block ml-1 animate-blink" />
+                <span className="w-[2px] h-4 bg-white inline-block ml-1 animate-blink" />
               </div>
 
               {/* Scripture Anchor in Editorial Serif */}
               <p
-                className="text-sm sm:text-base text-neutral-300 font-serif italic leading-relaxed border-l-2 border-amber-500/40 pl-4 py-1"
+                className="text-sm sm:text-base text-neutral-300 font-serif italic leading-relaxed border-l-2 border-white/40 pl-4 py-1"
                 data-aos="fade-up"
                 data-aos-delay="400"
               >
                 "Commit your actions to the LORD, and your plans will succeed."
-                <span className="block not-italic text-xs text-amber-400/80 font-mono mt-1 font-normal">
+                <span className="block not-italic text-xs text-neutral-400 font-mono mt-1 font-normal">
                   — Proverbs 16:3
                 </span>
               </p>
@@ -192,7 +192,7 @@ export default function ExecutiveBentoDeck({
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     />
                     <path
-                      className="text-amber-400 transition-all duration-700 ease-out"
+                      className="text-white transition-all duration-700 ease-out"
                       strokeDasharray={`${habitCompletionPct}, 100`}
                       strokeWidth="3.5"
                       strokeLinecap="round"
@@ -201,7 +201,7 @@ export default function ExecutiveBentoDeck({
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     />
                   </svg>
-                  <span className="absolute font-mono text-xs font-bold text-amber-300">
+                  <span className="absolute font-mono text-xs font-bold text-white">
                     {habitCompletionPct}%
                   </span>
                 </div>
@@ -219,7 +219,7 @@ export default function ExecutiveBentoDeck({
                 onClick={onToggleBookmarkVerse}
                 className={`p-4 rounded-2xl border transition-all flex flex-col items-center justify-center gap-1 min-w-[76px] ${
                   verseBookmarked
-                    ? "bg-amber-500/20 border-amber-500/50 text-amber-300"
+                    ? "bg-neutral-800 border-neutral-600 text-white"
                     : "glass-card text-neutral-400 hover:text-white"
                 }`}
                 title="Bookmark verse"
@@ -243,7 +243,7 @@ export default function ExecutiveBentoDeck({
               onClick={() => setDeckDisplayMode("carousel")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold transition-all ${
                 deckDisplayMode === "carousel"
-                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-neutral-950 font-bold shadow-md shadow-amber-500/25"
+                  ? "bg-white text-neutral-950 font-bold shadow-md"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
@@ -254,7 +254,7 @@ export default function ExecutiveBentoDeck({
               onClick={() => setDeckDisplayMode("grid")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold transition-all ${
                 deckDisplayMode === "grid"
-                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-neutral-950 font-bold shadow-md shadow-amber-500/25"
+                  ? "bg-white text-neutral-950 font-bold shadow-md"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
@@ -343,22 +343,22 @@ export default function ExecutiveBentoDeck({
           data-aos-duration="700"
         >
           {/* EkiZR Ambient Backlight */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-orange-600 rounded-3xl blur-lg opacity-0 group-hover:opacity-45 transition-all duration-700 pointer-events-none" />
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-700 to-neutral-800 rounded-3xl blur-lg opacity-0 group-hover:opacity-45 transition-all duration-700 pointer-events-none" />
 
-          <div className="relative rounded-3xl p-6 bg-[#0b0c16]/85 backdrop-blur-xl border border-white/[0.08] group-hover:border-amber-500/40 flex flex-col justify-between space-y-4 h-full transform transition-all duration-500 group-hover:scale-[1.015] group-hover:-translate-y-1">
+          <div className="relative rounded-3xl p-6 bg-[#0b0c16]/85 backdrop-blur-xl border border-white/[0.08] group-hover:border-neutral-500 flex flex-col justify-between space-y-4 h-full transform transition-all duration-500 group-hover:scale-[1.015] group-hover:-translate-y-1">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono tracking-wider uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono tracking-wider uppercase bg-neutral-800 text-neutral-200 border border-neutral-700 font-bold">
                   <Target className="w-3 h-3" />
                   Sprint Target 715+
                 </span>
-                <div className="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:bg-amber-500 group-hover:text-neutral-950 transition-colors">
+                <div className="w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white group-hover:bg-white group-hover:text-neutral-950 transition-colors">
                   <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-white group-hover:text-amber-300 transition-colors">
+                <h3 className="text-lg font-bold text-white group-hover:text-neutral-200 transition-colors">
                   GMAT Focus Edition Center
                 </h3>
                 <p className="text-xs text-neutral-400 mt-1">
@@ -370,7 +370,7 @@ export default function ExecutiveBentoDeck({
               <div className="p-3 rounded-2xl bg-[#030014]/60 border border-white/[0.05] flex items-center justify-between text-xs">
                 <div>
                   <span className="text-[10px] text-neutral-400 font-mono">Last Mock Score:</span>
-                  <p className="text-xl font-black font-mono text-amber-400">675 <span className="text-[11px] font-normal text-neutral-400">(95th %ile)</span></p>
+                  <p className="text-xl font-black font-mono text-white">675 <span className="text-[11px] font-normal text-neutral-400">(95th %ile)</span></p>
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] text-neutral-400 font-mono">Target Delta:</span>
@@ -379,7 +379,7 @@ export default function ExecutiveBentoDeck({
               </div>
             </div>
 
-            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-xs font-semibold text-amber-400">
+            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-xs font-semibold text-white">
               <span>Launch 60-Min Sprint & Score Tracker</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
@@ -436,56 +436,6 @@ export default function ExecutiveBentoDeck({
           </div>
         </div>
 
-        {/* CARD 4: VEERAKERALAPUDUR AGRIBUSINESS */}
-        <div
-          onClick={() => onSelectTab("farm")}
-          className="relative group cursor-pointer"
-          data-aos="fade-up"
-          data-aos-delay="150"
-          data-aos-duration="700"
-        >
-          {/* EkiZR Ambient Backlight */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl blur-lg opacity-0 group-hover:opacity-45 transition-all duration-700 pointer-events-none" />
-
-          <div className="relative rounded-3xl p-6 bg-[#0b0c16]/85 backdrop-blur-xl border border-white/[0.08] group-hover:border-emerald-500/40 flex flex-col justify-between space-y-4 h-full transform transition-all duration-500 group-hover:scale-[1.015] group-hover:-translate-y-1">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono tracking-wider uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                  <Sprout className="w-3 h-3" />
-                  Agribusiness Modeler
-                </span>
-                <div className="w-7 h-7 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-neutral-950 transition-colors">
-                  <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-bold text-white group-hover:text-emerald-300 transition-colors">
-                  Veerakeralapudur Farm ROI
-                </h3>
-                <p className="text-xs text-neutral-400 mt-1">
-                  High-Density Guava • Perennial Moringa • Free-Range Chicken • CapEx Tracker.
-                </p>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-[#030014]/60 border border-white/[0.05] grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="text-[10px] text-neutral-400 font-mono">Top Crop Revenue:</span>
-                  <p className="text-base font-bold text-emerald-400 font-mono">₹1.80L / yr</p>
-                </div>
-                <div>
-                  <span className="text-[10px] text-neutral-400 font-mono">CapEx Budget:</span>
-                  <p className="text-base font-bold text-neutral-200 font-mono">₹1.50L Cap</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-xs font-semibold text-emerald-400">
-              <span>Simulate Crop Yields & Payback</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-        </div>
 
         {/* CARD 5: MUSIC & SANCTUARY EQUALIZER */}
         <div
@@ -547,18 +497,18 @@ export default function ExecutiveBentoDeck({
           data-aos-duration="700"
         >
           {/* EkiZR Ambient Backlight */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 to-amber-600 rounded-3xl blur-lg opacity-0 group-hover:opacity-45 transition-all duration-700 pointer-events-none" />
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-700 to-neutral-800 rounded-3xl blur-lg opacity-0 group-hover:opacity-45 transition-all duration-700 pointer-events-none" />
 
-          <div className="relative rounded-3xl p-6 bg-[#0b0c16]/85 backdrop-blur-xl border border-white/[0.08] group-hover:border-rose-500/40 flex flex-col justify-between space-y-4 h-full transform transition-all duration-500 group-hover:scale-[1.015] group-hover:-translate-y-1">
+          <div className="relative rounded-3xl p-6 bg-[#0b0c16]/85 backdrop-blur-xl border border-white/[0.08] group-hover:border-neutral-500 flex flex-col justify-between space-y-4 h-full transform transition-all duration-500 group-hover:scale-[1.015] group-hover:-translate-y-1">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono tracking-wider uppercase bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono tracking-wider uppercase bg-neutral-800 text-neutral-200 border border-neutral-700 font-bold">
                   <Flame className="w-3 h-3" />
                   Daily Discipline
                 </span>
                 <button
                   onClick={() => onSelectTab("habits")}
-                  className="w-7 h-7 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 group-hover:bg-rose-500 group-hover:text-neutral-950 transition-colors"
+                  className="w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white group-hover:bg-white group-hover:text-neutral-950 transition-colors"
                 >
                   <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </button>
@@ -584,13 +534,13 @@ export default function ExecutiveBentoDeck({
                     }}
                     className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${
                       habit.completedToday
-                        ? "bg-amber-500/15 border-amber-500/40 text-amber-200"
+                        ? "bg-neutral-800/80 border-neutral-600 text-white"
                         : "bg-[#030014]/60 border-white/[0.05] text-neutral-400 hover:border-white/[0.18] hover:text-neutral-200"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 text-xs font-medium">
                       {habit.completedToday ? (
-                        <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                        <CheckCircle2 className="w-4 h-4 text-white shrink-0" />
                       ) : (
                         <Circle className="w-4 h-4 text-neutral-600 shrink-0" />
                       )}
@@ -598,7 +548,7 @@ export default function ExecutiveBentoDeck({
                         {habit.name}
                       </span>
                     </div>
-                    <span className="text-[10px] font-mono font-bold text-amber-400/90">
+                    <span className="text-[10px] font-mono font-bold text-neutral-300">
                       🔥 {habit.streak}d
                     </span>
                   </div>

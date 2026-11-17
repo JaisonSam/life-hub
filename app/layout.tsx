@@ -37,7 +37,7 @@ export default function RootLayout({
       <head>
         <link rel="preload" href="/videos/tron-intro.mp4" as="video" type="video/mp4" />
       </head>
-      <body className="min-h-full flex flex-col bg-[#0c0d11] text-[#f4f4f6] selection:bg-amber-500/30 selection:text-amber-200 relative">
+      <body className="min-h-full flex flex-col bg-[#0c0d11] text-[#f4f4f6] selection:bg-neutral-800 selection:text-white relative">
         {children}
       </body>
     </html>

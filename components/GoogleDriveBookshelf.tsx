@@ -207,8 +207,8 @@ export default function GoogleDriveBookshelf({
     <div className="space-y-6">
       {/* Upload Toast */}
       {uploadMessage && (
-        <div className="p-3.5 rounded-xl bg-[#181920] border border-amber-400/40 text-amber-300 text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200 font-mono">
-          <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+        <div className="p-3.5 rounded-xl bg-[#181920] border border-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200 font-mono">
+          <CheckCircle2 className="w-4 h-4 text-white shrink-0" />
           {uploadMessage}
         </div>
       )}
@@ -226,18 +226,18 @@ export default function GoogleDriveBookshelf({
             onDrop={handleDrop}
             className={`p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center transition-all min-h-[170px] ${
               isDragging
-                ? "border-amber-400 bg-amber-400/10"
+                ? "border-white bg-white/10"
                 : "border-[#262834] bg-[#14151b] hover:border-neutral-500"
             }`}
           >
-            <UploadCloud className="w-7 h-7 text-amber-400 mb-2" />
+            <UploadCloud className="w-7 h-7 text-white mb-2" />
             <span className="text-xs font-bold text-white">Send to Kobo & Cloud</span>
             <p className="text-[11px] text-[#8b91a0] mt-1 max-w-[200px] leading-relaxed">
               Drop any <strong className="text-white">.epub</strong> here to upload into Drive and sync to your Kobo
             </p>
 
             <div className="mt-3 flex items-center gap-2 font-mono">
-              <label className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 rounded-lg text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 shadow-sm">
+              <label className="px-3 py-1.5 bg-white hover:bg-neutral-200 text-black rounded-lg text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 shadow-sm">
                 <Plus className="w-3.5 h-3.5" />
                 Upload EPUB
                 <input
@@ -264,7 +264,7 @@ export default function GoogleDriveBookshelf({
 
           <div className="p-3 rounded-xl bg-[#14151b] border border-[#262834] text-[11px] text-[#8b91a0] space-y-1">
             <span className="font-semibold text-neutral-300 flex items-center gap-1.5 font-mono">
-              <HardDrive className="w-3.5 h-3.5 text-amber-400" />
+              <HardDrive className="w-3.5 h-3.5 text-white" />
               Kobo Google Drive Sync:
             </span>
             <p>
@@ -277,8 +277,8 @@ export default function GoogleDriveBookshelf({
         <div className="lg:col-span-8 p-6 rounded-2xl bg-[#14151b] border border-[#232530] flex flex-col justify-between space-y-4 shadow-lg">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-amber-400">
-                <FolderSync className="w-5 h-5 text-amber-400" />
+              <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-white">
+                <FolderSync className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h3 className="font-bold text-sm sm:text-base text-white">
@@ -301,7 +301,7 @@ export default function GoogleDriveBookshelf({
                     className="p-2 rounded-xl border border-[#262834] bg-[#181920] text-neutral-400 hover:text-white hover:bg-[#20222a] transition-colors"
                     title="Refresh Drive files"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-amber-400" : ""}`} />
+                    <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-white" : ""}`} />
                   </button>
                   <a
                     href="/api/auth/google-drive/logout"
@@ -313,7 +313,7 @@ export default function GoogleDriveBookshelf({
               ) : (
                 <a
                   href="/api/auth/google-drive/login"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold transition-all shadow-sm"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition-all shadow-sm"
                 >
                   <FolderSync className="w-3.5 h-3.5" />
                   Connect Google Drive
@@ -329,7 +329,7 @@ export default function GoogleDriveBookshelf({
               <p className="text-[10px] text-[#8b91a0] uppercase tracking-wider">Total Ebooks</p>
             </div>
             <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834]">
-              <span className="text-sm font-extrabold text-amber-400">
+              <span className="text-sm font-extrabold text-white">
                 {books.filter((b) => b.status === "Reading").length}
               </span>
               <p className="text-[10px] text-[#8b91a0] uppercase tracking-wider">In Progress</p>
@@ -348,7 +348,7 @@ export default function GoogleDriveBookshelf({
       <div className="space-y-4">
         <div className="flex items-center justify-between font-mono">
           <span className="text-xs font-bold text-white flex items-center gap-1.5">
-            <BookOpen className="w-4 h-4 text-amber-400" />
+            <BookOpen className="w-4 h-4 text-white" />
             Your Ebook Collection ({filteredBooks.length})
           </span>
           <span className="text-[10px] text-[#8b91a0]">
@@ -358,7 +358,7 @@ export default function GoogleDriveBookshelf({
 
         {loading ? (
           <div className="p-16 flex flex-col items-center justify-center gap-3 text-neutral-400">
-            <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-white" />
             <p className="text-xs font-mono">Scanning Google Drive for your Kobo EPUBs...</p>
           </div>
         ) : filteredBooks.length === 0 ? (
@@ -380,13 +380,13 @@ export default function GoogleDriveBookshelf({
                   {/* Card Header */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700 font-mono">
                         {book.size} • EPUB
                       </span>
-                      <h3 className="font-extrabold text-base text-white group-hover:text-[#e5c07b] transition-colors leading-snug line-clamp-2">
+                      <h3 className="font-extrabold text-base text-white group-hover:text-neutral-200 transition-colors leading-snug line-clamp-2">
                         {book.name}
                       </h3>
-                      <p className="text-[10px] text-[#8b91a0]">
+                      <p className="text-[10px] text-neutral-400">
                         Synced with Kobo & Google Drive
                       </p>
                     </div>
@@ -398,11 +398,7 @@ export default function GoogleDriveBookshelf({
                           progress: book.status === "Completed" ? 30 : 100,
                         })
                       }
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 transition-colors font-mono ${
-                        book.status === "Completed"
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                      }`}
+                      className="text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 transition-colors font-mono bg-neutral-800 text-neutral-200 border border-neutral-700"
                       title="Click to toggle status"
                     >
                       {book.status}
@@ -417,32 +413,32 @@ export default function GoogleDriveBookshelf({
                     </div>
                     <div className="w-full bg-[#101116] h-1.5 rounded-full overflow-hidden border border-[#282a38]">
                       <div
-                        className="bg-amber-500 h-full rounded-full transition-all duration-300"
+                        className="bg-white h-full rounded-full transition-all duration-300"
                         style={{ width: `${book.progress}%` }}
                       />
                     </div>
-                    <div className="flex justify-between text-[9px] text-[#8b91a0] pt-0.5">
-                      <button onClick={() => saveBookMeta(book.id, { progress: 25, status: "Reading" })} className="hover:text-neutral-300">25%</button>
-                      <button onClick={() => saveBookMeta(book.id, { progress: 50, status: "Reading" })} className="hover:text-neutral-300">50%</button>
-                      <button onClick={() => saveBookMeta(book.id, { progress: 75, status: "Reading" })} className="hover:text-neutral-300">75%</button>
-                      <button onClick={() => saveBookMeta(book.id, { progress: 100, status: "Completed" })} className="hover:text-neutral-300">100%</button>
+                    <div className="flex justify-between text-[9px] text-neutral-400 pt-0.5">
+                      <button onClick={() => saveBookMeta(book.id, { progress: 25, status: "Reading" })} className="hover:text-white">25%</button>
+                      <button onClick={() => saveBookMeta(book.id, { progress: 50, status: "Reading" })} className="hover:text-white">50%</button>
+                      <button onClick={() => saveBookMeta(book.id, { progress: 75, status: "Reading" })} className="hover:text-white">75%</button>
+                      <button onClick={() => saveBookMeta(book.id, { progress: 100, status: "Completed" })} className="hover:text-white">100%</button>
                     </div>
                   </div>
 
                   {/* Core Mental Model Card */}
                   {book.mentalModel ? (
                     <div className="p-3 rounded-xl bg-[#14151b] border border-[#262834] space-y-1 text-xs">
-                      <div className="text-[10px] font-bold text-amber-400 flex items-center gap-1 uppercase tracking-wider font-mono">
-                        <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+                      <div className="text-[10px] font-bold text-neutral-300 flex items-center gap-1 uppercase tracking-wider font-mono">
+                        <Lightbulb className="w-3.5 h-3.5 text-white" />
                         Mental Model
                       </div>
-                      <div className="font-bold text-[#e5c07b] text-xs font-mono">{book.mentalModel}</div>
+                      <div className="font-bold text-white text-xs font-mono">{book.mentalModel}</div>
                     </div>
                   ) : null}
 
                   {/* Key Quote / Highlights */}
                   {book.keyQuote ? (
-                    <blockquote className="text-[11px] text-neutral-300 italic border-l-2 border-amber-400/50 pl-3 leading-relaxed line-clamp-3">
+                    <blockquote className="text-[11px] text-neutral-300 italic border-l-2 border-neutral-600 pl-3 leading-relaxed line-clamp-3">
                       "{book.keyQuote}"
                     </blockquote>
                   ) : null}
@@ -462,14 +458,14 @@ export default function GoogleDriveBookshelf({
                         placeholder="Core mental model (e.g. Chokepoint Moats)..."
                         value={tempModel}
                         onChange={(e) => setTempModel(e.target.value)}
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
                       />
                       <textarea
                         rows={2}
                         placeholder="Actionable strategic takeaway..."
                         value={tempNote}
                         onChange={(e) => setTempNote(e.target.value)}
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
                       />
                       <div className="flex justify-end gap-1.5 font-mono">
                         <button
@@ -486,7 +482,7 @@ export default function GoogleDriveBookshelf({
                             });
                             setEditingNoteBookId(null);
                           }}
-                          className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-neutral-950 rounded-lg text-[11px] font-bold"
+                          className="px-3 py-1 bg-white hover:bg-neutral-200 text-black rounded-lg text-[11px] font-bold"
                         >
                           Save
                         </button>
@@ -500,7 +496,7 @@ export default function GoogleDriveBookshelf({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => onOpenReader(book.downloadUrl, book.name)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold transition-all shadow-sm"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black text-xs font-bold transition-all shadow-sm"
                     >
                       <BookOpen className="w-3.5 h-3.5" />
                       <span>Read</span>
@@ -515,7 +511,7 @@ export default function GoogleDriveBookshelf({
                       className="flex items-center gap-1 text-[11px] text-neutral-300 hover:text-white px-2 py-1 rounded-lg bg-[#14151b] border border-[#262834] hover:border-neutral-500 transition-colors"
                       title="Add mental model or note"
                     >
-                      <BookmarkPlus className="w-3.5 h-3.5 text-amber-400" />
+                      <BookmarkPlus className="w-3.5 h-3.5 text-white" />
                       <span>Note</span>
                     </button>
                   </div>

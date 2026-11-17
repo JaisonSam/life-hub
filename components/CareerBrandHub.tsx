@@ -391,8 +391,8 @@ export default function CareerBrandHub() {
           <div className="space-y-3 max-w-3xl">
             {/* Badges row */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/25 font-bold uppercase tracking-wider flex items-center gap-1.5 font-mono">
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-[10px] px-3 py-1 rounded-full bg-neutral-800 text-neutral-200 border border-neutral-700 font-bold uppercase tracking-wider flex items-center gap-1.5 font-mono">
+                <ShieldCheck className="w-3.5 h-3.5 text-white" />
                 Senior ERP Business Analyst
               </span>
               <span className="text-[10px] px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-semibold font-mono">
@@ -408,7 +408,7 @@ export default function CareerBrandHub() {
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
                 Jaison Shanmugiah
               </h1>
-              <p className="text-sm sm:text-base font-semibold text-[#e5c07b] mt-1">
+              <p className="text-sm sm:text-base font-semibold text-neutral-300 mt-1">
                 Enterprise SAP S/4HANA Transformation & Digital Manufacturing Integration Specialist
               </p>
             </div>
@@ -421,22 +421,22 @@ export default function CareerBrandHub() {
             {/* Contact & Location Strip */}
             <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-400 pt-1 font-mono">
               <span className="flex items-center gap-1 text-neutral-300">
-                <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                <MapPin className="w-3.5 h-3.5 text-white" />
                 Bengaluru, Karnataka, India
               </span>
               <a
                 href="mailto:jaisonsam47@gmail.com"
                 className="flex items-center gap-1 text-neutral-300 hover:text-white transition-colors"
               >
-                <Mail className="w-3.5 h-3.5 text-amber-400" />
+                <Mail className="w-3.5 h-3.5 text-white" />
                 jaisonsam47@gmail.com
               </a>
               <span className="flex items-center gap-1 text-neutral-300">
-                <Phone className="w-3.5 h-3.5 text-amber-400" />
+                <Phone className="w-3.5 h-3.5 text-white" />
                 +91 9388116984
               </span>
               <span className="flex items-center gap-1 text-neutral-300 font-medium">
-                <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+                <GraduationCap className="w-3.5 h-3.5 text-white" />
                 NIT Calicut (B.Tech Production Eng, 8.47 CGPA)
               </span>
             </div>
@@ -465,7 +465,7 @@ export default function CareerBrandHub() {
               rel="noreferrer"
               className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#181920] hover:bg-[#222430] text-white border border-[#282a38] hover:border-neutral-500 font-bold text-xs transition-all"
             >
-              <Building2 className="w-4 h-4 text-amber-400" />
+              <Building2 className="w-4 h-4 text-white" />
               <span>Naukri Candidate Portal</span>
               <ArrowUpRight className="w-3.5 h-3.5 text-neutral-400" />
             </a>
@@ -473,7 +473,7 @@ export default function CareerBrandHub() {
             {/* Copy 60-Sec Elevator Pitch */}
             <button
               onClick={handleCopyPitch}
-              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-semibold transition-all"
+              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold transition-all"
               title="Copy executive introduction to clipboard for InMails"
             >
               {copiedPitch ? (
@@ -495,11 +495,11 @@ export default function CareerBrandHub() {
       {/* 2. QUANTIFIED TRACK RECORD (EXECUTIVE METRICS MATRIX) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: "European Plants", value: "6 Sites", sub: "France, DE, PL, CZ, IT, NL", color: "text-[#e5c07b]" },
-          { label: "Shopfloor Users", value: "2,500+", sub: "Personnel enabled", color: "text-emerald-400" },
-          { label: "Order Data Hygiene", value: "1 TB", sub: "S/4HANA DB archival", color: "text-amber-400" },
-          { label: "Governance Tickets", value: "195+", sub: "145 SRs + 50 Incidents", color: "text-[#e5c07b]" },
-          { label: "Ales Plant Go-Live", value: "Fixed 3-4/k", sub: "Locked order resolution", color: "text-emerald-400" },
+          { label: "European Plants", value: "6 Sites", sub: "France, DE, PL, CZ, IT, NL", color: "text-white" },
+          { label: "Shopfloor Users", value: "2,500+", sub: "Personnel enabled", color: "text-neutral-200" },
+          { label: "Order Data Hygiene", value: "1 TB", sub: "S/4HANA DB archival", color: "text-neutral-300" },
+          { label: "Governance Tickets", value: "195+", sub: "145 SRs + 50 Incidents", color: "text-white" },
+          { label: "Ales Plant Go-Live", value: "Fixed 3-4/k", sub: "Locked order resolution", color: "text-neutral-200" },
           { label: "Attibele Plant", value: "20% Cut", sub: "Warehouse picking load", color: "text-white" },
         ].map((stat, idx) => (
           <div
@@ -518,33 +518,33 @@ export default function CareerBrandHub() {
       </div>
 
       {/* 3. CORE COMPETENCIES MATRIX */}
-      <div className="p-6 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-4">
-        <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-[#e5c07b]">
-          <Cpu className="w-4 h-4 text-amber-400" />
+      <div className="p-6 rounded-2xl bg-[#0a0a0c] border border-neutral-800 shadow-xl space-y-4">
+        <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-neutral-300">
+          <Cpu className="w-4 h-4 text-white" />
           Technical & Functional Core Competencies
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl bg-[#181920] border border-[#262834] space-y-2">
+          <div className="p-4 rounded-xl bg-[#121318] border border-neutral-800 space-y-2">
             <span className="text-xs font-bold text-white flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-amber-400" />
+              <Layers className="w-3.5 h-3.5 text-white" />
               SAP S/4HANA & PP
             </span>
             <p className="text-xs text-neutral-300 leading-relaxed font-sans">
               BOMs, routings, work centers, MRP Live, production order lifecycles, and database data volume management.
             </p>
           </div>
-          <div className="p-4 rounded-xl bg-[#181920] border border-[#262834] space-y-2">
+          <div className="p-4 rounded-xl bg-[#121318] border border-neutral-800 space-y-2">
             <span className="text-xs font-bold text-white flex items-center gap-1.5">
-              <Sliders className="w-3.5 h-3.5 text-emerald-400" />
+              <Sliders className="w-3.5 h-3.5 text-neutral-300" />
               Digital Mfg & MES
             </span>
             <p className="text-xs text-neutral-300 leading-relaxed font-sans">
               AVEVA LDS (Line Performance), PMS MES integration, shop-floor traceability, and live dispatch synchronization.
             </p>
           </div>
-          <div className="p-4 rounded-xl bg-[#181920] border border-[#262834] space-y-2">
+          <div className="p-4 rounded-xl bg-[#121318] border border-neutral-800 space-y-2">
             <span className="text-xs font-bold text-white flex items-center gap-1.5">
-              <Globe className="w-3.5 h-3.5 text-[#e5c07b]" />
+              <Globe className="w-3.5 h-3.5 text-white" />
               Supply Chain & Analytics
             </span>
             <p className="text-xs text-neutral-300 leading-relaxed font-sans">
@@ -553,7 +553,7 @@ export default function CareerBrandHub() {
           </div>
           <div className="p-4 rounded-xl bg-[#181920] border border-[#262834] space-y-2">
             <span className="text-xs font-bold text-white flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-amber-400" />
+              <Award className="w-3.5 h-3.5 text-white" />
               Production Engineering
             </span>
             <p className="text-xs text-neutral-300 leading-relaxed font-sans">
@@ -568,8 +568,8 @@ export default function CareerBrandHub() {
         {/* Desk Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-[#232530]">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-amber-400 shadow-sm">
-              <Briefcase className="w-5 h-5 text-amber-400" />
+            <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-white shadow-sm">
+              <Briefcase className="w-5 h-5 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -595,7 +595,7 @@ export default function CareerBrandHub() {
 
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold transition-all shadow-md"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition-all shadow-md"
             >
               <Plus className="w-4 h-4" />
               <span>Add Custom Job Opening</span>
@@ -609,13 +609,13 @@ export default function CareerBrandHub() {
             onClick={() => setActivePipelineFilter(activePipelineFilter === "wishlist" ? "all" : "wishlist")}
             className={`p-3.5 rounded-xl border text-left transition-all ${
               activePipelineFilter === "wishlist"
-                ? "bg-amber-500/15 border-amber-500/60 ring-1 ring-amber-500/30"
+                ? "bg-white/[0.12] border-white/40 ring-1 ring-white/30"
                 : "bg-[#181920] border-[#262834] hover:border-neutral-600"
             }`}
           >
             <div className="text-[10px] font-mono font-semibold text-[#8b91a0] uppercase tracking-wider flex items-center justify-between">
               <span>📌 Wishlist</span>
-              <span className="text-xs font-mono font-bold text-amber-400">{countWishlist}</span>
+              <span className="text-xs font-mono font-bold text-white">{countWishlist}</span>
             </div>
             <p className="text-xs font-bold text-white mt-1">To Apply / Review</p>
           </button>
@@ -639,13 +639,13 @@ export default function CareerBrandHub() {
             onClick={() => setActivePipelineFilter(activePipelineFilter === "interview" ? "all" : "interview")}
             className={`p-3.5 rounded-xl border text-left transition-all ${
               activePipelineFilter === "interview"
-                ? "bg-amber-500/15 border-amber-500/60 ring-1 ring-amber-500/30"
+                ? "bg-white/[0.12] border-white/40 ring-1 ring-white/30"
                 : "bg-[#181920] border-[#262834] hover:border-neutral-600"
             }`}
           >
             <div className="text-[10px] font-mono font-semibold text-[#8b91a0] uppercase tracking-wider flex items-center justify-between">
               <span>💬 In Progress</span>
-              <span className="text-xs font-mono font-bold text-amber-400">{countInterview}</span>
+              <span className="text-xs font-mono font-bold text-white">{countInterview}</span>
             </div>
             <p className="text-xs font-bold text-white mt-1">Screening & Interview</p>
           </button>
@@ -676,7 +676,7 @@ export default function CareerBrandHub() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter by role, company, skills (e.g. Kinaxis, S/4HANA, AVEVA, McKinsey)..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors font-sans"
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white transition-colors font-sans"
             />
             {searchQuery && (
               <button
@@ -714,10 +714,10 @@ export default function CareerBrandHub() {
         {/* Active Filter Indicators */}
         {(activePipelineFilter !== "all" || searchQuery) && (
           <div className="flex items-center gap-2 text-xs text-neutral-400 bg-[#181920] px-3.5 py-2 rounded-xl border border-[#262834] font-mono">
-            <Filter className="w-3.5 h-3.5 text-amber-400" />
+            <Filter className="w-3.5 h-3.5 text-white" />
             <span>Active Filter:</span>
             {activePipelineFilter !== "all" && (
-              <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold capitalize">
+              <span className="px-2 py-0.5 rounded-md bg-white/10 text-white font-bold capitalize">
                 Status: {activePipelineFilter}
               </span>
             )}
@@ -731,7 +731,7 @@ export default function CareerBrandHub() {
                 setActivePipelineFilter("all");
                 setSearchQuery("");
               }}
-              className="ml-auto text-[11px] text-amber-400 hover:underline font-semibold"
+              className="ml-auto text-[11px] text-white hover:underline font-semibold"
             >
               Reset Filters
             </button>
@@ -780,19 +780,19 @@ export default function CareerBrandHub() {
                         </span>
 
                         {job.isCustom && (
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neutral-800 text-neutral-200 border border-neutral-700 font-bold">
                             Custom Added
                           </span>
                         )}
                       </div>
 
-                      <h4 className="text-base sm:text-lg font-bold text-[#e5c07b] group-hover:text-[#f3d692] transition-colors">
+                      <h4 className="text-base sm:text-lg font-bold text-white group-hover:text-neutral-200 transition-colors">
                         {job.title}
                       </h4>
 
                       <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 font-mono">
                         <span className="font-semibold text-neutral-200 flex items-center gap-1">
-                          <Building2 className="w-3.5 h-3.5 text-amber-400" />
+                          <Building2 className="w-3.5 h-3.5 text-neutral-300" />
                           {job.company}
                         </span>
                         <span>•</span>
@@ -821,11 +821,11 @@ export default function CareerBrandHub() {
                           onChange={(e) => handleStatusChange(job.id, e.target.value as any)}
                           className={`text-xs font-bold px-2.5 py-1 rounded-lg border appearance-none cursor-pointer focus:outline-none transition-colors ${
                             job.status === "wishlist"
-                              ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
+                              ? "bg-neutral-800 text-neutral-200 border-neutral-700"
                               : job.status === "applied"
                               ? "bg-white/[0.08] text-white border-white/20"
                               : job.status === "screening" || job.status === "interview"
-                              ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
+                              ? "bg-neutral-800 text-neutral-200 border-neutral-700"
                               : job.status === "offer"
                               ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                               : "bg-neutral-800 text-neutral-400 border-neutral-700"
@@ -855,7 +855,7 @@ export default function CareerBrandHub() {
                   {/* Why You Fit & Skills */}
                   <div className="space-y-2 pt-1">
                     <p className="text-xs text-neutral-300 bg-[#101116] p-3 rounded-lg border border-[#262834] leading-relaxed font-sans">
-                      <strong className="text-amber-400 font-mono">Profile Fit: </strong>
+                      <strong className="text-white font-mono">Profile Fit: </strong>
                       {job.whyFit}
                     </p>
 
@@ -879,7 +879,7 @@ export default function CareerBrandHub() {
                         value={job.notes || ""}
                         onChange={(e) => handleNotesChange(job.id, e.target.value)}
                         placeholder="Add recruiter contact, interview date, or private notes here..."
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#101116] border border-[#262834] text-xs text-neutral-300 placeholder-neutral-600 focus:outline-none focus:border-amber-400 font-sans"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#101116] border border-[#262834] text-xs text-neutral-300 placeholder-neutral-600 focus:outline-none focus:border-white font-sans"
                       />
                     </div>
                   )}
@@ -916,7 +916,7 @@ export default function CareerBrandHub() {
                           title="Open verified recruiter posting on LinkedIn / Naukri"
                         >
                           <span>{job.recruiterLabel || "Recruiter Post"}</span>
-                          <ArrowUpRight className="w-3.5 h-3.5 text-amber-400" />
+                          <ArrowUpRight className="w-3.5 h-3.5 text-white" />
                         </a>
                       )}
 
@@ -924,7 +924,7 @@ export default function CareerBrandHub() {
                         href={job.directUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold transition-all shadow-sm"
+                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-neutral-950 font-bold transition-all shadow-sm"
                         title="Open official corporate career portal"
                       >
                         <span>Official Portal ↗</span>

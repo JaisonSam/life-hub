@@ -30,7 +30,6 @@ import {
 export type ViewTabId =
   | "career"
   | "gmat"
-  | "farm"
   | "books"
   | "habits"
   | "projects"
@@ -137,26 +136,6 @@ export default function ExecutiveViewCarousel({
       actionLabel: "Enter GMAT Sprint Sanctuary & Timer",
     },
     {
-      id: "farm",
-      title: "Veerakeralapudur Agribusiness Modeler",
-      category: "Agribusiness & Cash Flow",
-      badge: "0.25 Acre (11 Cents)",
-      roleSubtitle: "Tenkasi District, TN • High-Density Horticulture",
-      description: "Scientific agro-forestry financial engineering for 0.25-acre land in Veerakeralapudur: Taiwan Pink Guava, dwarf coconuts, free-range native poultry & CapEx modeling.",
-      icon: Sprout,
-      glowColor: "from-emerald-500 via-teal-600 to-green-500",
-      haloColor: "rgba(16, 185, 129, 0.25)",
-      accentBorder: "group-hover:border-emerald-500/50",
-      badgeBg: "bg-emerald-500/10 border-emerald-500/20",
-      badgeText: "text-emerald-400",
-      metrics: [
-        { label: "Budgeted CapEx", value: "₹1,15,000" },
-        { label: "Target Harvest", value: "₹1,85,000/yr" },
-        { label: "Farming Mode", value: "High-Density" },
-      ],
-      actionLabel: "Open Agribusiness Cash Flow Modeler",
-    },
-    {
       id: "books",
       title: "Strategic Bookshelf & Kobo E-Reader",
       category: "Intellectual Digest",
@@ -164,11 +143,11 @@ export default function ExecutiveViewCarousel({
       roleSubtitle: "Curated Daily Strategic Reads & Aeon Essays",
       description: "Revolving around your Google Drive EPUBs with built-in in-browser reader, Aeon philosophical essay recommendations, and a commonplace notebook for synthesized models.",
       icon: Library,
-      glowColor: "from-amber-500 via-indigo-600 to-purple-600",
-      haloColor: "rgba(245, 158, 11, 0.25)",
-      accentBorder: "group-hover:border-amber-500/50",
-      badgeBg: "bg-amber-500/10 border-amber-500/20",
-      badgeText: "text-amber-400",
+      glowColor: "from-neutral-700 via-neutral-800 to-neutral-900",
+      haloColor: "rgba(255, 255, 255, 0.15)",
+      accentBorder: "group-hover:border-neutral-500",
+      badgeBg: "bg-neutral-800 border-neutral-700",
+      badgeText: "text-white",
       metrics: [
         { label: "Daily Read", value: "Aeon + Tech" },
         { label: "E-Reader", value: "EPUB Cloud Sync" },
@@ -184,11 +163,11 @@ export default function ExecutiveViewCarousel({
       roleSubtitle: "Physical & Intellectual Streaks",
       description: "Track the atomic disciplines that compound into greatness. Real-time checklist and streak tracking for GMAT prep, gym workouts, and clean diet.",
       icon: Flame,
-      glowColor: "from-orange-500 via-amber-500 to-red-500",
-      haloColor: "rgba(249, 115, 22, 0.25)",
-      accentBorder: "group-hover:border-orange-500/50",
-      badgeBg: "bg-orange-500/10 border-orange-500/20",
-      badgeText: "text-orange-400",
+      glowColor: "from-neutral-700 via-neutral-800 to-neutral-900",
+      haloColor: "rgba(255, 255, 255, 0.15)",
+      accentBorder: "group-hover:border-neutral-500",
+      badgeBg: "bg-neutral-800 border-neutral-700",
+      badgeText: "text-white",
       metrics: [
         { label: "Today's Score", value: `${Math.round((completedHabitsCount / Math.max(1, totalHabitsCount)) * 100)}%` },
         { label: "Active Streaks", value: "Daily Momentum" },
@@ -303,8 +282,8 @@ export default function ExecutiveViewCarousel({
       <div className="flex flex-wrap items-center justify-between gap-4 px-2">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 via-indigo-500 to-purple-600 rounded-xl blur-sm opacity-50 animate-pulse" />
-            <div className="relative p-2 rounded-xl bg-[#0b0c16] border border-white/10 text-amber-400">
+            <div className="absolute -inset-1 bg-gradient-to-r from-neutral-700 via-neutral-600 to-neutral-800 rounded-xl blur-sm opacity-50 animate-pulse" />
+            <div className="relative p-2 rounded-xl bg-[#0b0c16] border border-white/10 text-white">
               <Compass className="w-4 h-4" />
             </div>
           </div>
@@ -312,7 +291,7 @@ export default function ExecutiveViewCarousel({
             <div className="flex items-center gap-2">
               <h2 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
                 Executive View Deck
-                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 font-mono font-semibold">
+                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-neutral-800 text-neutral-200 border border-neutral-700 font-mono font-semibold">
                   3D Coverflow
                 </span>
               </h2>
@@ -330,14 +309,14 @@ export default function ExecutiveViewCarousel({
             onClick={() => setIsAutoplay(!isAutoplay)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all ${
               isAutoplay
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-300 shadow-sm shadow-amber-500/20"
+                ? "bg-neutral-800 border-neutral-600 text-white shadow-sm"
                 : "bg-neutral-900/80 border-white/10 text-neutral-400 hover:text-white"
             }`}
             title={isAutoplay ? "Pause Autoplay" : "Start Autoplay"}
           >
             {isAutoplay ? (
               <>
-                <Pause className="w-3 h-3 text-amber-400" />
+                <Pause className="w-3 h-3 text-white" />
                 <span className="text-[10px] uppercase font-bold tracking-wider">Auto On</span>
               </>
             ) : (
@@ -359,7 +338,7 @@ export default function ExecutiveViewCarousel({
 
           {/* Index Counter Indicator */}
           <div className="px-3 py-1 rounded-xl bg-neutral-950/80 border border-white/10 text-xs font-mono text-neutral-300">
-            <span className="text-amber-400 font-bold">{activeIndex + 1}</span>
+            <span className="text-white font-bold">{activeIndex + 1}</span>
             <span className="text-neutral-500"> / {total}</span>
           </div>
 
@@ -505,14 +484,14 @@ export default function ExecutiveViewCarousel({
                       </span>
                     </div>
 
-                    <div className="w-8 h-8 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center text-neutral-300 group-hover:bg-amber-500 group-hover:text-neutral-950 transition-all duration-300">
+                    <div className="w-8 h-8 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center text-neutral-300 group-hover:bg-white group-hover:text-neutral-950 transition-all duration-300">
                       <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </div>
                   </div>
 
                   {/* Title & Subtitle */}
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight group-hover:text-amber-200 transition-colors flex items-center gap-2">
+                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight group-hover:text-neutral-200 transition-colors flex items-center gap-2">
                       {item.title}
                     </h3>
                     <p className="text-xs font-mono text-neutral-400 mt-1">
@@ -545,9 +524,9 @@ export default function ExecutiveViewCarousel({
                   </div>
 
                   {/* Launch Pill */}
-                  <div className="flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+                  <div className="flex items-center justify-between text-xs font-semibold text-white group-hover:text-neutral-200">
                     <span className="truncate">{item.actionLabel}</span>
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-300">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-700 text-neutral-200">
                       Enter →
                     </span>
                   </div>
@@ -575,7 +554,7 @@ export default function ExecutiveViewCarousel({
               onMouseLeave={handleCardLeave}
               className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-500 ease-out ${
                 isActive
-                  ? "bg-amber-500 text-neutral-950 font-bold shadow-lg shadow-amber-500/25 scale-105"
+                  ? "bg-white text-neutral-950 font-bold shadow-lg shadow-white/20 scale-105"
                   : "bg-neutral-900/60 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-white/5"
               }`}
             >

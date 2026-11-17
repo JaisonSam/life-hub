@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 p-8 sm:p-16 font-sans max-w-4xl mx-auto space-y-8">
-      <Link href="/" className="text-amber-400 hover:text-amber-300 text-sm font-semibold">
+      <Link href="/" className="text-neutral-300 hover:text-white text-sm font-semibold">
         ← Back to Life Hub
       </Link>
 

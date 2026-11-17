@@ -67,7 +67,7 @@ import {
 } from "@/lib/growwPortfolio";
 
 interface GlanceDashboardProps {
-  onSelectTab: (tabId: "career" | "gmat" | "farm" | "books" | "habits" | "projects" | "music") => void;
+  onSelectTab: (tabId: "career" | "gmat" | "books" | "habits" | "projects" | "music") => void;
   currentTime?: string;
   currentDate?: string;
 }
@@ -124,7 +124,7 @@ export default function GlanceDashboard({
   const [portfolioImportStatus, setPortfolioImportStatus] = useState<string>("");
 
   // 7. Device GPS & Live Weather State
-  const [weatherLocation, setWeatherLocation] = useState<"gps" | "blr" | "farm">("gps");
+  const [weatherLocation, setWeatherLocation] = useState<"gps" | "blr">("gps");
   const [gpsStatus, setGpsStatus] = useState<"locating" | "synced" | "denied" | "unsupported">("locating");
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [weatherLoading, setWeatherLoading] = useState<boolean>(false);
@@ -771,7 +771,7 @@ export default function GlanceDashboard({
   const habitPct = safeHabits.length > 0 ? Math.round((completedHabitsCount / safeHabits.length) * 100) : 0;
 
   // 4. Center Column Sub-Tabs
-  const [centerSubTab, setCenterSubTab] = useState<"career" | "gmat" | "tech" | "farm">("career");
+  const [centerSubTab, setCenterSubTab] = useState<"career" | "gmat" | "tech">("career");
   const [showMoreJobs, setShowMoreJobs] = useState(false);
 
   // Calendar calculations
@@ -848,20 +848,6 @@ export default function GlanceDashboard({
     return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }, [todayDate]);
 
-  // Today's Farm Ops Task (Rotates by day of week)
-  const farmDayTask = useMemo(() => {
-    const tasks = [
-      { day: "Sunday", task: "Grove Walk & Canopy Health Audit", metric: "Soil: Rest" },
-      { day: "Monday", task: "Drip Line 1 Fertigation (Bio-Enzyme)", metric: "45m Cycle" },
-      { day: "Tuesday", task: "Moisture Probe & Sensor Log Review", metric: "Sensor 42%" },
-      { day: "Wednesday", task: "High-Density Guava Pruning & Weed Patrol", metric: "Zone A" },
-      { day: "Thursday", task: "Borewell Solar Inverter & Pump Servicing", metric: "Solar 4.2kW" },
-      { day: "Friday", task: "Organic Pest Trap Inspection & Neem Spray", metric: "Eco Care" },
-      { day: "Saturday", task: "Agribusiness Cash Flow & Procurement Audit", metric: "Capex Plan" },
-    ];
-    const dayOfWeek = todayDate.getDay();
-    return tasks[dayOfWeek];
-  }, [todayDate]);
 
   // Selected date derivations for day-to-day planned activities
   const selectedDateObj = useMemo(() => {
@@ -928,7 +914,7 @@ export default function GlanceDashboard({
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3.5">
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-neutral-300 uppercase font-bold">
               <span className="flex items-center gap-1.5 text-white">
-                <CalendarIcon className="w-3.5 h-3.5 text-amber-400" />
+                <CalendarIcon className="w-3.5 h-3.5 text-white" />
                 CALENDAR
               </span>
               <div className="flex items-center gap-1">
@@ -1012,9 +998,9 @@ export default function GlanceDashboard({
                     }
                     className={`relative min-h-[30px] py-1 flex flex-col items-center justify-center rounded-md transition-all select-none cursor-pointer ${
                       isSelected
-                        ? "border-2 border-amber-400 text-amber-200 font-bold bg-amber-400/25 shadow-md ring-1 ring-amber-400/50 scale-105 z-10"
+                        ? "border-2 border-white text-white font-bold bg-white/20 shadow-md ring-1 ring-white/50 scale-105 z-10"
                         : item.isToday
-                        ? "border border-amber-400/90 text-amber-300 font-bold bg-amber-400/15 shadow-sm"
+                        ? "border border-white/80 text-white font-bold bg-white/10 shadow-sm"
                         : hasGCal
                         ? "text-sky-100 hover:bg-[#1a2336] bg-sky-950/25 border border-sky-800/40 hover:border-sky-500/60"
                         : item.isCurrentMonth
@@ -1033,7 +1019,7 @@ export default function GlanceDashboard({
                         )}
                         {hasCustom && (
                           <span
-                            className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_3px_#fbbf24]"
+                            className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_3px_#ffffff]"
                             title="Custom event"
                           />
                         )}
@@ -1048,7 +1034,7 @@ export default function GlanceDashboard({
             <div className="pt-3 border-t border-[#232530] space-y-2.5">
               <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-neutral-300 uppercase font-bold">
                 <span className="flex items-center gap-1.5 text-white">
-                  <CalendarCheck2 className="w-3.5 h-3.5 text-amber-400" />
+                  <CalendarCheck2 className="w-3.5 h-3.5 text-white" />
                   PLANNED ACTIVITIES
                 </span>
                 <div className="flex items-center gap-1.5 text-[10px] font-mono">
@@ -1111,11 +1097,11 @@ export default function GlanceDashboard({
                   onClick={() => setCalendarViewMode("day")}
                   className={`py-1 px-1.5 rounded-md transition-all flex items-center justify-center gap-1 font-semibold ${
                     calendarViewMode === "day"
-                      ? "bg-[#1c202d] text-amber-300 shadow-sm border border-amber-400/30 font-bold"
+                      ? "bg-[#1c202d] text-white shadow-sm border border-neutral-700 font-bold"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
-                  <CalendarIcon className="w-3 h-3 text-amber-400" />
+                  <CalendarIcon className="w-3 h-3 text-white" />
                   <span>{selectedDateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" })} Agenda</span>
                 </button>
               </div>
@@ -1162,7 +1148,7 @@ export default function GlanceDashboard({
                                 onClick={() => handleToggleActivity(act.id)}
                                 className={`w-3.5 h-3.5 mt-0.5 rounded flex items-center justify-center transition-colors shrink-0 ${
                                   isDone
-                                    ? "bg-amber-500 text-neutral-950 font-bold"
+                                    ? "bg-white text-black font-bold"
                                     : "border border-neutral-500 group-hover:border-neutral-300"
                                 }`}
                               >
@@ -1173,7 +1159,7 @@ export default function GlanceDashboard({
                                   <span
                                     className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${
                                       dateBadge.isToday
-                                        ? "bg-amber-400/20 text-amber-300 border border-amber-400/30"
+                                        ? "bg-white/15 text-white border border-white/30"
                                         : dateBadge.isTomorrow
                                         ? "bg-sky-400/20 text-sky-300 border border-sky-400/30"
                                         : "bg-neutral-800 text-neutral-300"
@@ -1233,7 +1219,7 @@ export default function GlanceDashboard({
                       onClick={() => setCalendarFilter("all")}
                       className={`px-2 py-0.5 rounded transition-colors font-medium ${
                         calendarFilter === "all"
-                          ? "bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold"
+                          ? "bg-white/15 text-white border border-white/30 font-bold"
                           : "text-neutral-400 hover:text-white bg-neutral-900/60"
                       }`}
                     >
@@ -1269,7 +1255,7 @@ export default function GlanceDashboard({
                         {selectedDateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                       </span>
                       {isSelectedDateToday && (
-                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">
+                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/15 text-white font-bold border border-white/30">
                           TODAY
                         </span>
                       )}
@@ -1278,7 +1264,7 @@ export default function GlanceDashboard({
                       onClick={() => setShowAddActivityForm(!showAddActivityForm)}
                       className="text-[10px] px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white transition-colors flex items-center gap-0.5 font-semibold"
                     >
-                      <Plus className="w-3 h-3 text-amber-400" />
+                      <Plus className="w-3 h-3 text-white" />
                       <span>Add</span>
                     </button>
                   </div>
@@ -1294,7 +1280,7 @@ export default function GlanceDashboard({
                         placeholder="e.g. Schneider ERP Sprint Review"
                         value={newActTitle}
                         onChange={(e) => setNewActTitle(e.target.value)}
-                        className="w-full text-xs px-2.5 py-1.5 rounded bg-[#101116] border border-neutral-800 text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 font-sans"
+                        className="w-full text-xs px-2.5 py-1.5 rounded bg-[#101116] border border-neutral-800 text-white placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
                         autoFocus
                       />
                       <div className="flex items-center gap-2 text-xs">
@@ -1323,7 +1309,7 @@ export default function GlanceDashboard({
                           type="checkbox"
                           checked={newActAlsoGCal}
                           onChange={(e) => setNewActAlsoGCal(e.target.checked)}
-                          className="rounded accent-amber-500"
+                          className="rounded accent-white"
                         />
                         <span>Open & save in Google Calendar</span>
                       </label>
@@ -1337,7 +1323,7 @@ export default function GlanceDashboard({
                         </button>
                         <button
                           type="submit"
-                          className="px-2.5 py-1 rounded bg-amber-500 text-neutral-950 font-bold hover:bg-amber-400 transition-colors"
+                          className="px-2.5 py-1 rounded bg-white text-black font-bold hover:bg-neutral-200 transition-colors"
                         >
                           Save Activity
                         </button>
@@ -1377,7 +1363,7 @@ export default function GlanceDashboard({
                                 onClick={() => handleToggleActivity(act.id)}
                                 className={`w-3.5 h-3.5 mt-0.5 rounded flex items-center justify-center transition-colors shrink-0 ${
                                   isDone
-                                    ? "bg-amber-500 text-neutral-950 font-bold"
+                                    ? "bg-white text-black font-bold"
                                     : "border border-neutral-500 group-hover:border-neutral-300"
                                 }`}
                               >
@@ -1385,7 +1371,7 @@ export default function GlanceDashboard({
                               </button>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5">
-                                  <span className="text-[10px] font-mono text-amber-400 font-bold shrink-0">
+                                  <span className="text-[10px] font-mono text-neutral-300 font-bold shrink-0">
                                     {act.time}
                                   </span>
                                   {isGCal ? (
@@ -1419,7 +1405,7 @@ export default function GlanceDashboard({
                               href={gcalAddLink}
                               target="_blank"
                               rel="noreferrer"
-                              className="shrink-0 p-1 text-neutral-400 hover:text-amber-400 transition-colors opacity-0 group-hover:opacity-100"
+                              className="shrink-0 p-1 text-neutral-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
                               title={isGCal ? "Open event in Google Calendar" : "Add this activity directly to Google Calendar"}
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
@@ -1438,10 +1424,10 @@ export default function GlanceDashboard({
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3.5">
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-neutral-300 uppercase font-bold">
               <span className="flex items-center gap-1.5 text-white">
-                <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                 DAILY HABITS
               </span>
-              <span className="text-amber-400 font-mono text-xs font-bold">
+              <span className="text-white font-mono text-xs font-bold">
                 {completedHabitsCount}/{dailyHabits.length} ({habitPct}%)
               </span>
             </div>
@@ -1449,7 +1435,7 @@ export default function GlanceDashboard({
             {/* Progress Bar */}
             <div className="w-full h-2 bg-[#1a1b23] rounded-full overflow-hidden border border-[#282a37]">
               <div
-                className="h-full bg-gradient-to-r from-amber-500 to-amber-300 transition-all duration-500"
+                className="h-full bg-white transition-all duration-500"
                 style={{ width: `${habitPct}%` }}
               />
             </div>
@@ -1466,7 +1452,7 @@ export default function GlanceDashboard({
                     <button
                       className={`w-4 h-4 rounded flex items-center justify-center transition-colors shrink-0 ${
                         habit.completedToday
-                          ? "bg-amber-500 text-neutral-950 font-bold"
+                          ? "bg-white text-black font-bold"
                           : "border border-neutral-500 group-hover:border-neutral-300"
                       }`}
                     >
@@ -1484,8 +1470,8 @@ export default function GlanceDashboard({
                   </div>
 
                   <div className="flex items-center gap-1.5 font-mono text-[11px] shrink-0 ml-2">
-                    <Flame className="w-3.5 h-3.5 text-amber-500" />
-                    <span className="text-amber-400 font-bold">{habit.streak}d</span>
+                    <Flame className="w-3.5 h-3.5 text-neutral-300" />
+                    <span className="text-white font-bold">{habit.streak}d</span>
                   </div>
                 </div>
               ))}
@@ -1505,26 +1491,26 @@ export default function GlanceDashboard({
         {/* COLUMN 2: CENTER (Daily Scripture Primary, Career, YT Music) */}
         {/* ========================================================= */}
         <div className="lg:col-span-6 space-y-5">
-          {/* 2.1 SUB-TABS (Glance style: HACKER NEWS | LOBSTERS / CAREER | GMAT | TECH | FARM) */}
+          {/* 2.1 SUB-TABS (Glance style: CAREER | GMAT | TECH) */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-4">
             <div className="flex items-center gap-5 border-b border-[#232530] pb-2 text-xs font-mono tracking-wider uppercase font-bold">
               <button
                 onClick={() => setCenterSubTab("career")}
                 className={`transition-colors flex items-center gap-1.5 relative ${
                   centerSubTab === "career"
-                    ? "text-amber-400 after:absolute after:-bottom-[9px] after:left-0 after:right-0 after:h-[2px] after:bg-amber-400"
+                    ? "text-white after:absolute after:-bottom-[9px] after:left-0 after:right-0 after:h-[2px] after:bg-white"
                     : "text-neutral-400 hover:text-white"
                 }`}
               >
                 <span>CAREER RADAR</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 font-normal">BLR</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-300 font-normal">BLR</span>
               </button>
 
               <button
                 onClick={() => setCenterSubTab("gmat")}
                 className={`transition-colors flex items-center gap-1.5 relative ${
                   centerSubTab === "gmat"
-                    ? "text-amber-400 after:absolute after:-bottom-[9px] after:left-0 after:right-0 after:h-[2px] after:bg-amber-400"
+                    ? "text-white after:absolute after:-bottom-[9px] after:left-0 after:right-0 after:h-[2px] after:bg-white"
                     : "text-neutral-400 hover:text-white"
                 }`}
               >
@@ -1536,23 +1522,14 @@ export default function GlanceDashboard({
                 onClick={() => setCenterSubTab("tech")}
                 className={`transition-colors relative ${
                   centerSubTab === "tech"
-                    ? "text-amber-400 after:absolute after:-bottom-[9px] after:left-0 after:right-0 after:h-[2px] after:bg-amber-400"
+                    ? "text-white after:absolute after:-bottom-[9px] after:left-0 after:right-0 after:h-[2px] after:bg-white"
                     : "text-neutral-400 hover:text-white"
                 }`}
               >
                 <span>TECH INTEL</span>
               </button>
 
-              <button
-                onClick={() => setCenterSubTab("farm")}
-                className={`transition-colors relative ${
-                  centerSubTab === "farm"
-                    ? "text-amber-400 after:absolute after:-bottom-[9px] after:left-0 after:right-0 after:h-[2px] after:bg-amber-400"
-                    : "text-neutral-400 hover:text-white"
-                }`}
-              >
-                <span>FARM OPS</span>
-              </button>
+
             </div>
 
             {/* 2.2 HIGH-DENSITY FEED CONTENT */}
@@ -1564,7 +1541,7 @@ export default function GlanceDashboard({
                     href="https://www.se.com/in/en/about-us/careers/job-details/senior-business-analyst/008XYZ/"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-amber-400 hover:text-amber-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
+                    className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
                   >
                     <span>Senior ERP Business Analyst • Global Energy Automation</span>
                     <span className="text-neutral-400 text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
@@ -1586,7 +1563,7 @@ export default function GlanceDashboard({
                     href="https://jobs.siemens.com/careers?query=ERP+Functional+Consultant+Bangalore"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-amber-400 hover:text-amber-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
+                    className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
                   >
                     <span>Principal Functional Consultant • SAP S/4HANA & Digital Core</span>
                     <span className="text-neutral-400 text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
@@ -1608,7 +1585,7 @@ export default function GlanceDashboard({
                     href="https://apply.deloitte.com/careers/SearchJobs/ERP%20Transformation%20Bangalore"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-amber-400 hover:text-amber-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
+                    className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
                   >
                     <span>ERP Transformation Solutions Architect • Cloud ERP Modernization</span>
                     <span className="text-neutral-400 text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
@@ -1630,7 +1607,7 @@ export default function GlanceDashboard({
                     href="https://careers.abb/global/en/search-results?keywords=ERP%20Supply%20Chain%20Bangalore"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-amber-400 hover:text-amber-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
+                    className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
                   >
                     <span>Supply Chain & ERP Systems Lead • Industrial Discrete Mfg</span>
                     <span className="text-neutral-400 text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
@@ -1654,7 +1631,7 @@ export default function GlanceDashboard({
                         href="https://careers.honeywell.com/us/en/search-results?keywords=ERP%20Business%20Analyst%20Bangalore"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-amber-400 hover:text-amber-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
+                        className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
                       >
                         <span>Enterprise Applications Lead BA • Connected Enterprise</span>
                         <span className="text-neutral-400 text-xs">↗</span>
@@ -1675,7 +1652,7 @@ export default function GlanceDashboard({
                         href="https://careers.microsoft.com/us/en/search-results?keywords=ERP%20Supply%20Chain%20Bangalore"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-amber-400 hover:text-amber-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
+                        className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
                       >
                         <span>Dynamics 365 Finance & Operations Functional Architect</span>
                         <span className="text-neutral-400 text-xs">↗</span>
@@ -1703,7 +1680,7 @@ export default function GlanceDashboard({
 
                   <button
                     onClick={() => onSelectTab("career")}
-                    className="text-xs font-mono text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-wider flex items-center gap-1 font-bold"
+                    className="text-xs font-mono text-white hover:text-neutral-300 transition-colors uppercase tracking-wider flex items-center gap-1 font-bold"
                   >
                     <span>Full Career Brand Hub</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
@@ -1716,7 +1693,7 @@ export default function GlanceDashboard({
               <div className="space-y-4">
                 <div className="p-3.5 rounded-xl bg-[#1a1b23] border border-[#282a37] space-y-2">
                   <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-amber-400 font-bold uppercase tracking-wider">
+                    <span className="text-white font-bold uppercase tracking-wider">
                       Target: 705+ Focus Edition (99th %ile)
                     </span>
                     <span className="text-neutral-300 font-semibold">{gmatDaysRemaining} Days to Exam</span>
@@ -1726,13 +1703,13 @@ export default function GlanceDashboard({
                   </div>
                   <div className="flex items-center gap-4 text-[11px] font-mono text-neutral-300 pt-1 border-t border-[#232530]">
                     <span>Diagnostic: <strong className="text-white">615</strong></span>
-                    <span>Practice 2: <strong className="text-amber-300">645</strong> (+30)</span>
+                    <span>Practice 2: <strong className="text-neutral-200">645</strong> (+30)</span>
                     <span>Target: <strong className="text-emerald-400">705+</strong></span>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-amber-400 font-semibold text-xs sm:text-sm">
+                  <div className="text-white font-semibold text-xs sm:text-sm">
                     Concept of the Day: Work-Rate Harmonized Inverses
                   </div>
                   <div className="text-xs font-mono text-neutral-300 flex items-center gap-2">
@@ -1745,7 +1722,7 @@ export default function GlanceDashboard({
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-amber-400 font-semibold text-xs sm:text-sm">
+                  <div className="text-white font-semibold text-xs sm:text-sm">
                     Critical Reasoning: Assumption vs Strengthener Scope
                   </div>
                   <div className="text-xs font-mono text-neutral-300 flex items-center gap-2">
@@ -1757,7 +1734,7 @@ export default function GlanceDashboard({
 
                 <button
                   onClick={() => onSelectTab("gmat")}
-                  className="text-xs font-mono text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-wider flex items-center gap-1 pt-1 font-bold"
+                  className="text-xs font-mono text-white hover:text-neutral-300 transition-colors uppercase tracking-wider flex items-center gap-1 pt-1 font-bold"
                 >
                   <span>Launch GMAT Focus Command Center</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
@@ -1772,7 +1749,7 @@ export default function GlanceDashboard({
                     href="https://news.ycombinator.com"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-amber-400 hover:text-amber-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group"
+                    className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group"
                   >
                     <span>Self-Hosted Executive Dashboards: High-Performance Architecture with Next.js 16</span>
                     <span className="text-neutral-400 text-xs">↗</span>
@@ -1787,7 +1764,7 @@ export default function GlanceDashboard({
                     href="https://news.ycombinator.com"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-amber-400 hover:text-amber-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group"
+                    className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group"
                   >
                     <span>SAP S/4HANA Clean Core Extensibility with Cloud Event Mesh</span>
                     <span className="text-neutral-400 text-xs">↗</span>
@@ -1802,7 +1779,7 @@ export default function GlanceDashboard({
                     href="https://news.ycombinator.com"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-amber-400 hover:text-amber-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group"
+                    className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group"
                   >
                     <span>Distributed Postgres and Agentic Reasoning Workflows in 2026</span>
                     <span className="text-neutral-400 text-xs">↗</span>
@@ -1814,41 +1791,14 @@ export default function GlanceDashboard({
               </div>
             )}
 
-            {centerSubTab === "farm" && (
-              <div className="space-y-4">
-                <div className="p-3.5 rounded-xl bg-[#1a1b23] border border-[#282a37] space-y-2">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-amber-400 font-bold uppercase tracking-wider">
-                      Veerakeralapudur Farm Model (0.25 Acre)
-                    </span>
-                    <span className="text-emerald-400 font-bold">Soil Moisture: 42%</span>
-                  </div>
-                  <div className="text-xs text-neutral-200 leading-relaxed font-sans">
-                    Today's Agro-Ops: <strong className="text-white">{farmDayTask.task}</strong> ({farmDayTask.metric}). Drip lines automated via solar pump tie-in.
-                  </div>
-                  <div className="flex items-center gap-4 text-[11px] font-mono text-neutral-300 pt-1 border-t border-[#232530]">
-                    <span>High-Density Guava: <strong className="text-white">140 Trees</strong></span>
-                    <span>Border: <strong className="text-white">18 Coconuts</strong></span>
-                    <span>Target ROI: <strong className="text-emerald-400">₹1.85L/yr</strong></span>
-                  </div>
-                </div>
 
-                <button
-                  onClick={() => onSelectTab("farm")}
-                  className="text-xs font-mono text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-wider flex items-center gap-1 pt-1 font-bold"
-                >
-                  <span>Open Full Veerakeralapudur Agribusiness Simulator</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
           </div>
 
           {/* 2.2 YOUTUBE MUSIC CATALOG */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs font-mono tracking-wider uppercase font-bold text-neutral-300">
-                <Headphones className="w-3.5 h-3.5 text-amber-400" />
+                <Headphones className="w-3.5 h-3.5 text-white" />
                 <span>YOUTUBE MUSIC CATALOG</span>
                 <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-red-500/15 text-red-400 border border-red-500/30">
                   YT MUSIC
@@ -1856,7 +1806,7 @@ export default function GlanceDashboard({
               </div>
               <button
                 onClick={() => onSelectTab("music")}
-                className="text-[11px] font-mono text-amber-400 hover:text-amber-300 uppercase tracking-wider flex items-center gap-1 font-semibold"
+                className="text-[11px] font-mono text-white hover:text-neutral-300 uppercase tracking-wider flex items-center gap-1 font-semibold"
               >
                 <span>Open Sanctuary Deck</span>
                 <ArrowUpRight className="w-3 h-3" />
@@ -1917,7 +1867,7 @@ export default function GlanceDashboard({
               ].map((album) => (
                 <div
                   key={album.id}
-                  className="group rounded-xl bg-[#181920] border border-[#262834] hover:border-amber-400/50 p-2.5 transition-all space-y-2 flex flex-col justify-between"
+                  className="group rounded-xl bg-[#181920] border border-[#262834] hover:border-neutral-500 p-2.5 transition-all space-y-2 flex flex-col justify-between"
                 >
                   <div className="space-y-1.5">
                     <div className="relative aspect-video rounded-lg overflow-hidden bg-neutral-900 border border-[#262834]">
@@ -1927,13 +1877,13 @@ export default function GlanceDashboard({
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors" />
-                      <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/85 text-[9px] font-mono text-amber-300 font-bold border border-amber-500/20">
+                      <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/85 text-[9px] font-mono text-neutral-200 font-bold border border-neutral-700">
                         {album.tag}
                       </span>
                     </div>
 
                     <div className="min-w-0">
-                      <div className="text-xs font-semibold text-white group-hover:text-amber-300 transition-colors truncate">
+                      <div className="text-xs font-semibold text-white group-hover:text-neutral-200 transition-colors truncate">
                         {album.title}
                       </div>
                       <div className="text-[10px] font-mono text-neutral-400 truncate">
@@ -1946,7 +1896,7 @@ export default function GlanceDashboard({
                     href={album.ytUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-center gap-1.5 w-full py-1 rounded bg-[#1e202a] hover:bg-amber-400 hover:text-neutral-950 text-[10px] font-mono font-bold text-neutral-300 transition-all border border-[#2a2c3a] hover:border-amber-400"
+                    className="flex items-center justify-center gap-1.5 w-full py-1 rounded bg-[#1e202a] hover:bg-white hover:text-black text-[10px] font-mono font-bold text-neutral-200 transition-all border border-[#2a2c3a] hover:border-white"
                   >
                     <span>▶ Play on YT Music</span>
                     <ExternalLink className="w-2.5 h-2.5" />
@@ -1958,14 +1908,14 @@ export default function GlanceDashboard({
         </div>
 
         {/* ========================================================= */}
-        {/* COLUMN 3: RIGHT (Weather, Repository, Markets, Farm IoT)  */}
+        {/* COLUMN 3: RIGHT (Weather, Repository, Markets)  */}
         {/* ========================================================= */}
         <div className="lg:col-span-3 space-y-5">
           {/* 3.1 WEATHER WIDGET CARD (Synced to Device GPS) */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-3">
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-neutral-300 uppercase font-bold">
               <div className="flex items-center gap-1.5 text-white">
-                <CloudSun className="w-3.5 h-3.5 text-amber-400" />
+                <CloudSun className="w-3.5 h-3.5 text-white" />
                 <span>WEATHER</span>
                 {weatherLocation === "gps" && gpsStatus === "synced" && (
                   <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
@@ -1997,86 +1947,30 @@ export default function GlanceDashboard({
                   }}
                   className={`px-1.5 py-0.5 rounded transition-colors ${
                     weatherLocation === "blr"
-                      ? "bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30"
+                      ? "bg-white/15 text-white font-bold border border-white/30"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
                   BLR
                 </button>
-                <button
-                  onClick={() => setWeatherLocation("farm")}
-                  className={`px-1.5 py-0.5 rounded transition-colors ${
-                    weatherLocation === "farm"
-                      ? "bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30"
-                      : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  Farm
-                </button>
               </div>
             </div>
 
             {/* Weather Main Display */}
-            {weatherLocation === "farm" ? (
-              <div className="space-y-2.5 animate-in fade-in duration-200">
-                <div className="flex items-baseline justify-between">
-                  <div>
-                    <div className="text-sm font-bold text-white">Veerakeralapudur Farm</div>
-                    <div className="text-xs text-neutral-300 font-medium">Sunny & Breezy · Feels like 31°C</div>
+            <div className="space-y-2.5 animate-in fade-in duration-200">
+              <div className="flex items-baseline justify-between">
+                <div className="min-w-0 pr-2">
+                  <div className="text-sm font-bold text-white truncate flex items-center gap-1.5">
+                    <span>{weatherLocation === "blr" ? "Bengaluru (Electronic City)" : `${liveWeather.locationName} (${liveWeather.locality})`}</span>
                   </div>
-                  <div className="text-2xl font-bold font-mono text-amber-300">30°C</div>
-                </div>
-
-                {/* Glance Temperature Bar Chart */}
-                <div className="pt-2">
-                  <div className="flex items-end justify-between h-14 gap-1 px-1">
-                    <div className="flex flex-col items-center gap-1 flex-1">
-                      <div className="w-full bg-[#1e202a] rounded-t h-6" />
-                      <span className="text-[10px] font-mono text-neutral-400 font-semibold">6am</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 flex-1">
-                      <div className="w-full bg-[#1e202a] rounded-t h-10" />
-                      <span className="text-[10px] font-mono text-neutral-400 font-semibold">10am</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 flex-1">
-                      <div className="w-full bg-amber-500 rounded-t h-13 relative shadow-md">
-                        <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-amber-300 font-bold">
-                          32°
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-mono text-amber-300 font-bold">2pm</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 flex-1">
-                      <div className="w-full bg-[#1e202a] rounded-t h-8" />
-                      <span className="text-[10px] font-mono text-neutral-400 font-semibold">6pm</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 flex-1">
-                      <div className="w-full bg-[#1e202a] rounded-t h-5" />
-                      <span className="text-[10px] font-mono text-neutral-400 font-semibold">10pm</span>
-                    </div>
+                  <div className="text-xs text-neutral-300 font-medium">
+                    {liveWeather.condition} · Feels like {liveWeather.feelsLike}°C
                   </div>
                 </div>
-
-                <div className="flex items-center justify-between text-[11px] font-mono text-neutral-300 pt-1 border-t border-[#232530]">
-                  <span>Soil Moisture: <strong className="text-emerald-400 font-bold">42%</strong></span>
-                  <span>Solar Pump: <strong className="text-white font-bold">Active</strong></span>
+                <div className="text-2xl font-bold font-mono text-white shrink-0">
+                  {liveWeather.temp}°C
                 </div>
               </div>
-            ) : (
-              <div className="space-y-2.5 animate-in fade-in duration-200">
-                <div className="flex items-baseline justify-between">
-                  <div className="min-w-0 pr-2">
-                    <div className="text-sm font-bold text-white truncate flex items-center gap-1.5">
-                      <span>{weatherLocation === "blr" ? "Bengaluru (Electronic City)" : `${liveWeather.locationName} (${liveWeather.locality})`}</span>
-                    </div>
-                    <div className="text-xs text-neutral-300 font-medium">
-                      {liveWeather.condition} · Feels like {liveWeather.feelsLike}°C
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold font-mono text-white shrink-0">
-                    {liveWeather.temp}°C
-                  </div>
-                </div>
 
                 {/* Glance Dynamic Temperature Bar Chart */}
                 <div className="pt-2">
@@ -2089,10 +1983,10 @@ export default function GlanceDashboard({
                         <div key={idx} className="flex flex-col items-center gap-1 flex-1">
                           {slot.isPeak ? (
                             <div
-                              className="w-full bg-amber-400 rounded-t relative shadow-md transition-all"
+                              className="w-full bg-white rounded-t relative shadow-md transition-all"
                               style={{ height: `${heightPx}px` }}
                             >
-                              <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-amber-300 font-bold">
+                              <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-white font-bold">
                                 {slot.temp}°
                               </span>
                             </div>
@@ -2105,7 +1999,7 @@ export default function GlanceDashboard({
                           )}
                           <span
                             className={`text-[10px] font-mono ${
-                              slot.isPeak ? "text-amber-300 font-bold" : "text-neutral-400 font-semibold"
+                              slot.isPeak ? "text-white font-bold" : "text-neutral-400 font-semibold"
                             }`}
                           >
                             {slot.time}
@@ -2137,7 +2031,6 @@ export default function GlanceDashboard({
                   </div>
                 </div>
               </div>
-            )}
           </div>
 
           {/* 3.2 INDIAN MARKETS & GROWW PORTFOLIO WIDGET CARD */}
@@ -2184,7 +2077,7 @@ export default function GlanceDashboard({
                     : "text-neutral-400 hover:text-white"
                 }`}
               >
-                <TrendingUp className="w-3 h-3 text-amber-400" />
+                <TrendingUp className="w-3 h-3 text-white" />
                 <span>Live Watchlist</span>
               </button>
               <button
@@ -2258,7 +2151,7 @@ export default function GlanceDashboard({
                         rel="noreferrer"
                         className={`flex items-center justify-between p-2 rounded-lg border transition-all group select-none ${
                           (item as any).highlight
-                            ? "bg-[#181922] border-amber-500/40 hover:border-amber-400 hover:bg-[#1f212d]"
+                            ? "bg-[#181922] border-neutral-600 hover:border-neutral-400 hover:bg-[#1f212d]"
                             : "bg-[#181920]/60 hover:bg-[#1f2029] border-[#262834] hover:border-neutral-600"
                         }`}
                       >
@@ -2271,7 +2164,7 @@ export default function GlanceDashboard({
                               <span
                                 className={`text-[9px] font-mono px-1 py-0.2 rounded font-semibold ${
                                   (item as any).highlight
-                                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                    ? "bg-white/15 text-white border border-white/25"
                                     : "bg-neutral-800 text-neutral-400"
                                 }`}
                               >
@@ -2703,15 +2596,15 @@ export default function GlanceDashboard({
                 </button>
               </div>
               <p className="text-[11px] text-neutral-400 font-sans leading-relaxed">
-                Fetches and synchronizes all upcoming Google Calendar meetings, Schneider ERP reviews, GMAT focus sprints, and farm telemetry milestones onto your calendar days.
+                Fetches and synchronizes all upcoming Google Calendar meetings, Schneider ERP reviews, and GMAT focus sprints onto your calendar days.
               </p>
             </div>
 
             {/* Option 1: Live iCal URL Sync */}
             <div className="space-y-2 p-3.5 rounded-xl bg-[#171821] border border-[#262834]">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-mono uppercase tracking-wider text-amber-300 font-bold flex items-center gap-1.5">
-                  <Link2 className="w-3.5 h-3.5 text-amber-400" />
+                <label className="text-[11px] font-mono uppercase tracking-wider text-neutral-200 font-bold flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5 text-white" />
                   Option 1: Live iCal Link (Auto-Sync)
                 </label>
               </div>
@@ -2720,11 +2613,11 @@ export default function GlanceDashboard({
                 placeholder="https://calendar.google.com/calendar/ical/.../basic.ics"
                 value={gcalIcsUrl}
                 onChange={(e) => setGcalIcsUrl(e.target.value)}
-                className="w-full text-xs font-mono px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400"
+                className="w-full text-xs font-mono px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-600 focus:outline-none focus:border-white"
               />
               <div className="p-2.5 rounded-lg bg-neutral-900/70 border border-neutral-800 text-[11px] font-mono text-neutral-400 space-y-1">
                 <div className="text-neutral-200 font-semibold">Quick setup steps:</div>
-                <div>1. Open <a href="https://calendar.google.com/calendar/u/0/r/settings" target="_blank" rel="noreferrer" className="text-amber-400 underline font-semibold">Google Calendar Settings ↗</a></div>
+                <div>1. Open <a href="https://calendar.google.com/calendar/u/0/r/settings" target="_blank" rel="noreferrer" className="text-white underline font-semibold">Google Calendar Settings ↗</a></div>
                 <div>2. Under <strong>Settings for my calendars</strong>, click your calendar on the left.</div>
                 <div>3. Scroll to <strong>Integrate calendar</strong> &gt; copy <strong>"Secret address in iCal format"</strong>.</div>
                 <div>4. Paste it above and click "Save & Sync Feed".</div>
@@ -2754,7 +2647,7 @@ export default function GlanceDashboard({
 
             {/* Status message */}
             {gcalStatus && (
-              <div className="text-xs font-mono p-2.5 rounded-xl bg-neutral-900 text-amber-300 border border-neutral-800">
+              <div className="text-xs font-mono p-2.5 rounded-xl bg-neutral-900 text-neutral-200 border border-neutral-800">
                 {gcalStatus}
               </div>
             )}
@@ -2782,7 +2675,7 @@ export default function GlanceDashboard({
                   type="button"
                   onClick={() => syncGCal(gcalIcsUrl)}
                   disabled={gcalLoading || !gcalIcsUrl.trim()}
-                  className="px-4 py-1.5 rounded-xl text-xs font-mono font-bold bg-amber-500 text-neutral-950 hover:bg-amber-400 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                  className="px-4 py-1.5 rounded-xl text-xs font-mono font-bold bg-white text-black hover:bg-neutral-200 transition-colors disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {gcalLoading && <RefreshCw className="w-3 h-3 animate-spin" />}
                   <span>{gcalLoading ? "Syncing..." : "Save & Sync Feed"}</span>

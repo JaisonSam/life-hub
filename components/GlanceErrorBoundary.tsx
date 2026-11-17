@@ -47,9 +47,9 @@ export default class GlanceErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="w-full p-6 sm:p-8 rounded-2xl bg-[#111215] border border-amber-500/30 text-neutral-200 space-y-4 shadow-2xl my-4">
+        <div className="w-full p-6 sm:p-8 rounded-2xl bg-[#111215] border border-neutral-700 text-neutral-200 space-y-4 shadow-2xl my-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white">
               <AlertCircle className="w-5 h-5" />
             </div>
             <div>
@@ -69,7 +69,7 @@ export default class GlanceErrorBoundary extends Component<Props, State> {
           <div className="flex items-center gap-3 pt-2">
             <button
               onClick={this.handleReset}
-              className="px-4 py-2 rounded-xl bg-amber-500 text-neutral-950 font-bold text-xs font-mono flex items-center gap-2 hover:bg-amber-400 transition-colors shadow-sm"
+              className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs font-mono flex items-center gap-2 hover:bg-neutral-200 transition-colors shadow-sm"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset & Refresh Dashboard</span>
