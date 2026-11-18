@@ -1602,8 +1602,8 @@ export default function GlanceDashboard({
                 {/* Open Full Google Hub button */}
                 <div className="pt-1 flex items-center justify-between border-t border-[#232530] text-xs font-mono">
                   <a
-                    href="/api/auth/google/login"
-                    className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold"
+                    href="/api/auth/google/login?service=calendar"
+                    className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold cursor-pointer"
                   >
                     <span>⚡ Connect / Sync Google Account</span>
                   </a>

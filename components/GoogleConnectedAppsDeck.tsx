@@ -473,6 +473,31 @@ export default function GoogleConnectedAppsDeck() {
                 </a>
               </div>
             </div>
+
+            {/* STEP 5: Reset Old Cached Permissions */}
+            <div className="md:col-span-2 p-4 rounded-2xl bg-neutral-900/70 border border-neutral-800 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-white">
+                <span className="w-5 h-5 rounded-full bg-white text-black flex items-center justify-center text-[11px] font-bold">5</span>
+                <span>Fix "Scopes cannot be requested together" Error (1-Click Google Reset)</span>
+              </div>
+              <p className="text-neutral-400 leading-relaxed text-[11px]">
+                If Google remembered an old conflicting permission from YouTube or Drive, open your Google Account permissions and remove Life Hub so Google clears its memory:
+              </p>
+              <div className="pt-1 flex items-center gap-3">
+                <a
+                  href="https://myaccount.google.com/connections"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs transition-all"
+                >
+                  <span>Google Account Third-Party Connections</span>
+                  <ExternalLink className="w-3 h-3 text-neutral-400" />
+                </a>
+                <span className="text-[11px] text-neutral-500">
+                  Click <strong>Life Hub</strong> → Click <strong>Delete all connections</strong>. Then click Connect above!
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       )}

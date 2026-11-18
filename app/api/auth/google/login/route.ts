@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   }
 
   // Google OAuth forbids requesting Drive and YouTube in the same request.
-  // We use Incremental Authorization (service-specific scopes + include_granted_scopes=true)
+  // Each service is authorized independently without include_granted_scopes to prevent scope collisions.
   let scopes: string[] = [];
   let state = "google_calendar";
 
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
     ];
     state = "google_youtube";
   } else {
-    // Default: Google Calendar & Profile
+    // Default: Google Calendar & Profile ONLY (Zero conflict with YouTube or Drive)
     scopes = [
       "openid",
       "https://www.googleapis.com/auth/userinfo.profile",
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
     redirectUri
   )}&response_type=code&scope=${encodeURIComponent(
     scopes.join(" ")
-  )}&access_type=offline&prompt=consent&include_granted_scopes=true&state=${state}`;
+  )}&access_type=offline&prompt=consent&state=${state}`;
 
   return NextResponse.redirect(authUrl);
 }
