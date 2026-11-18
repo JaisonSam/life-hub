@@ -1280,44 +1280,6 @@ export default function LifeHub() {
         </div>
       </header>
 
-      {/* SEPARATE VIDEO OR YOUVERSION SCRIPTURE SHOWCASE SECTION (Below Main Top Tab, Clean & Frameless) */}
-      <section className="max-w-7xl mx-auto px-2 sm:px-4">
-        <div className="relative rounded-2xl overflow-hidden min-h-[300px] sm:min-h-[380px] md:min-h-[440px] bg-black shadow-2xl">
-          {!hasVideoEnded ? (
-            <>
-              {/* Native Video Playing INSIDE the Section (Plays only once) */}
-              <video
-                ref={sectionVideoRef}
-                src="/videos/tron-intro.mp4"
-                autoPlay
-                muted
-                playsInline
-                preload="auto"
-                onEnded={handleStopVideoAndShowScripture}
-                className="w-full h-full object-cover"
-              />
-              {/* Subtle button to switch to scripture passage directly */}
-              <div className="absolute top-3 right-3 z-10">
-                <button
-                  onClick={handleStopVideoAndShowScripture}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/75 hover:bg-black/95 text-neutral-300 hover:text-white border border-white/10 text-xs font-sans backdrop-blur-md transition-all shadow-lg"
-                >
-                  <BookOpen className="w-3.5 h-3.5 text-white" />
-                  <span>Scripture Passage</span>
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="w-full h-full relative">
-              <YouVersionVerse variant="showcase" />
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* GENEROUS TRANSITION GAP (Allows smooth visible transition between main video and background video) */}
-      <div className="h-44 sm:h-60 md:h-72" aria-hidden="true" />
-
       {/* Main Content Area */}
       <main id="dashboard-contents" className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-7 sm:space-y-8">
         {/* Return Breadcrumb banner when viewing a deep-dive module */}
@@ -3029,6 +2991,41 @@ export default function LifeHub() {
           </section>
         </div>
       </main>
+
+      {/* SEPARATE VIDEO OR YOUVERSION SCRIPTURE SHOWCASE SECTION (At Bottom, Clean & Frameless) */}
+      <section className="max-w-7xl mx-auto px-2 sm:px-4 my-10 sm:my-14">
+        <div className="relative rounded-2xl overflow-hidden min-h-[300px] sm:min-h-[380px] md:min-h-[440px] bg-black shadow-2xl">
+          {!hasVideoEnded ? (
+            <>
+              {/* Native Video Playing INSIDE the Section (Plays only once) */}
+              <video
+                ref={sectionVideoRef}
+                src="/videos/tron-intro.mp4"
+                autoPlay
+                muted
+                playsInline
+                preload="auto"
+                onEnded={handleStopVideoAndShowScripture}
+                className="w-full h-full object-cover"
+              />
+              {/* Subtle button to switch to scripture passage directly */}
+              <div className="absolute top-3 right-3 z-10">
+                <button
+                  onClick={handleStopVideoAndShowScripture}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/75 hover:bg-black/95 text-neutral-300 hover:text-white border border-white/10 text-xs font-sans backdrop-blur-md transition-all shadow-lg"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-white" />
+                  <span>Scripture Passage</span>
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="w-full h-full relative">
+              <YouVersionVerse variant="showcase" />
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="border-t border-neutral-800/80 py-6 text-center text-xs text-neutral-500">
