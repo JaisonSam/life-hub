@@ -2237,6 +2237,41 @@ export default function LifeHub() {
         </div>
       </main>
 
+      {/* SEPARATE VIDEO OR YOUVERSION SCRIPTURE SHOWCASE SECTION (At Bottom of Website) */}
+      <section className="max-w-7xl mx-auto px-2 sm:px-4 my-10 sm:my-14">
+        <div className="relative rounded-2xl overflow-hidden min-h-[320px] sm:min-h-[420px] md:min-h-[480px] bg-black shadow-2xl border border-neutral-800/80">
+          {!hasVideoEnded ? (
+            <div className="relative w-full h-full min-h-[320px] sm:min-h-[420px] md:min-h-[480px] flex items-center justify-center bg-black">
+              {/* Native Video Playing INSIDE the Section (Plays only once) */}
+              <video
+                ref={sectionVideoRef}
+                src="/videos/tron-intro.mp4"
+                autoPlay
+                muted
+                playsInline
+                preload="auto"
+                onEnded={handleStopVideoAndShowScripture}
+                className="w-full h-full object-cover min-h-[320px] sm:min-h-[420px] md:min-h-[480px]"
+              />
+              {/* Subtle button to switch to scripture passage directly */}
+              <div className="absolute top-4 right-4 z-10">
+                <button
+                  onClick={handleStopVideoAndShowScripture}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/80 hover:bg-black text-neutral-300 hover:text-white border border-white/15 text-xs font-sans backdrop-blur-md transition-all shadow-lg cursor-pointer"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-white" />
+                  <span>Scripture Passage</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="w-full h-full relative">
+              <YouVersionVerse variant="showcase" />
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-neutral-800/80 py-6 text-center text-xs text-neutral-500">
         <div>Jaison's Personal Life Operating System • Built with Next.js, React 19 & Tailwind CSS</div>
