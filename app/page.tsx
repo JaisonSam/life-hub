@@ -496,7 +496,7 @@ export default function LifeHub() {
   }, [homescreenVisible, hasVideoEnded]);
 
   // Navigation tabs
-  const [activeTab, setActiveTab] = useState<"all" | "google" | "books" | "habits" | "projects" | "music">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "google" | "books" | "music">("all");
   const [homeViewMode, setHomeViewMode] = useState<"glance" | "carousel" | "bento">("glance");
 
   // Strategic Bookshelf State
@@ -771,7 +771,7 @@ export default function LifeHub() {
   }, [gmatTimerRunning, gmatTimerSeconds, habits]);
 
   // Handle tab selection for desktop and smooth scrolling on mobile
-  const handleSelectTab = (tabId: "all" | "google" | "books" | "habits" | "projects" | "music") => {
+  const handleSelectTab = (tabId: "all" | "google" | "books" | "music") => {
     setActiveTab(tabId);
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       if (tabId === "all") {
@@ -799,17 +799,15 @@ export default function LifeHub() {
       // Only run scroll-spy on mobile screens (< 768px)
       if (typeof window === "undefined" || window.innerWidth >= 768) return;
 
-      const sectionIds: Array<{ id: "all" | "google" | "books" | "habits" | "projects" | "music"; elId: string }> = [
+      const sectionIds: Array<{ id: "all" | "google" | "books" | "music"; elId: string }> = [
         { id: "all", elId: "module-all" },
         { id: "google", elId: "module-google" },
         { id: "books", elId: "module-books" },
-        { id: "habits", elId: "module-habits" },
-        { id: "projects", elId: "module-projects" },
         { id: "music", elId: "module-music" },
       ];
 
       const scrollPos = window.scrollY + 140;
-      let currentTab: "all" | "google" | "books" | "habits" | "projects" | "music" = "all";
+      let currentTab: "all" | "google" | "books" | "music" = "all";
 
       for (const item of sectionIds) {
         const el = document.getElementById(item.elId);
@@ -1221,8 +1219,6 @@ export default function LifeHub() {
                 { id: "all", label: "Home" },
                 { id: "google", label: "Google Apps" },
                 { id: "books", label: "Books" },
-                { id: "habits", label: "Habits" },
-                { id: "projects", label: "Projects" },
                 { id: "music", label: "Music" },
               ].map((tab) => {
                 const isActive = activeTab === tab.id;
@@ -1545,167 +1541,6 @@ export default function LifeHub() {
                 </div>
               </div>
             )}
-          </section>
-        </div>
-
-        {/* HABIT TRACKER */}
-        <div
-          id="module-habits"
-          className={getModuleVisibilityClass("habits")}
-          data-aos="fade-up"
-          data-aos-duration="700"
-          data-aos-offset="80"
-        >
-          <section className="p-6 sm:p-8 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-[#262834]">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-white shadow-sm">
-                  <Flame className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h2 className="font-extrabold text-base text-white">Daily Habit Tracker</h2>
-                  <p className="text-xs text-neutral-400">Consistency builds destiny • Dynamic daily rhythm</p>
-                </div>
-              </div>
-              <div className="text-xs font-mono text-neutral-400">
-                <span className="text-white font-bold">{completedHabitsCount}</span> of {habits.length} Completed
-              </div>
-            </div>
-
-            {/* Habit List */}
-            <div className="space-y-2.5">
-              {habits.map((h) => (
-                <div
-                  key={h.id}
-                  onClick={() => toggleHabit(h.id)}
-                  className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${
-                    h.completedToday
-                      ? "bg-[#181920] border-white/40 text-white"
-                      : "bg-[#181920] border-[#262834] hover:border-neutral-500 text-neutral-300"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    {h.completedToday ? (
-                      <CheckCircle2 className="w-5 h-5 text-white flex-shrink-0" />
-                    ) : (
-                      <Circle className="w-5 h-5 text-neutral-500 flex-shrink-0" />
-                    )}
-                    <div>
-                      <div className={`text-sm font-medium ${h.completedToday ? "line-through text-neutral-500" : "text-white"}`}>
-                        {h.name}
-                      </div>
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-[#8b91a0] font-semibold">
-                        {h.category}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#14151b] border border-[#262834] text-xs font-mono text-white">
-                    <Flame className="w-3.5 h-3.5 fill-white text-white" />
-                    {h.streak}d
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-
-        {/* ACTIVE PROJECTS TRACKER */}
-        <div
-          id="module-projects"
-          className={getModuleVisibilityClass("projects")}
-          data-aos="fade-up"
-          data-aos-duration="700"
-          data-aos-offset="80"
-        >
-          <section className="p-6 sm:p-8 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-[#262834]">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-[#181920] border border-[#262834] text-white shadow-sm">
-                  <FolderKanban className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h2 className="font-extrabold text-base text-white">Active Projects Tracker</h2>
-                  <p className="text-xs text-neutral-400">Goals, deliverables, and progress</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowNewProject(!showNewProject)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black text-xs font-bold transition-all shadow-sm font-mono"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                {showNewProject ? "Close" : "New Project"}
-              </button>
-            </div>
-
-            {/* New Project Form Modal */}
-            {showNewProject && (
-              <form onSubmit={addProject} className="p-4 rounded-xl border border-[#262834] bg-[#181920] space-y-3 shadow-xl">
-                <div className="text-xs font-semibold text-white font-mono">Add New Project</div>
-                <div className="flex flex-wrap gap-2">
-                  <input
-                    type="text"
-                    placeholder="Project Name..."
-                    value={newProjName}
-                    onChange={(e) => setNewProjName(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Category (e.g. Life, Tech, Spiritual)..."
-                    value={newProjCategory}
-                    onChange={(e) => setNewProjCategory(e.target.value)}
-                    className="w-48 px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-white hover:bg-neutral-200 text-black font-bold rounded-xl text-xs transition-colors font-mono"
-                  >
-                    Create
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Project Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {projects.map((proj) => (
-                <div
-                  key={proj.id}
-                  className="p-4 rounded-xl border border-[#262834] bg-[#181920] hover:border-neutral-500 transition-all flex flex-col justify-between space-y-4"
-                >
-                  <div>
-                    <div className="flex items-center justify-between text-[11px] mb-2 font-mono">
-                      <span className="text-neutral-400 font-medium">{proj.category}</span>
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                          proj.status === "Completed"
-                            ? "bg-neutral-800 text-neutral-200 border border-neutral-700"
-                            : "bg-neutral-800 text-neutral-300 border border-neutral-700"
-                        }`}
-                      >
-                        {proj.status}
-                      </span>
-                    </div>
-                    <h3 className="font-bold text-sm text-white">{proj.name}</h3>
-                  </div>
-
-                  <div className="space-y-1.5 font-mono">
-                    <div className="flex justify-between text-xs text-neutral-400">
-                      <span>Progress</span>
-                      <span className="text-white font-bold">{proj.progress}%</span>
-                    </div>
-                    <div className="w-full bg-[#101116] h-2 rounded-full overflow-hidden border border-[#282a38]">
-                      <div
-                        className="bg-white h-full rounded-full transition-all"
-                        style={{ width: `${proj.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </section>
         </div>
 

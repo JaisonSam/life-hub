@@ -70,7 +70,7 @@ import {
 } from "@/lib/growwPortfolio";
 
 interface GlanceDashboardProps {
-  onSelectTab: (tabId: "google" | "books" | "habits" | "projects" | "music") => void;
+  onSelectTab: (tabId: "google" | "books" | "music") => void;
   currentTime?: string;
   currentDate?: string;
 }
@@ -1483,13 +1483,9 @@ export default function GlanceDashboard({
               ))}
             </div>
 
-            <button
-              onClick={() => onSelectTab("habits")}
-              className="text-[10px] font-mono text-neutral-300 hover:text-white transition-colors uppercase tracking-wider pt-1 flex items-center gap-1 font-semibold"
-            >
-              <span>Deep Habit Architecture</span>
-              <ArrowUpRight className="w-3 h-3" />
-            </button>
+            <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider pt-1 flex items-center gap-1 font-semibold">
+              <span>Daily Focus & Rituals</span>
+            </div>
           </div>
         </div>
 
