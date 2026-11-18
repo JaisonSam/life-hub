@@ -51,7 +51,6 @@ import {
   Disc,
   Volume2,
 } from "lucide-react";
-import { CuratedAlbum, CURATED_ALBUMS, DEFAULT_CURRENT_PLAYLIST } from "@/lib/musicData";
 import { getDateKey } from "@/lib/dailyHabits";
 import {
   PlannedActivity,
@@ -118,13 +117,8 @@ export default function GlanceDashboard({
   const [todayKey, setTodayKey] = useState<string>("2026-11-16");
 
   // YouTube Music Deck State
-  const [musicFilter, setMusicFilter] = useState<"all" | "worship" | "focus" | "energy">("all");
-  const [localCurrentPlaylist, setLocalCurrentPlaylist] = useState(
-    currentPlaylist || DEFAULT_CURRENT_PLAYLIST
-  );
   const [localDemoNowPlaying, setLocalDemoNowPlaying] = useState(false);
 
-  const activeCurrentPlaylist = currentPlaylist || localCurrentPlaylist;
   const isDemo = demoNowPlaying ?? localDemoNowPlaying;
   const isLive = isDemo || nowPlayingTrack?.nowPlaying;
   const displayTrack = isDemo
@@ -146,19 +140,6 @@ export default function GlanceDashboard({
     } else {
       setLocalDemoNowPlaying((prev) => !prev);
     }
-  };
-
-  const handleSelectAlbum = (album: CuratedAlbum) => {
-    const pl = {
-      title: album.title,
-      subtitle: album.artist,
-      ytUrl: album.ytUrl,
-      coverUrl: album.coverUrl,
-      tag: album.tag,
-      bpmOrVibe: album.bpmOrVibe,
-    };
-    setLocalCurrentPlaylist(pl);
-    if (onPlayAlbum) onPlayAlbum(pl);
   };
 
   // 4. Day-to-Day Planned Activities & Google Calendar State
@@ -1801,158 +1782,6 @@ export default function GlanceDashboard({
                     {isDemo ? "Stop Demo" : "Test Demo"}
                   </button>
                 </div>
-              </div>
-            </div>
-
-            {/* CURATED ALBUM DECK - ORGANIZED CATEGORY TABS */}
-            <div className="space-y-3 pt-1">
-              <div className="flex flex-wrap items-center justify-between gap-2.5">
-                <div className="flex items-center gap-2">
-                  <Disc className="w-4 h-4 text-white" />
-                  <h4 className="font-bold text-xs sm:text-sm text-white">Curated Album & Playlist Deck</h4>
-                </div>
-
-                {/* Category Filter Pills */}
-                <div className="flex flex-wrap items-center gap-1 bg-[#181920] border border-[#262834] p-1 rounded-xl text-[11px] font-mono">
-                  {[
-                    { id: "all", label: "All Decks" },
-                    { id: "worship", label: "🕊️ Worship & Sanctuary" },
-                    { id: "focus", label: "🎯 GMAT & Focus" },
-                    { id: "energy", label: "⚡ Training & Drive" },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setMusicFilter(tab.id as any)}
-                      className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
-                        musicFilter === tab.id
-                          ? "bg-white text-black font-bold shadow-sm"
-                          : "text-neutral-400 hover:text-white"
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* ALBUM CARDS GRID */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {CURATED_ALBUMS
-                  .filter((album) => musicFilter === "all" || album.category === musicFilter)
-                  .map((album) => (
-                    <div
-                      key={album.id}
-                      onClick={() => handleSelectAlbum(album)}
-                      className="group rounded-xl border border-[#262834] bg-[#181920] hover:border-neutral-500 overflow-hidden flex flex-col justify-between transition-all duration-300 cursor-pointer"
-                    >
-                      {/* Album Cover with Badges & Hover Play */}
-                      <div className="aspect-square relative overflow-hidden bg-[#101116]">
-                        <img
-                          src={album.coverUrl}
-                          alt={album.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#14151b] via-transparent to-transparent opacity-80" />
-
-                        {/* Badges */}
-                        <div className="absolute top-2 left-2 right-2 flex justify-between items-center text-[9px] font-mono">
-                          <span
-                            className={`px-2 py-0.5 rounded-full font-semibold border ${
-                              album.category === "worship"
-                                ? "bg-white/10 text-white border-white/20"
-                                : album.category === "focus"
-                                ? "bg-sky-500/10 text-sky-300 border-sky-500/30"
-                                : "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
-                            }`}
-                          >
-                            {album.tag}
-                          </span>
-                          <span className="px-1.5 py-0.5 rounded-full bg-[#101116]/90 text-neutral-300 border border-[#282a38]">
-                            {album.bpmOrVibe}
-                          </span>
-                        </div>
-
-                        {/* Hover Play Button */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center shadow-lg scale-90 group-hover:scale-100 transition-transform">
-                            <Play className="w-4 h-4 ml-0.5 fill-black text-black" />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-3 space-y-1.5">
-                        <div>
-                          <h5 className="font-bold text-xs text-white group-hover:text-neutral-200 transition-colors line-clamp-1">
-                            {album.title}
-                          </h5>
-                          <p className="text-[10px] text-[#8b91a0] mt-0.5 line-clamp-1">{album.artist}</p>
-                        </div>
-
-                        <p className="text-[10px] text-neutral-400 leading-tight line-clamp-2">
-                          {album.moodDescription}
-                        </p>
-
-                        <div className="flex items-center justify-between text-[10px] text-[#8b91a0] pt-2 border-t border-[#262834] font-mono">
-                          <span>{album.trackCount} tracks</span>
-                          <a
-                            href={album.ytUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-neutral-300 hover:text-white flex items-center gap-1 transition-colors font-medium"
-                          >
-                            Listen in YT Music <ExternalLink className="w-2.5 h-2.5" />
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            {/* CURRENTLY QUEUED SOUNDTRACK DOCK */}
-            <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl border border-[#262834] bg-[#181920] shadow-md">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="relative flex-shrink-0">
-                  {activeCurrentPlaylist.coverUrl ? (
-                    <img
-                      src={activeCurrentPlaylist.coverUrl}
-                      alt={activeCurrentPlaylist.title}
-                      className="w-10 h-10 rounded-xl object-cover border border-[#282a38] shadow-md"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-xl bg-[#14151b] border border-[#262834] flex items-center justify-center text-white">
-                      <Volume2 className="w-5 h-5 animate-pulse" />
-                    </div>
-                  )}
-                  <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-white text-black">
-                    <Music className="w-2 h-2" />
-                  </div>
-                </div>
-
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white truncate">{activeCurrentPlaylist.title}</span>
-                    <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-neutral-800 text-neutral-200 border border-neutral-700 font-medium font-mono shrink-0">
-                      {activeCurrentPlaylist.tag}
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-neutral-400 font-mono truncate">{activeCurrentPlaylist.subtitle}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 font-mono shrink-0">
-                <a
-                  href={activeCurrentPlaylist.ytUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold shadow-sm transition-all"
-                >
-                  <Play className="w-3 h-3 fill-black text-black" />
-                  <span>Play in YT Music</span>
-                  <ExternalLink className="w-3 h-3 text-black/80" />
-                </a>
               </div>
             </div>
           </div>
