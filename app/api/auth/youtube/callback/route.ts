@@ -8,16 +8,19 @@ export async function GET(request: Request) {
 
   const host = request.headers.get("host") || "localhost:3000";
   const protocol = host.includes("localhost") ? "http" : "https";
-  const baseUrl = `${protocol}://${host}`;
+  const baseUrl = host.includes("localhost")
+    ? `${protocol}://${host}`
+    : (process.env.NEXT_PUBLIC_APP_URL || "https://life-hub-lemon-five.vercel.app");
   const redirectUri = `${baseUrl}/api/auth/youtube/callback`;
 
   const isUnified = state === "google_unified";
   const isGDrive = state === "gdrive";
+  const errorParam = encodeURIComponent(error || "access_denied");
   const errorRedirect = isUnified
-    ? `${baseUrl}/?google_error=access_denied#google`
+    ? `${baseUrl}/?google_error=${errorParam}#google`
     : isGDrive
-    ? `${baseUrl}/?gdrive_error=access_denied#books`
-    : `${baseUrl}/?yt_error=access_denied#music`;
+    ? `${baseUrl}/?gdrive_error=${errorParam}#books`
+    : `${baseUrl}/?yt_error=${errorParam}#music`;
 
   if (error || !code) {
     console.error("Google OAuth error or denied:", error);
