@@ -57,6 +57,10 @@ export default function GoogleConnectedAppsDeck() {
   const [driveFiles, setDriveFiles] = useState<any[]>([]);
   const [ytPlaylists, setYtPlaylists] = useState<any[]>([]);
 
+  // Google Calendar API Enable check
+  const [calNeedsApiEnable, setCalNeedsApiEnable] = useState(false);
+  const [calApiEnableUrl, setCalApiEnableUrl] = useState("https://console.developers.google.com/apis/api/calendar-json.googleapis.com/overview?project=958553719884");
+
   // Secret iCal URL state (100% reliable Google Calendar sync without OAuth)
   const [showIcalInput, setShowIcalInput] = useState(false);
   const [icalUrl, setIcalUrl] = useState("");
@@ -97,6 +101,12 @@ export default function GoogleConnectedAppsDeck() {
       try {
         const calRes = await fetch("/api/calendar/events");
         const calData = await calRes.json();
+        if (calData.needsApiEnable) {
+          setCalNeedsApiEnable(true);
+          if (calData.apiEnableUrl) setCalApiEnableUrl(calData.apiEnableUrl);
+        } else {
+          setCalNeedsApiEnable(false);
+        }
         if (calData.events && calData.events.length > 0) {
           setCalendarEvents(calData.events);
           eventsLoaded = true;
@@ -587,6 +597,28 @@ export default function GoogleConnectedAppsDeck() {
             <p className="text-xs text-neutral-400 leading-relaxed">
               Synchronizes corporate meetings, personal agendas, and reminders directly into your daily schedule.
             </p>
+
+            {/* Google Calendar API Enable Required Notice */}
+            {calNeedsApiEnable && (
+              <div className="p-3.5 rounded-2xl bg-amber-950/50 border border-amber-500/50 text-amber-200 text-xs space-y-2 animate-in fade-in duration-200">
+                <div className="flex items-center gap-2 font-bold text-amber-300">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+                  <span>1-Click Setup: Enable Google Calendar API</span>
+                </div>
+                <p className="text-[11px] text-amber-200/90 leading-relaxed">
+                  Your Google Account signed in successfully! However, Google Calendar API is disabled by default on Google Cloud projects. Click below to toggle it on:
+                </p>
+                <a
+                  href={calApiEnableUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
+                >
+                  <span>Enable Google Calendar API</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            )}
 
             {/* Upcoming Calendar Events Preview */}
             <div className="space-y-2 pt-2">

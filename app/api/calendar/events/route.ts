@@ -58,12 +58,23 @@ export async function GET() {
     });
 
     if (!calRes.ok) {
-      const errData = await calRes.text();
-      console.error("Google Calendar API error:", calRes.status, errData);
+      const errText = await calRes.text();
+      console.error("Google Calendar API error:", calRes.status, errText);
+
+      const isApiDisabled =
+        errText.includes("has not been used") ||
+        errText.includes("disabled") ||
+        errText.includes("accessNotConfigured") ||
+        errText.includes("SERVICE_DISABLED");
+
       return NextResponse.json({
-        connected: false,
+        connected: true, // OAuth is authenticated!
+        needsApiEnable: isApiDisabled,
+        apiEnableUrl: "https://console.developers.google.com/apis/api/calendar-json.googleapis.com/overview?project=958553719884",
         events: [],
-        error: `Google Calendar returned status ${calRes.status}`,
+        error: isApiDisabled
+          ? "Google Calendar API has not been enabled in your Google Cloud Project yet. Click below to toggle it on."
+          : `Google Calendar returned status ${calRes.status}`,
       });
     }
 
@@ -88,39 +99,38 @@ export async function GET() {
         dayNumber = startDateTime.getDate();
       } else if (startDateOnly) {
         dateKey = startDateOnly;
-        const parts = startDateOnly.split("-");
-        if (parts.length === 3) {
-          dayNumber = parseInt(parts[2], 10);
-        }
+        try {
+          dayNumber = parseInt(startDateOnly.split("-")[2], 10);
+        } catch {}
       }
 
       return {
-        id: item.id,
-        title: item.summary || "Google Calendar Event",
+        id: item.id || Math.random().toString(),
+        title: item.summary || "Untitled Calendar Event",
         time: timeFormatted,
-        category: "Google Calendar",
-        completed: false,
-        isGCal: true,
-        htmlLink: item.htmlLink || "https://calendar.google.com",
-        location: item.location || "",
-        description: item.description || "",
         dateKey,
-        day: dayNumber,
+        dayNumber,
+        category: "Corporate Agendas",
+        status: "Upcoming",
+        description: item.description || "",
+        location: item.location || "",
+        htmlLink: item.htmlLink || "",
+        attendeesCount: item.attendees?.length || 0,
       };
     });
 
     return NextResponse.json({
       connected: true,
-      count: events.length,
       events,
+      count: events.length,
       syncedAt: new Date().toISOString(),
-      accountName: calData.summary || "Primary Calendar",
     });
   } catch (err: any) {
-    console.error("Error fetching Google Calendar events:", err);
-    return NextResponse.json(
-      { connected: false, events: [], error: err.message || "Failed to fetch calendar events" },
-      { status: 500 }
-    );
+    console.error("Failed to query Google Calendar API:", err);
+    return NextResponse.json({
+      connected: true,
+      events: [],
+      error: err.message || "Failed to fetch calendar events",
+    });
   }
 }
