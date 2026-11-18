@@ -16,6 +16,8 @@ import {
   ExternalLink,
   RefreshCw,
   Check,
+  CheckCircle2,
+  Bookmark,
   AlertCircle,
   Trash2,
   Search,
@@ -30,6 +32,8 @@ import {
   ShieldCheck,
   Clock,
   ChevronRight,
+  Calendar,
+  CloudSun,
 } from "lucide-react";
 
 export interface MapLocation {
@@ -38,6 +42,7 @@ export interface MapLocation {
   query: string;
   lat: number;
   lng: number;
+  status: "visited" | "saved" | "want_to_go";
   category: "corporate" | "agri" | "spiritual" | "gmat" | "transit" | "personal";
   categoryLabel: string;
   address: string;
@@ -47,15 +52,18 @@ export interface MapLocation {
   transitFromBlr?: string;
   source?: "curated" | "imported" | "custom";
   visitedDate?: string;
+  targetDate?: string;
 }
 
 export const DEFAULT_LOCATIONS: MapLocation[] = [
+  // 1. SAVED PLACES (Core Strategic Bases & Anchors)
   {
     id: "loc-blr-corp",
     title: "Schneider Electric Global Hub",
     query: "Schneider Electric, Bagmane World Technology Center, Bengaluru, Karnataka",
     lat: 12.9866,
     lng: 77.6898,
+    status: "saved",
     category: "corporate",
     categoryLabel: "Corporate & ERP",
     address: "Outer Ring Road, Mahadevapura, Bengaluru, Karnataka 560048",
@@ -71,6 +79,7 @@ export const DEFAULT_LOCATIONS: MapLocation[] = [
     query: "Veerakeralapudur, Tenkasi District, Tamil Nadu",
     lat: 8.9564,
     lng: 77.4428,
+    status: "saved",
     category: "agri",
     categoryLabel: "Agri-Tech & Farm",
     address: "Veerakeralapudur Taluk, Tenkasi District, Tamil Nadu 627861",
@@ -81,26 +90,12 @@ export const DEFAULT_LOCATIONS: MapLocation[] = [
     source: "curated",
   },
   {
-    id: "loc-st-marks",
-    title: "St. Mark's Cathedral & Fellowship",
-    query: "St. Mark's Cathedral, MG Road, Bengaluru, Karnataka",
-    lat: 12.9738,
-    lng: 77.6015,
-    category: "spiritual",
-    categoryLabel: "Spiritual Sanctuary",
-    address: "1, Mahatma Gandhi Rd, Shanthala Nagar, Bengaluru, Karnataka 560001",
-    notes: "Weekly Sunday morning Liturgical sanctuary, Holy Communion worship, choir hymnody, and community fellowship.",
-    elevation: "916m ASL",
-    microclimate: "Heritage Tree Canopy • 23°C",
-    transitFromBlr: "12 km from Tech Park",
-    source: "curated",
-  },
-  {
     id: "loc-gmat-test",
     title: "Pearson VUE Professional Testing Center",
     query: "Pearson Professional Centers, Bengaluru, Karnataka",
     lat: 12.9352,
     lng: 77.6245,
+    status: "saved",
     category: "gmat",
     categoryLabel: "GMAT 705+ Milestone",
     address: "Koramangala 4th Block, Bengaluru, Karnataka 560034",
@@ -116,6 +111,7 @@ export const DEFAULT_LOCATIONS: MapLocation[] = [
     query: "Kempegowda International Airport, Devanahalli, Bengaluru",
     lat: 13.1986,
     lng: 77.7066,
+    status: "saved",
     category: "transit",
     categoryLabel: "Aviation Gateway",
     address: "KIAL Rd, Devanahalli, Bengaluru, Karnataka 560300",
@@ -131,6 +127,7 @@ export const DEFAULT_LOCATIONS: MapLocation[] = [
     query: "Madurai Airport, Madurai, Tamil Nadu",
     lat: 9.8345,
     lng: 78.0934,
+    status: "saved",
     category: "transit",
     categoryLabel: "Transit Gateway",
     address: "Madurai Airport, Madurai, Tamil Nadu 625022",
@@ -140,6 +137,196 @@ export const DEFAULT_LOCATIONS: MapLocation[] = [
     transitFromBlr: "435 km South Flight Path",
     source: "curated",
   },
+  {
+    id: "loc-tenkasi-junction",
+    title: "Tenkasi Junction Railway Station (TSI)",
+    query: "Tenkasi Junction, Tenkasi, Tamil Nadu",
+    lat: 8.9592,
+    lng: 77.3134,
+    status: "saved",
+    category: "transit",
+    categoryLabel: "Agri Logistics Railhead",
+    address: "Tenkasi Junction, Railway Feeder Rd, Tenkasi, Tamil Nadu 627811",
+    notes: "Rail terminal for overnight express routes (Silambu / Podhigai Express) and freight dispatch for guava harvests.",
+    elevation: "140m ASL",
+    microclimate: "Foothills Railhead",
+    transitFromBlr: "Overnight Train from SBC / SMVB",
+    source: "curated",
+  },
+
+  // 2. PLACES VISITED (Historical Milestones, Spiritual, and Field Inspections)
+  {
+    id: "loc-st-marks",
+    title: "St. Mark's Cathedral & Fellowship",
+    query: "St. Mark's Cathedral, MG Road, Bengaluru, Karnataka",
+    lat: 12.9738,
+    lng: 77.6015,
+    status: "visited",
+    category: "spiritual",
+    categoryLabel: "Spiritual Sanctuary",
+    address: "1, Mahatma Gandhi Rd, Shanthala Nagar, Bengaluru, Karnataka 560001",
+    notes: "Weekly Sunday morning Liturgical sanctuary, Holy Communion worship, choir hymnody, and community fellowship.",
+    elevation: "916m ASL",
+    microclimate: "Heritage Tree Canopy • 23°C",
+    transitFromBlr: "12 km from Tech Park",
+    source: "curated",
+    visitedDate: "Weekly Liturgy",
+  },
+  {
+    id: "loc-bagmane-wtc",
+    title: "Bagmane World Technology Center (WTC)",
+    query: "Bagmane World Technology Center, KR Puram, Bengaluru",
+    lat: 12.9912,
+    lng: 77.6931,
+    status: "visited",
+    category: "corporate",
+    categoryLabel: "Corporate Campus",
+    address: "Mahadevapura, Bengaluru, Karnataka 560048",
+    notes: "Frequent corporate project sprints, ERP cross-functional governance, and partner vendor reviews.",
+    elevation: "918m ASL",
+    microclimate: "Tech Corridor",
+    transitFromBlr: "1 km from SE Base",
+    source: "curated",
+    visitedDate: "Daily Operations",
+  },
+  {
+    id: "loc-tirunelveli-heritage",
+    title: "Tirunelveli Town & Iruttu Kadai Halwa Landmark",
+    query: "Iruttu Kadai Halwa, Tirunelveli, Tamil Nadu",
+    lat: 8.7291,
+    lng: 77.6946,
+    status: "visited",
+    category: "personal",
+    categoryLabel: "Heritage & Culture",
+    address: "East Car Street, Tirunelveli Town, Tamil Nadu 627006",
+    notes: "Visited during Southern transit; world-renowned wheat ghee halwa culinary heritage and local market trade exploration.",
+    elevation: "47m ASL",
+    microclimate: "Tamirabarani River Basin",
+    transitFromBlr: "50 km East of Tenkasi Farm",
+    source: "curated",
+    visitedDate: "Transit Route",
+  },
+  {
+    id: "loc-cubbon-park",
+    title: "Cubbon Park & Central Executive Walk",
+    query: "Cubbon Park, Kasturba Road, Bengaluru, Karnataka",
+    lat: 12.9763,
+    lng: 77.5929,
+    status: "visited",
+    category: "personal",
+    categoryLabel: "Wellness Haven",
+    address: "Kasturba Road, Behind High Court, Bengaluru, Karnataka 560001",
+    notes: "Visited for Saturday morning aerobic walks, botanical biodiversity reflection, and executive calm in Bengaluru.",
+    elevation: "925m ASL",
+    microclimate: "Bamboo & Mahogany Canopy • 22°C",
+    transitFromBlr: "14 km from Hub",
+    source: "curated",
+    visitedDate: "Regular Weekend Walks",
+  },
+  {
+    id: "loc-holy-trinity",
+    title: "Holy Trinity Church (MG Road Circle)",
+    query: "Holy Trinity Church, Trinity Circle, Bengaluru, Karnataka",
+    lat: 12.9727,
+    lng: 77.6206,
+    status: "visited",
+    category: "spiritual",
+    categoryLabel: "Spiritual Heritage",
+    address: "Trinity Circle, MG Road, Bengaluru, Karnataka 560008",
+    notes: "Historical 1851 English Renaissance garrison church; visited for evening devotion, choral recitals, and pipe organ acoustics.",
+    elevation: "920m ASL",
+    microclimate: "Trinity Greenery",
+    transitFromBlr: "9 km West",
+    source: "curated",
+    visitedDate: "Special Services",
+  },
+
+  // 3. WANT TO GO (Future Agribusiness Expansions, Executive Milestones, & Travel)
+  {
+    id: "loc-courtallam-falls",
+    title: "Courtallam Waterfalls & Eco-Agritourism Hub",
+    query: "Courtallam Main Falls, Tenkasi District, Tamil Nadu",
+    lat: 8.9295,
+    lng: 77.2694,
+    status: "want_to_go",
+    category: "agri",
+    categoryLabel: "Agritourism Target",
+    address: "Courtallam, Tenkasi District, Tamil Nadu 627802",
+    notes: "Target destination for Western Ghats herbal mineral water analysis, ecotourism farmstay conceptualization, and farm guest retreats.",
+    elevation: "160m ASL",
+    microclimate: "Southwest Monsoon Spray Zone • 21°C",
+    transitFromBlr: "12 km Southwest of Veerakeralapudur Farm",
+    source: "curated",
+    targetDate: "Next Monsoon",
+  },
+  {
+    id: "loc-iimb",
+    title: "Indian Institute of Management Bangalore (IIMB)",
+    query: "IIM Bangalore, Bannerghatta Road, Bengaluru",
+    lat: 12.8953,
+    lng: 77.6015,
+    status: "want_to_go",
+    category: "gmat",
+    categoryLabel: "Executive Target",
+    address: "Bannerghatta Main Rd, Bilekahalli, Bengaluru, Karnataka 560076",
+    notes: "Premier target institution for Executive Post Graduate MBA and Agribusiness Supply Chain Strategy summits post-GMAT 705+.",
+    elevation: "912m ASL",
+    microclimate: "Granite Stone Campus Sanctuary",
+    transitFromBlr: "22 km South",
+    source: "curated",
+    targetDate: "Post-GMAT 705+",
+  },
+  {
+    id: "loc-tnau-killikulam",
+    title: "TNAU Agricultural College & Research Institute",
+    query: "Agricultural College and Research Institute, Killikulam, Vallanadu, Tamil Nadu",
+    lat: 8.7042,
+    lng: 77.8572,
+    status: "want_to_go",
+    category: "agri",
+    categoryLabel: "Soil Science Research",
+    address: "Killikulam, Vallanadu, Thoothukudi / Tirunelveli Border, Tamil Nadu 628252",
+    notes: "Target research visit for precision soil micronutrient profiling, bio-fertilizer cultures, and ultra-high-density guava pruning seminars.",
+    elevation: "42m ASL",
+    microclimate: "Southern Dry Agro-Climatic Zone",
+    transitFromBlr: "68 km Southeast of Farm",
+    source: "curated",
+    targetDate: "Q1 AgTech Summit",
+  },
+  {
+    id: "loc-iisc-bangalore",
+    title: "Indian Institute of Science (IISc)",
+    query: "Indian Institute of Science, CV Raman Rd, Bengaluru",
+    lat: 13.0219,
+    lng: 77.5671,
+    status: "want_to_go",
+    category: "corporate",
+    categoryLabel: "IoT & Eco-Research",
+    address: "CV Raman Rd, Bengaluru, Karnataka 560012",
+    notes: "Target visit for Center for Sustainable Technologies, solar drip valve telemetry protocols, and LoRaWAN agricultural mesh workshops.",
+    elevation: "935m ASL",
+    microclimate: "Dense Botanical Reserve",
+    transitFromBlr: "18 km Northwest",
+    source: "curated",
+    targetDate: "Summer Workshop",
+  },
+  {
+    id: "loc-shencottah-reserve",
+    title: "Shencottah Border & Aryankavu Ghat Pass",
+    query: "Shencottah, Tenkasi District, Tamil Nadu",
+    lat: 8.9854,
+    lng: 77.2464,
+    status: "want_to_go",
+    category: "agri",
+    categoryLabel: "Highland Spice Frontier",
+    address: "Shencottah Taluk, Tenkasi District, Tamil Nadu 627809",
+    notes: "Border pass connecting Tamil Nadu to Kerala through the Western Ghats; target study for high-value vanilla & Malabar pepper intercropping.",
+    elevation: "240m ASL",
+    microclimate: "Rainforest Transition Gap",
+    transitFromBlr: "16 km West of Farm",
+    source: "curated",
+    targetDate: "Western Ghats Survey",
+  },
 ];
 
 export default function GoogleMapsVisualizer() {
@@ -148,8 +335,18 @@ export default function GoogleMapsVisualizer() {
   const [viewMode, setViewMode] = useState<"interactive-map" | "corridor-radar" | "analytics">("interactive-map");
   const [mapType, setMapType] = useState<"m" | "k" | "p">("m"); // m = roadmap, k = satellite, p = terrain
   const [zoomLevel, setZoomLevel] = useState<number>(14);
+  const [statusFilter, setStatusFilter] = useState<"all" | "visited" | "saved" | "want_to_go">("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Google Account Sync State
+  const [syncingDrive, setSyncingDrive] = useState(false);
+  const [driveSyncResult, setDriveSyncResult] = useState<{
+    success: boolean;
+    message: string;
+    filesFound?: number;
+    placesCount?: number;
+  } | null>(null);
 
   // Modals
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
@@ -159,9 +356,11 @@ export default function GoogleMapsVisualizer() {
   // New Place Form
   const [newTitle, setNewTitle] = useState("");
   const [newQuery, setNewQuery] = useState("");
+  const [newStatus, setNewStatus] = useState<MapLocation["status"]>("saved");
   const [newCategory, setNewCategory] = useState<MapLocation["category"]>("corporate");
   const [newAddress, setNewAddress] = useState("");
   const [newNotes, setNewNotes] = useState("");
+  const [newDate, setNewDate] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -172,8 +371,13 @@ export default function GoogleMapsVisualizer() {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setLocations(parsed);
-          setActiveLocation(parsed[0]);
+          // Normalize existing stored places to ensure status property exists
+          const normalized = parsed.map((item: any) => ({
+            ...item,
+            status: item.status || (item.category === "spiritual" ? "visited" : "saved"),
+          }));
+          setLocations(normalized);
+          setActiveLocation(normalized[0]);
         }
       }
     } catch (e) {
@@ -181,24 +385,92 @@ export default function GoogleMapsVisualizer() {
     }
   }, []);
 
+  // Compute status counts
+  const visitedCount = useMemo(() => locations.filter((l) => l.status === "visited").length, [locations]);
+  const savedCount = useMemo(() => locations.filter((l) => l.status === "saved").length, [locations]);
+  const wantToGoCount = useMemo(() => locations.filter((l) => l.status === "want_to_go").length, [locations]);
+
   // Filtered locations list
   const filteredLocations = useMemo(() => {
     return locations.filter((loc) => {
+      const matchesStatus = statusFilter === "all" || loc.status === statusFilter;
       const matchesCategory = categoryFilter === "all" || loc.category === categoryFilter;
       const matchesSearch =
         !searchQuery ||
         loc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         loc.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
         loc.notes.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
+      return matchesStatus && matchesCategory && matchesSearch;
     });
-  }, [locations, categoryFilter, searchQuery]);
+  }, [locations, statusFilter, categoryFilter, searchQuery]);
 
   // Construct Google Maps Embed URL
   const embedUrl = useMemo(() => {
     const q = encodeURIComponent(activeLocation.query || `${activeLocation.lat},${activeLocation.lng}`);
     return `https://maps.google.com/maps?q=${q}&t=${mapType}&z=${zoomLevel}&ie=UTF8&iwloc=&output=embed`;
   }, [activeLocation, mapType, zoomLevel]);
+
+  // 1-Click Status Switcher for active location
+  const handleUpdateStatus = (locId: string, targetStatus: "visited" | "saved" | "want_to_go") => {
+    const updated = locations.map((loc) => {
+      if (loc.id === locId) {
+        return { ...loc, status: targetStatus };
+      }
+      return loc;
+    });
+    setLocations(updated);
+    if (activeLocation.id === locId) {
+      setActiveLocation({ ...activeLocation, status: targetStatus });
+    }
+    try {
+      localStorage.setItem("lifehub_google_map_places", JSON.stringify(updated));
+    } catch {}
+  };
+
+  // Google Account Sync handler (Drive)
+  const handleDriveSync = async () => {
+    try {
+      setSyncingDrive(true);
+      setDriveSyncResult(null);
+      const res = await fetch("/api/maps/drive-sync");
+      const data = await res.json();
+
+      if (data.places && data.places.length > 0) {
+        const existingIds = new Set(locations.map((l) => l.id));
+        const fresh = data.places.filter((p: MapLocation) => !existingIds.has(p.id));
+        const merged = [...fresh, ...locations];
+        setLocations(merged);
+        if (fresh.length > 0) setActiveLocation(fresh[0]);
+        try {
+          localStorage.setItem("lifehub_google_map_places", JSON.stringify(merged));
+        } catch {}
+        setDriveSyncResult({
+          success: true,
+          message: `Successfully synced ${fresh.length} new places from your Google Account!`,
+          filesFound: data.filesFound,
+          placesCount: data.places.length,
+        });
+      } else if (data.connected) {
+        setDriveSyncResult({
+          success: false,
+          message: data.message || "Connected to Google Drive, but no Google Maps export files were found.",
+          filesFound: data.filesFound || 0,
+        });
+      } else {
+        setDriveSyncResult({
+          success: false,
+          message: "Google Drive is not connected yet. Click 'Connect Drive' in Google Apps to enable automatic sync.",
+        });
+      }
+    } catch (err) {
+      setDriveSyncResult({
+        success: false,
+        message: "Failed to communicate with Google Drive. You can also import Takeout JSON directly below.",
+      });
+    } finally {
+      setSyncingDrive(false);
+    }
+  };
 
   // Handle saving new custom place
   const handleAddPlace = (e: React.FormEvent) => {
@@ -220,11 +492,14 @@ export default function GoogleMapsVisualizer() {
       query: newQuery.trim() || newTitle.trim(),
       lat: 12.9716, // Default fallback center
       lng: 77.5946,
+      status: newStatus,
       category: newCategory,
       categoryLabel: categoryLabels[newCategory] || "Custom Place",
       address: newAddress.trim() || newTitle.trim(),
       notes: newNotes.trim() || "Saved via Google Maps Hub",
       source: "custom",
+      visitedDate: newStatus === "visited" ? (newDate.trim() || "Recently") : undefined,
+      targetDate: newStatus === "want_to_go" ? (newDate.trim() || "Planned") : undefined,
     };
 
     const updated = [newLoc, ...locations];
@@ -238,6 +513,7 @@ export default function GoogleMapsVisualizer() {
     setNewQuery("");
     setNewAddress("");
     setNewNotes("");
+    setNewDate("");
     setShowAddModal(false);
   };
 
@@ -245,6 +521,14 @@ export default function GoogleMapsVisualizer() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const lowerName = file.name.toLowerCase();
+    let fileStatus: "visited" | "saved" | "want_to_go" = "saved";
+    if (lowerName.includes("want") || lowerName.includes("wish") || lowerName.includes("to-go")) {
+      fileStatus = "want_to_go";
+    } else if (lowerName.includes("timeline") || lowerName.includes("location") || lowerName.includes("history") || lowerName.includes("record")) {
+      fileStatus = "visited";
+    }
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -262,14 +546,21 @@ export default function GoogleMapsVisualizer() {
               const coords = feat.geometry?.coordinates || [77.5946, 12.9716];
               const title = feat.properties?.Title || feat.properties?.name || `Imported Place ${idx + 1}`;
               const address = feat.properties?.address || feat.properties?.Location?.Address || title;
+              
+              let placeStatus = fileStatus;
+              const listName = (feat.properties?.listName || feat.properties?.List || "").toLowerCase();
+              if (listName.includes("want")) placeStatus = "want_to_go";
+              else if (listName.includes("star") || listName.includes("fav")) placeStatus = "saved";
+
               return {
                 id: `loc-imported-${idx}-${Date.now()}`,
                 title,
                 query: `${title}, ${address}`,
                 lat: coords[1] || 12.9716,
                 lng: coords[0] || 77.5946,
+                status: placeStatus,
                 category: "personal" as const,
-                categoryLabel: "Google Takeout Saved",
+                categoryLabel: placeStatus === "want_to_go" ? "Want to Go" : placeStatus === "visited" ? "Visited" : "Google Saved",
                 address,
                 notes: feat.properties?.Comment || "Imported from Google Maps Takeout",
                 source: "imported" as const,
@@ -287,6 +578,7 @@ export default function GoogleMapsVisualizer() {
                 query: `${lat},${lng}`,
                 lat,
                 lng,
+                status: "visited" as const,
                 category: "personal" as const,
                 categoryLabel: "Timeline Stop",
                 address: `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
@@ -303,6 +595,7 @@ export default function GoogleMapsVisualizer() {
               query: item.query || item.title || item.name,
               lat: item.lat || 12.9716,
               lng: item.lng || 77.5946,
+              status: item.status || fileStatus,
               category: item.category || "personal",
               categoryLabel: item.categoryLabel || "Imported Place",
               address: item.address || "",
@@ -322,6 +615,7 @@ export default function GoogleMapsVisualizer() {
                 query: cols[0] || "Bengaluru",
                 lat: parseFloat(cols[1]) || 12.9716,
                 lng: parseFloat(cols[2]) || 77.5946,
+                status: fileStatus,
                 category: "personal" as const,
                 categoryLabel: "CSV Imported",
                 address: cols[3] || cols[0],
@@ -377,21 +671,31 @@ export default function GoogleMapsVisualizer() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="font-extrabold text-lg sm:text-xl text-white tracking-tight">
-                  Google Maps & Strategic Geography Deck
+                  Google Maps & Geospatial Intelligence
                 </h2>
                 <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-semibold flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Live Geospatial Radar
+                  Live Sync Engine
                 </span>
               </div>
               <p className="text-xs text-neutral-400 mt-0.5">
-                Satellite intelligence, transit corridors, and Google Takeout Timeline visualization
+                Places Visited, Saved Bases, and Want-to-Go Destinations with 562 km Transit Corridor Radar
               </p>
             </div>
           </div>
 
-          {/* Action Buttons: Add Place & Import Takeout */}
+          {/* Action Buttons: Google Drive Sync, Add Place, Import Takeout */}
           <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+            <button
+              onClick={handleDriveSync}
+              disabled={syncingDrive}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-md transition-all cursor-pointer disabled:opacity-50"
+              title="Scan connected Google Account & Drive for Takeout files"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${syncingDrive ? "animate-spin" : ""}`} />
+              <span>{syncingDrive ? "Scanning Drive..." : "Sync Google Account"}</span>
+            </button>
+
             <button
               onClick={() => setShowAddModal(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold shadow-md transition-all cursor-pointer"
@@ -405,7 +709,7 @@ export default function GoogleMapsVisualizer() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#181920] hover:bg-[#20222a] border border-[#262834] hover:border-neutral-500 text-neutral-200 transition-all cursor-pointer"
             >
               <Upload className="w-3.5 h-3.5 text-neutral-400" />
-              <span>Import Takeout JSON</span>
+              <span>Import Takeout</span>
             </button>
 
             <button
@@ -417,6 +721,32 @@ export default function GoogleMapsVisualizer() {
             </button>
           </div>
         </div>
+
+        {/* DRIVE SYNC FEEDBACK BANNER */}
+        {driveSyncResult && (
+          <div
+            className={`p-3.5 rounded-2xl border text-xs flex items-center justify-between gap-3 animate-in fade-in ${
+              driveSyncResult.success
+                ? "bg-emerald-950/60 border-emerald-500/40 text-emerald-300"
+                : "bg-neutral-900 border-neutral-700 text-neutral-300"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {driveSyncResult.success ? (
+                <Check className="w-4 h-4 shrink-0 text-emerald-400" />
+              ) : (
+                <AlertCircle className="w-4 h-4 shrink-0 text-blue-400" />
+              )}
+              <span>{driveSyncResult.message}</span>
+            </div>
+            <button
+              onClick={() => setDriveSyncResult(null)}
+              className="text-[10px] text-neutral-400 hover:text-white font-mono"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {/* NOTIFICATION BANNER */}
         {importNotification && (
@@ -477,13 +807,70 @@ export default function GoogleMapsVisualizer() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
           {/* LEFT: LOCATIONS DIRECTORY & FILTER (5 Cols) */}
           <div className="lg:col-span-5 space-y-4">
+            {/* 3-WAY STATUS SEGMENTED CONTROL: ALL / VISITED / SAVED / WANT TO GO */}
+            <div className="grid grid-cols-4 gap-1.5 p-1.5 rounded-2xl bg-[#14151b] border border-[#232530] text-xs font-mono shadow-md">
+              <button
+                onClick={() => setStatusFilter("all")}
+                className={`py-2 px-1 rounded-xl font-bold flex flex-col items-center justify-center transition-all cursor-pointer ${
+                  statusFilter === "all"
+                    ? "bg-white text-black shadow-sm"
+                    : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                <span className="text-[10px] uppercase tracking-wider">All Hubs</span>
+                <span className="text-xs font-extrabold">{locations.length}</span>
+              </button>
+
+              <button
+                onClick={() => setStatusFilter("visited")}
+                className={`py-2 px-1 rounded-xl font-bold flex flex-col items-center justify-center transition-all cursor-pointer ${
+                  statusFilter === "visited"
+                    ? "bg-emerald-500 text-white shadow-sm"
+                    : "text-neutral-400 hover:text-emerald-300"
+                }`}
+              >
+                <span className="text-[10px] uppercase tracking-wider flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Visited
+                </span>
+                <span className="text-xs font-extrabold">{visitedCount}</span>
+              </button>
+
+              <button
+                onClick={() => setStatusFilter("saved")}
+                className={`py-2 px-1 rounded-xl font-bold flex flex-col items-center justify-center transition-all cursor-pointer ${
+                  statusFilter === "saved"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-neutral-400 hover:text-blue-300"
+                }`}
+              >
+                <span className="text-[10px] uppercase tracking-wider flex items-center gap-1">
+                  <Bookmark className="w-3 h-3" /> Saved
+                </span>
+                <span className="text-xs font-extrabold">{savedCount}</span>
+              </button>
+
+              <button
+                onClick={() => setStatusFilter("want_to_go")}
+                className={`py-2 px-1 rounded-xl font-bold flex flex-col items-center justify-center transition-all cursor-pointer ${
+                  statusFilter === "want_to_go"
+                    ? "bg-amber-500 text-black shadow-sm"
+                    : "text-neutral-400 hover:text-amber-300"
+                }`}
+              >
+                <span className="text-[10px] uppercase tracking-wider flex items-center gap-1">
+                  <Compass className="w-3 h-3" /> To Go
+                </span>
+                <span className="text-xs font-extrabold">{wantToGoCount}</span>
+              </button>
+            </div>
+
             {/* Search & Category Pills */}
             <div className="p-4 rounded-2xl bg-[#14151b] border border-[#232530] space-y-3 shadow-lg">
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-2.5 text-neutral-500" />
                 <input
                   type="text"
-                  placeholder="Search mapped locations..."
+                  placeholder="Search visited, saved, or target places..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#101116] border border-[#262834] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white font-sans"
@@ -499,11 +886,12 @@ export default function GoogleMapsVisualizer() {
                   { id: "spiritual", label: "⛪ Spiritual" },
                   { id: "gmat", label: "🎯 GMAT" },
                   { id: "transit", label: "✈️ Transit" },
+                  { id: "personal", label: "🏡 Lifestyle" },
                 ].map((c) => (
                   <button
                     key={c.id}
                     onClick={() => setCategoryFilter(c.id)}
-                    className={`px-2 py-1 rounded-lg transition-all ${
+                    className={`px-2 py-1 rounded-lg transition-all cursor-pointer ${
                       categoryFilter === c.id
                         ? "bg-white text-black font-bold"
                         : "bg-[#181920] text-neutral-400 hover:text-white border border-[#262834]"
@@ -541,20 +929,22 @@ export default function GoogleMapsVisualizer() {
                         </h4>
                       </div>
 
+                      {/* Status Badge */}
                       <span
-                        className={`text-[9px] px-2 py-0.5 rounded-full font-mono font-semibold border ${
-                          loc.category === "corporate"
-                            ? "bg-blue-500/10 text-blue-300 border-blue-500/30"
-                            : loc.category === "agri"
+                        className={`text-[9px] px-2 py-0.5 rounded-full font-mono font-bold border flex items-center gap-1 ${
+                          loc.status === "visited"
                             ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
-                            : loc.category === "spiritual"
-                            ? "bg-purple-500/10 text-purple-300 border-purple-500/30"
-                            : loc.category === "gmat"
-                            ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
-                            : "bg-sky-500/10 text-sky-300 border-sky-500/30"
+                            : loc.status === "saved"
+                            ? "bg-blue-500/10 text-blue-300 border-blue-500/30"
+                            : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                         }`}
                       >
-                        {loc.categoryLabel}
+                        {loc.status === "visited" && <CheckCircle2 className="w-2.5 h-2.5" />}
+                        {loc.status === "saved" && <Bookmark className="w-2.5 h-2.5" />}
+                        {loc.status === "want_to_go" && <Compass className="w-2.5 h-2.5" />}
+                        <span>
+                          {loc.status === "visited" ? "Visited" : loc.status === "saved" ? "Saved" : "Want to Go"}
+                        </span>
                       </span>
                     </div>
 
@@ -578,6 +968,22 @@ export default function GoogleMapsVisualizer() {
                   </div>
                 );
               })}
+
+              {filteredLocations.length === 0 && (
+                <div className="p-8 rounded-2xl bg-[#14151b] border border-[#232530] text-center text-xs text-neutral-500 space-y-2">
+                  <p>No places match the active filters.</p>
+                  <button
+                    onClick={() => {
+                      setStatusFilter("all");
+                      setCategoryFilter("all");
+                      setSearchQuery("");
+                    }}
+                    className="text-white underline font-mono"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -601,7 +1007,7 @@ export default function GoogleMapsVisualizer() {
                   <div className="flex items-center p-0.5 rounded-lg bg-[#101116] border border-[#262834]">
                     <button
                       onClick={() => setMapType("m")}
-                      className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all ${
+                      className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${
                         mapType === "m" ? "bg-white text-black font-bold" : "text-neutral-400 hover:text-white"
                       }`}
                     >
@@ -609,7 +1015,7 @@ export default function GoogleMapsVisualizer() {
                     </button>
                     <button
                       onClick={() => setMapType("k")}
-                      className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all ${
+                      className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${
                         mapType === "k" ? "bg-white text-black font-bold" : "text-neutral-400 hover:text-white"
                       }`}
                     >
@@ -617,7 +1023,7 @@ export default function GoogleMapsVisualizer() {
                     </button>
                     <button
                       onClick={() => setMapType("p")}
-                      className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all ${
+                      className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${
                         mapType === "p" ? "bg-white text-black font-bold" : "text-neutral-400 hover:text-white"
                       }`}
                     >
@@ -629,7 +1035,7 @@ export default function GoogleMapsVisualizer() {
                   <div className="flex items-center p-0.5 rounded-lg bg-[#101116] border border-[#262834]">
                     <button
                       onClick={() => setZoomLevel((z) => Math.max(z - 1, 8))}
-                      className="px-2 py-1 text-neutral-300 hover:text-white font-bold"
+                      className="px-2 py-1 text-neutral-300 hover:text-white font-bold cursor-pointer"
                       title="Zoom Out"
                     >
                       -
@@ -637,7 +1043,7 @@ export default function GoogleMapsVisualizer() {
                     <span className="text-[10px] px-1 text-neutral-400">{zoomLevel}x</span>
                     <button
                       onClick={() => setZoomLevel((z) => Math.min(z + 1, 19))}
-                      className="px-2 py-1 text-neutral-300 hover:text-white font-bold"
+                      className="px-2 py-1 text-neutral-300 hover:text-white font-bold cursor-pointer"
                       title="Zoom In"
                     >
                       +
@@ -646,8 +1052,51 @@ export default function GoogleMapsVisualizer() {
                 </div>
               </div>
 
+              {/* Status Switcher Bar for Selected Place */}
+              <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-2xl bg-[#101116] border border-[#232530] text-xs font-mono">
+                <span className="text-[11px] text-neutral-400 flex items-center gap-1.5">
+                  <span>Current Status:</span>
+                  <strong className="text-white capitalize">{activeLocation.status.replace("_", " ")}</strong>
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => handleUpdateStatus(activeLocation.id, "visited")}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                      activeLocation.status === "visited"
+                        ? "bg-emerald-500 text-white shadow-sm"
+                        : "bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-emerald-300"
+                    }`}
+                  >
+                    ✓ Mark Visited
+                  </button>
+
+                  <button
+                    onClick={() => handleUpdateStatus(activeLocation.id, "saved")}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                      activeLocation.status === "saved"
+                        ? "bg-blue-600 text-white shadow-sm"
+                        : "bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-blue-300"
+                    }`}
+                  >
+                    ⭐ Mark Saved
+                  </button>
+
+                  <button
+                    onClick={() => handleUpdateStatus(activeLocation.id, "want_to_go")}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                      activeLocation.status === "want_to_go"
+                        ? "bg-amber-500 text-black shadow-sm"
+                        : "bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-amber-300"
+                    }`}
+                  >
+                    🎯 Want to Go
+                  </button>
+                </div>
+              </div>
+
               {/* Responsive Embedded Google Map Iframe */}
-              <div className="relative w-full h-[460px] sm:h-[520px] rounded-2xl overflow-hidden border border-[#262834] bg-[#0c0d11]">
+              <div className="relative w-full h-[460px] sm:h-[500px] rounded-2xl overflow-hidden border border-[#262834] bg-[#0c0d11]">
                 <iframe
                   title={`Google Map - ${activeLocation.title}`}
                   src={embedUrl}
@@ -706,8 +1155,10 @@ export default function GoogleMapsVisualizer() {
                   <span className="font-bold text-white mt-0.5 block truncate">{activeLocation.transitFromBlr || "Connected"}</span>
                 </div>
                 <div className="p-3 rounded-xl bg-[#101116] border border-[#232530]">
-                  <span className="text-[10px] text-neutral-500 block uppercase font-bold">Data Source</span>
-                  <span className="font-bold text-emerald-400 mt-0.5 block capitalize">{activeLocation.source || "Curated"}</span>
+                  <span className="text-[10px] text-neutral-500 block uppercase font-bold">Category & Status</span>
+                  <span className="font-bold text-emerald-400 mt-0.5 block capitalize truncate">
+                    {activeLocation.status.replace("_", " ")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -748,157 +1199,150 @@ export default function GoogleMapsVisualizer() {
                   <div className="w-10 h-10 rounded-2xl bg-blue-500/20 border-2 border-blue-400 flex items-center justify-center text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.5)]">
                     <Building2 className="w-5 h-5 text-blue-300" />
                   </div>
-                  <div className="w-0.5 h-16 bg-gradient-to-b from-blue-400 via-sky-400 to-amber-400" />
+                  <div className="w-0.5 h-16 bg-gradient-to-b from-blue-400 via-sky-400 to-emerald-400 my-1" />
                 </div>
-                <div className="space-y-1 pt-1 min-w-0 flex-1">
-                  <div className="flex items-center gap-2 font-mono text-xs">
-                    <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold">KM 0</span>
-                    <span className="text-neutral-400">12.9716° N, 77.5946° E • 920m ASL</span>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono font-bold">
+                      BASE 0 KM
+                    </span>
+                    <h4 className="font-bold text-white text-sm">Bengaluru Executive HQ (Schneider Electric WTC)</h4>
                   </div>
-                  <h4 className="font-extrabold text-base text-white">Bengaluru Executive Command & Tech Park</h4>
                   <p className="text-xs text-neutral-400">
-                    Corporate headquarters, Schneider Electric ERP operations, St. Mark's fellowship, and GMAT 705+ test suite.
+                    Outer Ring Road, Mahadevapura • Elevation: 920m ASL • Urban Tech Corridor
                   </p>
                 </div>
               </div>
 
-              {/* Waypoint: Salem & Dindigul Central Junctions */}
+              {/* Node 2: Aviation Gateway (BLR -> IXM) */}
               <div className="flex items-start gap-4">
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300">
-                    <Car className="w-4 h-4 text-amber-300" />
+                  <div className="w-10 h-10 rounded-2xl bg-sky-500/20 border-2 border-sky-400 flex items-center justify-center text-sky-300 shadow-[0_0_15px_rgba(56,189,248,0.5)]">
+                    <Plane className="w-5 h-5 text-sky-300" />
                   </div>
-                  <div className="w-0.5 h-16 bg-gradient-to-b from-amber-400 via-purple-400 to-emerald-400" />
+                  <div className="w-0.5 h-16 bg-gradient-to-b from-sky-400 to-amber-400 my-1" />
                 </div>
-                <div className="space-y-1 pt-0.5 min-w-0 flex-1">
-                  <div className="flex items-center gap-2 font-mono text-xs">
-                    <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">KM 202 - 370</span>
-                    <span className="text-neutral-400">Salem ⇄ Namakkal ⇄ Dindigul Express Tollway</span>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-mono font-bold">
+                      AIR CORRIDOR (1H 10M)
+                    </span>
+                    <h4 className="font-bold text-white text-sm">Kempegowda (BLR) ✈️ Madurai Airport (IXM)</h4>
                   </div>
-                  <h5 className="font-bold text-sm text-neutral-200">Central Tamil Nadu Transit Highway</h5>
                   <p className="text-xs text-neutral-400">
-                    Six-lane high-speed expressway transit with multiple fast-fuel EV charging and refreshment waypoints.
+                    Non-stop Indigo flights • Connects Bengaluru directly with South Tamil Nadu transit grid
                   </p>
                 </div>
               </div>
 
-              {/* Waypoint: Madurai Aviation Gateway */}
+              {/* Node 3: Tenkasi Junction Railhead */}
               <div className="flex items-start gap-4">
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-400 flex items-center justify-center text-sky-300">
-                    <Plane className="w-4 h-4 text-sky-300" />
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.5)]">
+                    <Train className="w-5 h-5 text-amber-300" />
                   </div>
-                  <div className="w-0.5 h-16 bg-gradient-to-b from-sky-400 to-emerald-400" />
+                  <div className="w-0.5 h-16 bg-gradient-to-b from-amber-400 to-emerald-400 my-1" />
                 </div>
-                <div className="space-y-1 pt-0.5 min-w-0 flex-1">
-                  <div className="flex items-center gap-2 font-mono text-xs">
-                    <span className="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-bold">KM 435</span>
-                    <span className="text-neutral-400">Madurai Airport (IXM)</span>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono font-bold">
+                      RAIL CORRIDOR (OVERNIGHT)
+                    </span>
+                    <h4 className="font-bold text-white text-sm">Tenkasi Junction (TSI) Railhead</h4>
                   </div>
-                  <h5 className="font-bold text-sm text-neutral-200">Aviation Node & Western Ghats Foothills</h5>
                   <p className="text-xs text-neutral-400">
-                    Flight landing from BLR in 70 mins; direct highway link to Tenkasi District via Rajapalayam / Srivilliputhur.
+                    Direct sleeper train options from SBC/SMVB Bengaluru • Guava bulk logistics and transit
                   </p>
                 </div>
               </div>
 
-              {/* Node 2: Veerakeralapudur Agribusiness Smart Farm */}
+              {/* Node 4: Veerakeralapudur Farm Destination */}
               <div className="flex items-start gap-4">
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
-                    <Sprout className="w-5 h-5 text-emerald-300" />
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.7)] animate-bounce">
+                    <Sprout className="w-5 h-5 text-emerald-400" />
                   </div>
                 </div>
-                <div className="space-y-1 pt-1 min-w-0 flex-1">
-                  <div className="flex items-center gap-2 font-mono text-xs">
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">KM 562</span>
-                    <span className="text-neutral-400">8.9564° N, 77.4428° E • 115m ASL</span>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold">
+                      DESTINATION 562 KM
+                    </span>
+                    <h4 className="font-bold text-white text-sm">Veerakeralapudur Agribusiness Smart Farm</h4>
                   </div>
-                  <h4 className="font-extrabold text-base text-white">Veerakeralapudur Agribusiness Smart Farm</h4>
                   <p className="text-xs text-neutral-400">
-                    5-Acre Precision Guava Orchard, Taiwan Pink graft rootstocks, solar-powered drip irrigation, and telemetry soil node.
+                    Tenkasi District, TN • 5-Acre Precision Guava Orchard • Western Ghats foothills microclimate
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Transit Modes Comparison */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
-            <div className="p-4 rounded-2xl bg-[#181920] border border-[#262834] space-y-1.5">
-              <div className="flex items-center gap-2 text-white font-bold">
-                <Car className="w-4 h-4 text-amber-400" />
-                <span>Expressway Drive</span>
-              </div>
-              <p className="text-neutral-400 font-sans text-xs">
-                NH 44 via Hosur, Krishnagiri, Salem, Madurai, Tenkasi. ~9 hours 15 mins driving time.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[#181920] border border-[#262834] space-y-1.5">
-              <div className="flex items-center gap-2 text-white font-bold">
-                <Plane className="w-4 h-4 text-sky-400" />
-                <span>Flight + Cab</span>
-              </div>
-              <p className="text-neutral-400 font-sans text-xs">
-                BLR ✈️ IXM (Madurai) 1h 10m + 2h taxi to Veerakeralapudur farm. Peak efficiency travel.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[#181920] border border-[#262834] space-y-1.5">
-              <div className="flex items-center gap-2 text-white font-bold">
-                <Train className="w-4 h-4 text-purple-400" />
-                <span>Overnight Express</span>
-              </div>
-              <p className="text-neutral-400 font-sans text-xs">
-                Bengaluru (SBC) to Tenkasi Junction (TSI) via Tuticorin / Tirunelveli sleeper train.
-              </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* 4. GEOGRAPHY TELEMETRY & ANALYTICS VIEW */}
+      {/* 4. GEOGRAPHY TELEMETRY MATRIX (Analytics Mode) */}
       {viewMode === "analytics" && (
         <div className="p-6 sm:p-8 rounded-3xl bg-[#14151b] border border-[#232530] shadow-2xl space-y-6">
-          <div className="border-b border-[#232530] pb-4">
-            <h3 className="font-extrabold text-base sm:text-lg text-white">Geospatial Telemetry & Asset Matrix</h3>
-            <p className="text-xs text-neutral-400">
-              Microclimate conditions, altitude gradients, and strategic category allocation
-            </p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#232530]">
+            <div>
+              <h3 className="font-extrabold text-base sm:text-lg text-white">Geospatial Telemetry Matrix</h3>
+              <p className="text-xs text-neutral-400">
+                Detailed coordinate distribution, altitude breakdown, and regional microclimate profiles
+              </p>
+            </div>
+            <div className="text-xs font-mono text-neutral-400">
+              {locations.length} total mapped nodes
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {locations.map((loc) => (
-              <div key={loc.id} className="p-4 rounded-2xl bg-[#181920] border border-[#262834] space-y-3">
+              <div
+                key={loc.id}
+                className="p-5 rounded-2xl bg-[#101116] border border-[#262834] space-y-3 hover:border-neutral-500 transition-all"
+              >
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-white truncate">{loc.title}</span>
-                  <span className="text-[9px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 font-mono">
-                    {loc.categoryLabel}
+                  <h4 className="font-bold text-sm text-white truncate max-w-[180px]">{loc.title}</h4>
+                  <span
+                    className={`text-[9px] px-2 py-0.5 rounded-full font-mono font-bold border ${
+                      loc.status === "visited"
+                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                        : loc.status === "saved"
+                        ? "bg-blue-500/10 text-blue-300 border-blue-500/30"
+                        : "bg-amber-500/10 text-amber-300 border-amber-500/30"
+                    }`}
+                  >
+                    {loc.status === "visited" ? "Visited" : loc.status === "saved" ? "Saved" : "Want to Go"}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-neutral-400">
-                  <div className="p-2 rounded-lg bg-[#12131a] border border-[#232530]">
-                    <span className="text-[9px] text-neutral-500 block">COORDINATES</span>
-                    <span className="text-white font-bold">{loc.lat.toFixed(2)}°N, {loc.lng.toFixed(2)}°E</span>
+                <div className="space-y-1.5 text-xs text-neutral-400 font-mono">
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Category:</span>
+                    <span className="text-white">{loc.categoryLabel}</span>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#12131a] border border-[#232530]">
-                    <span className="text-[9px] text-neutral-500 block">ELEVATION</span>
-                    <span className="text-white font-bold">{loc.elevation || "N/A"}</span>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Elevation:</span>
+                    <span className="text-white">{loc.elevation || "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Microclimate:</span>
+                    <span className="text-white truncate max-w-[150px]">{loc.microclimate || "Regional"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Coordinates:</span>
+                    <span className="text-neutral-300">{loc.lat.toFixed(4)}°, {loc.lng.toFixed(4)}°</span>
                   </div>
                 </div>
 
-                <p className="text-[11px] text-neutral-400 line-clamp-2">{loc.notes}</p>
-
                 <div className="pt-2 border-t border-[#232530] flex items-center justify-between text-xs font-mono">
-                  <span className="text-[10px] text-neutral-500">{loc.microclimate || "Active Zone"}</span>
+                  <span className="text-[10px] text-neutral-500 uppercase">{loc.source || "Curated"}</span>
                   <button
                     onClick={() => {
                       setActiveLocation(loc);
                       setViewMode("interactive-map");
                     }}
-                    className="text-white hover:text-neutral-300 font-bold flex items-center gap-1"
+                    className="text-white hover:text-neutral-300 font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <span>View on Map →</span>
                   </button>
@@ -920,7 +1364,7 @@ export default function GoogleMapsVisualizer() {
               </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-xs text-neutral-400 hover:text-white px-2 py-1 rounded bg-neutral-900 border border-neutral-800"
+                className="text-xs text-neutral-400 hover:text-white px-2 py-1 rounded bg-neutral-900 border border-neutral-800 cursor-pointer"
               >
                 Close
               </button>
@@ -939,6 +1383,48 @@ export default function GoogleMapsVisualizer() {
                   onChange={(e) => setNewTitle(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-white focus:outline-none focus:border-white"
                 />
+              </div>
+
+              {/* Status Radio Selector */}
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-mono font-semibold">
+                  Map List / Status *
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setNewStatus("visited")}
+                    className={`py-2 px-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                      newStatus === "visited"
+                        ? "bg-emerald-500 text-white border-emerald-400 shadow-md"
+                        : "bg-[#101116] border-[#282a38] text-neutral-400 hover:text-emerald-300"
+                    }`}
+                  >
+                    ✓ Places Visited
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewStatus("saved")}
+                    className={`py-2 px-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                      newStatus === "saved"
+                        ? "bg-blue-600 text-white border-blue-500 shadow-md"
+                        : "bg-[#101116] border-[#282a38] text-neutral-400 hover:text-blue-300"
+                    }`}
+                  >
+                    ⭐ Saved Place
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewStatus("want_to_go")}
+                    className={`py-2 px-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                      newStatus === "want_to_go"
+                        ? "bg-amber-500 text-black border-amber-400 shadow-md"
+                        : "bg-[#101116] border-[#282a38] text-neutral-400 hover:text-amber-300"
+                    }`}
+                  >
+                    🎯 Want to Go
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -974,17 +1460,32 @@ export default function GoogleMapsVisualizer() {
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-mono font-semibold">
-                  Full Address / City
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Tenkasi Main Road, Tamil Nadu 627811"
-                  value={newAddress}
-                  onChange={(e) => setNewAddress(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-white focus:outline-none focus:border-white"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-mono font-semibold">
+                    Full Address / City
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Tenkasi Main Road, Tamil Nadu 627811"
+                    value={newAddress}
+                    onChange={(e) => setNewAddress(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-white focus:outline-none focus:border-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-mono font-semibold">
+                    {newStatus === "visited" ? "Visit Date / Timeline" : "Target Date / Milestone"}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={newStatus === "visited" ? "e.g. October 2026 / Regular" : "e.g. Q1 2027 Harvest"}
+                    value={newDate}
+                    onChange={(e) => setNewDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-[#101116] border border-[#282a38] text-white focus:outline-none focus:border-white font-mono"
+                  />
+                </div>
               </div>
 
               <div className="space-y-1">
@@ -1004,13 +1505,13 @@ export default function GoogleMapsVisualizer() {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 font-mono text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 font-mono text-xs font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold font-mono text-xs shadow-md"
+                  className="px-5 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold font-mono text-xs shadow-md cursor-pointer"
                 >
                   Save to Map
                 </button>
@@ -1031,7 +1532,7 @@ export default function GoogleMapsVisualizer() {
               </div>
               <button
                 onClick={() => setShowImportModal(false)}
-                className="text-xs text-neutral-400 hover:text-white px-2 py-1 rounded bg-neutral-900 border border-neutral-800"
+                className="text-xs text-neutral-400 hover:text-white px-2 py-1 rounded bg-neutral-900 border border-neutral-800 cursor-pointer"
               >
                 Close
               </button>
@@ -1041,13 +1542,18 @@ export default function GoogleMapsVisualizer() {
               <div className="p-3.5 rounded-2xl bg-[#181920] border border-[#262834] space-y-2">
                 <h4 className="font-bold text-white flex items-center gap-1.5 font-mono">
                   <span className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center text-[10px]">1</span>
-                  How to export from Google Takeout:
+                  How to export from Google Account:
                 </h4>
                 <ol className="list-decimal list-inside space-y-1 text-neutral-400 pl-1 text-[11px]">
-                  <li>Visit <strong>takeout.google.com</strong> signed in with your Google account.</li>
-                  <li>Deselect all, then check <strong>Maps (your places)</strong> or <strong>Location History (Timeline)</strong>.</li>
-                  <li>Click Export and download the ZIP file.</li>
-                  <li>Drop the extracted <strong>Saved Places.json</strong> or <strong>Records.json</strong> below!</li>
+                  <li>
+                    <strong>From Computer</strong>: Visit <a href="https://takeout.google.com" target="_blank" rel="noreferrer" className="text-white underline">takeout.google.com</a>, check <strong>Maps (your places)</strong>, and export.
+                  </li>
+                  <li>
+                    <strong>From Mobile Phone (Timeline)</strong>: In the Google Maps app, tap your profile ➔ <strong>Your Timeline</strong> ➔ Settings ➔ <strong>Export Timeline data</strong>.
+                  </li>
+                  <li>
+                    Drop the downloaded <strong>Saved Places.json</strong>, <strong>Want to go.json</strong>, or <strong>Timeline.json</strong> file below!
+                  </li>
                 </ol>
               </div>
 
@@ -1061,7 +1567,7 @@ export default function GoogleMapsVisualizer() {
                 </div>
                 <div className="font-bold text-white">Drop your Google Maps file here, or click to browse</div>
                 <p className="text-[11px] text-neutral-500 font-mono">
-                  Supports .json, .geojson, .kml, and .csv files
+                  Supports Saved Places.json, Timeline.json, GeoJSON, and CSV files
                 </p>
                 <input
                   type="file"
@@ -1073,7 +1579,7 @@ export default function GoogleMapsVisualizer() {
               </div>
 
               <div className="text-[11px] text-neutral-500 font-mono text-center">
-                All imported places are stored locally in your browser storage. Zero private location data leaves your device.
+                All imported places are stored locally in your browser. Zero private location data leaves your device.
               </div>
             </div>
           </div>
