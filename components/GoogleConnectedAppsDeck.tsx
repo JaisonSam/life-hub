@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import GoogleMapsVisualizer from "@/components/GoogleMapsVisualizer";
 import {
   Calendar,
   HardDrive,
@@ -25,6 +26,8 @@ import {
   Plus,
   Link as LinkIcon,
   Sparkles,
+  MapPin,
+  Compass,
 } from "lucide-react";
 
 interface GoogleServiceStatus {
@@ -350,6 +353,11 @@ export default function GoogleConnectedAppsDeck() {
                 <span className={`w-1.5 h-1.5 rounded-full ${isYtConnected ? "bg-emerald-400" : "bg-neutral-500"}`} />
                 YouTube: {isYtConnected ? "Live Synced" : "Not Linked"}
               </span>
+
+              <span className="px-2.5 py-1 rounded-lg border bg-neutral-900 border-neutral-800 text-neutral-300 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                Maps: 7 Hubs Plotted
+              </span>
             </div>
 
             {/* Account Profile Details if Available */}
@@ -379,6 +387,14 @@ export default function GoogleConnectedAppsDeck() {
               <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-white" : ""}`} />
               <span>{refreshing ? "Syncing..." : "Sync All Feeds"}</span>
             </button>
+
+            <a
+              href="#google-maps-visualizer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all cursor-pointer"
+            >
+              <Compass className="w-3.5 h-3.5 text-blue-400" />
+              <span>Geospatial Map</span>
+            </a>
 
             <button
               onClick={() => setShowGuide((prev) => !prev)}
@@ -892,7 +908,12 @@ export default function GoogleConnectedAppsDeck() {
         </div>
       </div>
 
-      {/* 3. GOOGLE WORKSPACE EXECUTIVE DOCK (1-Click Access) */}
+      {/* 3. GOOGLE MAPS & GEOSPATIAL INTELLIGENCE SUITE */}
+      <div id="google-maps-visualizer" className="scroll-mt-6">
+        <GoogleMapsVisualizer />
+      </div>
+
+      {/* 4. GOOGLE WORKSPACE EXECUTIVE DOCK (1-Click Access) */}
       <div className="p-5 sm:p-6 rounded-3xl bg-[#14151b] border border-[#232530] shadow-xl space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -904,11 +925,12 @@ export default function GoogleConnectedAppsDeck() {
           <span className="text-[10px] text-neutral-500 font-mono">Official Web Suites</span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
           {[
             { name: "Gmail", icon: Mail, url: "https://mail.google.com", subtitle: "Executive Inbox" },
             { name: "Calendar", icon: Calendar, url: "https://calendar.google.com", subtitle: "Schedules" },
             { name: "Drive", icon: HardDrive, url: "https://drive.google.com", subtitle: "Cloud Vault" },
+            { name: "Maps", icon: MapPin, url: "https://maps.google.com", subtitle: "Geospatial" },
             { name: "Meet", icon: Video, url: "https://meet.google.com", subtitle: "Video Calls" },
             { name: "Docs", icon: FileText, url: "https://docs.google.com", subtitle: "Documents" },
             { name: "Sheets", icon: FileSpreadsheet, url: "https://sheets.google.com", subtitle: "Spreadsheets" },

@@ -1576,19 +1576,41 @@ export default function GlanceDashboard({
                   </a>
                 </div>
 
-                {/* Open Full Google Hub button */}
-                <div className="pt-1 flex items-center justify-between border-t border-[#232530] text-xs font-mono">
-                  <a
-                    href="/api/auth/google/login?service=calendar"
-                    className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold cursor-pointer"
-                  >
-                    <span>⚡ Connect / Sync Google Account</span>
-                  </a>
+                {/* Google Maps & Geospatial Telemetry Snippet */}
+                <div className="p-3 rounded-xl bg-[#181920] border border-[#262834] flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-blue-400">
+                      <MapPin className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">Google Maps & Timeline</span>
+                      <span className="text-[10px] text-neutral-400 font-mono">
+                        7 Strategic Hubs • 562 km Corridor Radar
+                      </span>
+                    </div>
+                  </div>
                   <button
                     onClick={() => onSelectTab("google")}
-                    className="text-white hover:text-neutral-300 font-bold flex items-center gap-1"
+                    className="text-xs font-mono text-neutral-300 hover:text-white flex items-center gap-1 font-semibold cursor-pointer"
                   >
-                    <span>Full Google Hub →</span>
+                    <span>View Map</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </button>
+                </div>
+
+                {/* Open Full Google Hub button */}
+                <div className="pt-1 flex items-center justify-between border-t border-[#232530] text-xs font-mono">
+                  <button
+                    onClick={() => onSelectTab("google")}
+                    className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold cursor-pointer"
+                  >
+                    <span>⚡ Google Connected Apps Hub</span>
+                  </button>
+                  <button
+                    onClick={() => onSelectTab("google")}
+                    className="text-white hover:text-neutral-300 font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Open Hub →</span>
                   </button>
                 </div>
               </div>
