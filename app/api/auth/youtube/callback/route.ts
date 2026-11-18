@@ -4,7 +4,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");
-  const state = searchParams.get("state");
+  const state = searchParams.get("state") || "google_calendar";
 
   const host = request.headers.get("host") || "localhost:3000";
   const protocol = host.includes("localhost") ? "http" : "https";
@@ -13,14 +13,16 @@ export async function GET(request: Request) {
     : (process.env.NEXT_PUBLIC_APP_URL || "https://life-hub-lemon-five.vercel.app");
   const redirectUri = `${baseUrl}/api/auth/youtube/callback`;
 
-  const isUnified = state === "google_unified";
-  const isGDrive = state === "gdrive";
+  const isDrive = state === "gdrive" || state === "google_drive";
+  const isYouTube = state === "youtube" || state === "google_youtube";
+  const isCalendar = state === "google_calendar" || state === "google_unified";
+
   const errorParam = encodeURIComponent(error || "access_denied");
-  const errorRedirect = isUnified
-    ? `${baseUrl}/?google_error=${errorParam}#google`
-    : isGDrive
-    ? `${baseUrl}/?gdrive_error=${errorParam}#books`
-    : `${baseUrl}/?yt_error=${errorParam}#music`;
+  const errorRedirect = isDrive
+    ? `${baseUrl}/?google_error=${errorParam}&service=drive#google`
+    : isYouTube
+    ? `${baseUrl}/?google_error=${errorParam}&service=youtube#google`
+    : `${baseUrl}/?google_error=${errorParam}&service=calendar#google`;
 
   if (error || !code) {
     console.error("Google OAuth error or denied:", error);
@@ -31,12 +33,7 @@ export async function GET(request: Request) {
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    const credError = isUnified
-      ? `${baseUrl}/?google_error=missing_credentials#google`
-      : isGDrive
-      ? `${baseUrl}/?gdrive_error=missing_credentials#books`
-      : `${baseUrl}/?yt_error=missing_credentials#music`;
-    return NextResponse.redirect(credError);
+    return NextResponse.redirect(`${baseUrl}/?google_error=missing_credentials#google`);
   }
 
   try {
@@ -59,24 +56,15 @@ export async function GET(request: Request) {
 
     if (!tokenResponse.ok || !tokenData.access_token) {
       console.error("Failed to exchange token:", tokenData);
-      const failRedirect = isUnified
-        ? `${baseUrl}/?google_error=token_exchange_failed#google`
-        : isGDrive
-        ? `${baseUrl}/?gdrive_error=token_exchange_failed#books`
-        : `${baseUrl}/?yt_error=token_exchange_failed#music`;
-      return NextResponse.redirect(failRedirect);
+      return NextResponse.redirect(`${baseUrl}/?google_error=token_exchange_failed#google`);
     }
 
-    // Success response URL
-    const successUrl = isUnified
-      ? `${baseUrl}/?google_connected=true#google`
-      : isGDrive
-      ? `${baseUrl}/?gdrive_connected=true#books`
-      : `${baseUrl}/?yt_connected=true#music`;
-
+    // Determine target redirect after success
+    const connectedService = isDrive ? "drive" : isYouTube ? "youtube" : "calendar";
+    const successUrl = `${baseUrl}/?google_connected=${connectedService}#google`;
     const response = NextResponse.redirect(successUrl);
 
-    // If unified login or gdrive, fetch Google User profile
+    // Fetch user profile info
     let userName = "";
     let userEmail = "";
     let userPic = "";
@@ -97,7 +85,7 @@ export async function GET(request: Request) {
     const cookieMaxAge = tokenData.expires_in || 3600;
     const refreshMaxAge = 60 * 24 * 60 * 60; // 60 days
 
-    // Store user identity cookies if available
+    // Store user identity cookies
     if (userName) {
       response.cookies.set("google_user_name", userName, {
         httpOnly: false,
@@ -126,43 +114,8 @@ export async function GET(request: Request) {
       });
     }
 
-    if (isUnified) {
-      // Store all unified tokens across Drive, YouTube, Calendar
-      const tokensToSet = [
-        "google_access_token",
-        "gdrive_access_token",
-        "yt_access_token",
-        "gcal_access_token",
-      ];
-      tokensToSet.forEach((key) => {
-        response.cookies.set(key, tokenData.access_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: cookieMaxAge,
-          path: "/",
-        });
-      });
-
-      if (tokenData.refresh_token) {
-        const refreshTokensToSet = [
-          "google_refresh_token",
-          "gdrive_refresh_token",
-          "yt_refresh_token",
-          "gcal_refresh_token",
-        ];
-        refreshTokensToSet.forEach((key) => {
-          response.cookies.set(key, tokenData.refresh_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: refreshMaxAge,
-            path: "/",
-          });
-        });
-      }
-    } else if (isGDrive) {
-      // Store Google Drive tokens
+    // Save tokens based on service state
+    if (isDrive) {
       response.cookies.set("gdrive_access_token", tokenData.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -170,7 +123,6 @@ export async function GET(request: Request) {
         maxAge: cookieMaxAge,
         path: "/",
       });
-
       if (tokenData.refresh_token) {
         response.cookies.set("gdrive_refresh_token", tokenData.refresh_token, {
           httpOnly: true,
@@ -180,8 +132,7 @@ export async function GET(request: Request) {
           path: "/",
         });
       }
-    } else {
-      // Store YouTube tokens
+    } else if (isYouTube) {
       response.cookies.set("yt_access_token", tokenData.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -189,9 +140,40 @@ export async function GET(request: Request) {
         maxAge: cookieMaxAge,
         path: "/",
       });
-
       if (tokenData.refresh_token) {
         response.cookies.set("yt_refresh_token", tokenData.refresh_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: refreshMaxAge,
+          path: "/",
+        });
+      }
+    } else {
+      // Calendar & General Google session
+      response.cookies.set("gcal_access_token", tokenData.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: cookieMaxAge,
+        path: "/",
+      });
+      response.cookies.set("google_access_token", tokenData.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: cookieMaxAge,
+        path: "/",
+      });
+      if (tokenData.refresh_token) {
+        response.cookies.set("gcal_refresh_token", tokenData.refresh_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: refreshMaxAge,
+          path: "/",
+        });
+        response.cookies.set("google_refresh_token", tokenData.refresh_token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
@@ -204,11 +186,6 @@ export async function GET(request: Request) {
     return response;
   } catch (err) {
     console.error("OAuth exchange exception:", err);
-    const serverErrRedirect = isUnified
-      ? `${baseUrl}/?google_error=server_error#google`
-      : isGDrive
-      ? `${baseUrl}/?gdrive_error=server_error#books`
-      : `${baseUrl}/?yt_error=server_error#music`;
-    return NextResponse.redirect(serverErrRedirect);
+    return NextResponse.redirect(`${baseUrl}/?google_error=server_error#google`);
   }
 }

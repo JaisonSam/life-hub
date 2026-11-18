@@ -4,16 +4,16 @@ import { NextResponse } from "next/server";
 export async function GET() {
   const cookieStore = await cookies();
 
+  const gcalToken = cookieStore.get("gcal_access_token")?.value;
+  const gdriveToken = cookieStore.get("gdrive_access_token")?.value;
+  const ytToken = cookieStore.get("yt_access_token")?.value;
   const googleToken = cookieStore.get("google_access_token")?.value;
-  const gdriveToken = cookieStore.get("gdrive_access_token")?.value || googleToken;
-  const ytToken = cookieStore.get("yt_access_token")?.value || googleToken;
-  const gcalToken = cookieStore.get("gcal_access_token")?.value || googleToken;
 
   const userName = cookieStore.get("google_user_name")?.value || null;
   const userEmail = cookieStore.get("google_user_email")?.value || null;
   const userPicture = cookieStore.get("google_user_picture")?.value || null;
 
-  const isConnected = !!(googleToken || gdriveToken || ytToken || gcalToken);
+  const isConnected = !!(gcalToken || gdriveToken || ytToken || googleToken);
 
   return NextResponse.json({
     connected: isConnected,
@@ -24,7 +24,7 @@ export async function GET() {
     },
     services: {
       calendar: {
-        connected: !!gcalToken,
+        connected: !!(gcalToken || googleToken),
         name: "Google Calendar",
         description: "Live schedule, meetings & agenda",
       },

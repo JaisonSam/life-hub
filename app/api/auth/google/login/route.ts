@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const service = searchParams.get("service") || "calendar";
+
   const host = request.headers.get("host") || "localhost:3000";
   const protocol = host.includes("localhost") ? "http" : "https";
   
@@ -18,22 +21,44 @@ export async function GET(request: Request) {
     );
   }
 
-  // Unified Google Scopes for Profile, Calendar, Drive, and YouTube
-  const scopes = [
-    "openid",
-    "https://www.googleapis.com/auth/userinfo.profile",
-    "https://www.googleapis.com/auth/userinfo.email",
-    "https://www.googleapis.com/auth/calendar.readonly",
-    "https://www.googleapis.com/auth/drive.readonly",
-    "https://www.googleapis.com/auth/drive.file",
-    "https://www.googleapis.com/auth/youtube.readonly",
-  ].join(" ");
+  // Google OAuth forbids requesting Drive and YouTube in the same request.
+  // We use Incremental Authorization (service-specific scopes + include_granted_scopes=true)
+  let scopes: string[] = [];
+  let state = "google_calendar";
+
+  if (service === "drive") {
+    scopes = [
+      "openid",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/drive.readonly",
+      "https://www.googleapis.com/auth/drive.file",
+    ];
+    state = "google_drive";
+  } else if (service === "youtube") {
+    scopes = [
+      "openid",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/youtube.readonly",
+    ];
+    state = "google_youtube";
+  } else {
+    // Default: Google Calendar & Profile
+    scopes = [
+      "openid",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/calendar.readonly",
+    ];
+    state = "google_calendar";
+  }
 
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
     redirectUri
   )}&response_type=code&scope=${encodeURIComponent(
-    scopes
-  )}&access_type=offline&prompt=consent&state=google_unified`;
+    scopes.join(" ")
+  )}&access_type=offline&prompt=consent&include_granted_scopes=true&state=${state}`;
 
   return NextResponse.redirect(authUrl);
 }

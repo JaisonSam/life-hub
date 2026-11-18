@@ -22,6 +22,7 @@ import {
   Check,
   Info,
   HelpCircle,
+  Plus,
 } from "lucide-react";
 
 interface GoogleServiceStatus {
@@ -121,11 +122,20 @@ export default function GoogleConnectedAppsDeck() {
       const googleError = params.get("google_error") || params.get("gdrive_error") || params.get("yt_error");
       const googleDisconnected = params.get("google_disconnected");
 
-      if (googleConnected === "true") {
+      if (googleConnected) {
+        const serviceName =
+          googleConnected === "calendar"
+            ? "Google Calendar"
+            : googleConnected === "drive"
+            ? "Google Drive"
+            : googleConnected === "youtube"
+            ? "YouTube Music"
+            : "Google Account";
+
         setUrlMessage({
           type: "success",
-          title: "Google Account Connected",
-          description: "Your Google services are authenticated and actively synchronizing data into Life Hub.",
+          title: `${serviceName} Connected Successfully!`,
+          description: "Permissions granted. Your live data is now syncing into your Life Hub dashboard.",
         });
       } else if (googleDisconnected === "true") {
         setUrlMessage({
@@ -134,7 +144,7 @@ export default function GoogleConnectedAppsDeck() {
           description: "You have securely signed out of your Google session. Local authorization cookies have been cleared.",
         });
       } else if (googleError) {
-        setShowGuide(true); // Automatically expand troubleshooting guide on error
+        setShowGuide(true);
         if (googleError === "access_denied") {
           setUrlMessage({
             type: "error",
@@ -158,7 +168,7 @@ export default function GoogleConnectedAppsDeck() {
           setUrlMessage({
             type: "error",
             title: "Connection Error",
-            description: `Google returned error code: ${googleError}. Follow the setup checklist below to resolve it.`,
+            description: `Google returned: ${googleError}. Follow the setup checklist below to resolve it.`,
           });
         }
       }
@@ -166,6 +176,10 @@ export default function GoogleConnectedAppsDeck() {
   }, []);
 
   const isConnected = !!status?.connected;
+  const isCalConnected = !!status?.services.calendar.connected;
+  const isDriveConnected = !!status?.services.drive.connected;
+  const isYtConnected = !!status?.services.youtube.connected;
+  const allConnected = isCalConnected && isDriveConnected && isYtConnected;
 
   return (
     <div className="space-y-6">
@@ -194,7 +208,7 @@ export default function GoogleConnectedAppsDeck() {
             </div>
             <button
               onClick={() => setUrlMessage(null)}
-              className="text-xs opacity-60 hover:opacity-100 px-2 py-1 rounded bg-black/30 font-mono"
+              className="text-xs opacity-60 hover:opacity-100 px-2 py-1 rounded bg-black/30 font-mono cursor-pointer"
             >
               Dismiss
             </button>
@@ -205,7 +219,7 @@ export default function GoogleConnectedAppsDeck() {
       {/* 1. MASTER GOOGLE ACCOUNT BANNER */}
       <div className="p-6 sm:p-8 rounded-3xl bg-[#14151b] border border-[#232530] shadow-2xl relative overflow-hidden">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2 max-w-2xl">
+          <div className="space-y-3 max-w-2xl">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-neutral-900 border border-neutral-700 flex items-center justify-center text-white shadow-md">
                 <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
@@ -232,9 +246,45 @@ export default function GoogleConnectedAppsDeck() {
               </div>
             </div>
 
+            {/* Service Status Badges */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-mono">
+              <span
+                className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${
+                  isCalConnected
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                    : "bg-neutral-900 border-neutral-800 text-neutral-400"
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isCalConnected ? "bg-emerald-400" : "bg-neutral-500"}`} />
+                Calendar: {isCalConnected ? "Connected" : "Ready"}
+              </span>
+
+              <span
+                className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${
+                  isDriveConnected
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                    : "bg-neutral-900 border-neutral-800 text-neutral-400"
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isDriveConnected ? "bg-emerald-400" : "bg-neutral-500"}`} />
+                Drive: {isDriveConnected ? "Connected" : "Ready"}
+              </span>
+
+              <span
+                className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${
+                  isYtConnected
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                    : "bg-neutral-900 border-neutral-800 text-neutral-400"
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isYtConnected ? "bg-emerald-400" : "bg-neutral-500"}`} />
+                YouTube: {isYtConnected ? "Connected" : "Ready"}
+              </span>
+            </div>
+
             {/* Account Details if Connected */}
             {isConnected && (
-              <div className="flex items-center gap-3 pt-2 text-xs font-mono text-neutral-300">
+              <div className="flex items-center gap-3 pt-1 text-xs font-mono text-neutral-300">
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900/80 border border-neutral-800">
                   <User className="w-3.5 h-3.5 text-neutral-400" />
                   <span className="font-semibold text-white">{status?.user.name || "Jaison"}</span>
@@ -273,7 +323,7 @@ export default function GoogleConnectedAppsDeck() {
             {isConnected ? (
               <a
                 href="/api/auth/google/logout"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-red-500/10 hover:border-red-500/30 text-neutral-400 hover:text-red-300 transition-all"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-red-500/10 hover:border-red-500/30 text-neutral-400 hover:text-red-300 transition-all cursor-pointer"
                 title="Disconnect Google Account"
               >
                 <LogOut className="w-3.5 h-3.5" />
@@ -281,8 +331,8 @@ export default function GoogleConnectedAppsDeck() {
               </a>
             ) : (
               <a
-                href="/api/auth/google/login"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold shadow-lg shadow-white/10 transition-all"
+                href="/api/auth/google/login?service=calendar"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold shadow-lg shadow-white/10 transition-all cursor-pointer"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z" />
@@ -306,7 +356,7 @@ export default function GoogleConnectedAppsDeck() {
             </div>
             <button
               onClick={() => setShowGuide(false)}
-              className="text-xs text-neutral-400 hover:text-white px-2 py-1 rounded bg-neutral-900 border border-neutral-800"
+              className="text-xs text-neutral-400 hover:text-white px-2 py-1 rounded bg-neutral-900 border border-neutral-800 cursor-pointer"
             >
               Close
             </button>
@@ -443,18 +493,19 @@ export default function GoogleConnectedAppsDeck() {
                 </div>
               </div>
 
-              {calendarEvents.length > 0 ? (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-semibold">
-                  {calendarEvents.length} Events Synced
-                </span>
-              ) : isConnected ? (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 font-mono">
-                  Synced (0 Events)
+              {isCalConnected ? (
+                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {calendarEvents.length} Synced
                 </span>
               ) : (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 font-mono">
-                  Not Connected
-                </span>
+                <a
+                  href="/api/auth/google/login?service=calendar"
+                  className="text-[11px] px-3 py-1 rounded-full bg-white hover:bg-neutral-200 text-black font-bold font-mono transition-all flex items-center gap-1 shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Connect</span>
+                </a>
               )}
             </div>
 
@@ -489,9 +540,9 @@ export default function GoogleConnectedAppsDeck() {
 
               {calendarEvents.length === 0 && (
                 <div className="p-4 rounded-xl bg-neutral-900/40 border border-neutral-800/60 text-center text-xs text-neutral-500">
-                  {isConnected
+                  {isCalConnected
                     ? "No upcoming events scheduled in the next 60 days."
-                    : "Connect your Google account above to populate your live Calendar agenda."}
+                    : "Click 'Connect' above to authorize your Google Calendar feed."}
                 </div>
               )}
             </div>
@@ -524,18 +575,19 @@ export default function GoogleConnectedAppsDeck() {
                 </div>
               </div>
 
-              {driveFiles.length > 0 ? (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-semibold">
-                  {driveFiles.length} Ebooks / Files
-                </span>
-              ) : isConnected ? (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 font-mono">
-                  Synced (0 Files)
+              {isDriveConnected ? (
+                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {driveFiles.length} Synced
                 </span>
               ) : (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 font-mono">
-                  Not Connected
-                </span>
+                <a
+                  href="/api/auth/google/login?service=drive"
+                  className="text-[11px] px-3 py-1 rounded-full bg-white hover:bg-neutral-200 text-black font-bold font-mono transition-all flex items-center gap-1 shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Connect</span>
+                </a>
               )}
             </div>
 
@@ -570,9 +622,9 @@ export default function GoogleConnectedAppsDeck() {
 
               {driveFiles.length === 0 && (
                 <div className="p-4 rounded-xl bg-neutral-900/40 border border-neutral-800/60 text-center text-xs text-neutral-500">
-                  {isConnected
+                  {isDriveConnected
                     ? "No files found in 'Kobo eReader' folder."
-                    : "Connect your Google account above to browse your Drive books and documents."}
+                    : "Click 'Connect' above to link your Google Drive vault."}
                 </div>
               )}
             </div>
@@ -605,18 +657,19 @@ export default function GoogleConnectedAppsDeck() {
                 </div>
               </div>
 
-              {ytPlaylists.length > 0 ? (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-semibold">
-                  {ytPlaylists.length} Playlists
-                </span>
-              ) : isConnected ? (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 font-mono">
-                  Synced (0 Playlists)
+              {isYtConnected ? (
+                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {ytPlaylists.length} Synced
                 </span>
               ) : (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 font-mono">
-                  Not Connected
-                </span>
+                <a
+                  href="/api/auth/google/login?service=youtube"
+                  className="text-[11px] px-3 py-1 rounded-full bg-white hover:bg-neutral-200 text-black font-bold font-mono transition-all flex items-center gap-1 shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Connect</span>
+                </a>
               )}
             </div>
 
@@ -649,9 +702,9 @@ export default function GoogleConnectedAppsDeck() {
 
               {ytPlaylists.length === 0 && (
                 <div className="p-4 rounded-xl bg-neutral-900/40 border border-neutral-800/60 text-center text-xs text-neutral-500">
-                  {isConnected
+                  {isYtConnected
                     ? "No public playlists found in YouTube account."
-                    : "Connect your Google account above to load your personal YouTube Music library."}
+                    : "Click 'Connect' above to link your YouTube Music account."}
                 </div>
               )}
             </div>
@@ -699,7 +752,7 @@ export default function GoogleConnectedAppsDeck() {
                 href={app.url}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3.5 rounded-2xl bg-neutral-900/60 border border-neutral-800 hover:border-neutral-600 hover:bg-neutral-800/60 transition-all flex flex-col items-center justify-center text-center space-y-1.5 group"
+                className="p-3.5 rounded-2xl bg-neutral-900/60 border border-neutral-800 hover:border-neutral-600 hover:bg-neutral-800/60 transition-all flex flex-col items-center justify-center text-center space-y-1.5 group cursor-pointer"
               >
                 <AppIcon className="w-5 h-5 text-neutral-300 group-hover:text-white transition-colors" />
                 <span className="text-xs font-bold text-white group-hover:underline">{app.name}</span>
