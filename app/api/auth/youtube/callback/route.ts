@@ -11,10 +11,13 @@ export async function GET(request: Request) {
   const baseUrl = `${protocol}://${host}`;
   const redirectUri = `${baseUrl}/api/auth/youtube/callback`;
 
+  const isUnified = state === "google_unified";
   const isGDrive = state === "gdrive";
-  const errorRedirect = isGDrive
+  const errorRedirect = isUnified
+    ? `${baseUrl}/?google_error=access_denied#google`
+    : isGDrive
     ? `${baseUrl}/?gdrive_error=access_denied#books`
-    : `${baseUrl}/?yt_error=access_denied`;
+    : `${baseUrl}/?yt_error=access_denied#music`;
 
   if (error || !code) {
     console.error("Google OAuth error or denied:", error);
@@ -25,9 +28,11 @@ export async function GET(request: Request) {
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    const credError = isGDrive
+    const credError = isUnified
+      ? `${baseUrl}/?google_error=missing_credentials#google`
+      : isGDrive
       ? `${baseUrl}/?gdrive_error=missing_credentials#books`
-      : `${baseUrl}/?yt_error=missing_credentials`;
+      : `${baseUrl}/?yt_error=missing_credentials#music`;
     return NextResponse.redirect(credError);
   }
 
@@ -51,26 +56,115 @@ export async function GET(request: Request) {
 
     if (!tokenResponse.ok || !tokenData.access_token) {
       console.error("Failed to exchange token:", tokenData);
-      const failRedirect = isGDrive
+      const failRedirect = isUnified
+        ? `${baseUrl}/?google_error=token_exchange_failed#google`
+        : isGDrive
         ? `${baseUrl}/?gdrive_error=token_exchange_failed#books`
-        : `${baseUrl}/?yt_error=token_exchange_failed`;
+        : `${baseUrl}/?yt_error=token_exchange_failed#music`;
       return NextResponse.redirect(failRedirect);
     }
 
-    // Success response
-    const successUrl = isGDrive
+    // Success response URL
+    const successUrl = isUnified
+      ? `${baseUrl}/?google_connected=true#google`
+      : isGDrive
       ? `${baseUrl}/?gdrive_connected=true#books`
       : `${baseUrl}/?yt_connected=true#music`;
 
     const response = NextResponse.redirect(successUrl);
 
-    if (isGDrive) {
+    // If unified login or gdrive, fetch Google User profile
+    let userName = "";
+    let userEmail = "";
+    let userPic = "";
+    try {
+      const userRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+        headers: { Authorization: `Bearer ${tokenData.access_token}` },
+      });
+      if (userRes.ok) {
+        const userInfo = await userRes.json();
+        userName = userInfo.name || "";
+        userEmail = userInfo.email || "";
+        userPic = userInfo.picture || "";
+      }
+    } catch (e) {
+      console.warn("Could not fetch user profile info:", e);
+    }
+
+    const cookieMaxAge = tokenData.expires_in || 3600;
+    const refreshMaxAge = 60 * 24 * 60 * 60; // 60 days
+
+    // Store user identity cookies if available
+    if (userName) {
+      response.cookies.set("google_user_name", userName, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: refreshMaxAge,
+        path: "/",
+      });
+    }
+    if (userEmail) {
+      response.cookies.set("google_user_email", userEmail, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: refreshMaxAge,
+        path: "/",
+      });
+    }
+    if (userPic) {
+      response.cookies.set("google_user_picture", userPic, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: refreshMaxAge,
+        path: "/",
+      });
+    }
+
+    if (isUnified) {
+      // Store all unified tokens across Drive, YouTube, Calendar
+      const tokensToSet = [
+        "google_access_token",
+        "gdrive_access_token",
+        "yt_access_token",
+        "gcal_access_token",
+      ];
+      tokensToSet.forEach((key) => {
+        response.cookies.set(key, tokenData.access_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: cookieMaxAge,
+          path: "/",
+        });
+      });
+
+      if (tokenData.refresh_token) {
+        const refreshTokensToSet = [
+          "google_refresh_token",
+          "gdrive_refresh_token",
+          "yt_refresh_token",
+          "gcal_refresh_token",
+        ];
+        refreshTokensToSet.forEach((key) => {
+          response.cookies.set(key, tokenData.refresh_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: refreshMaxAge,
+            path: "/",
+          });
+        });
+      }
+    } else if (isGDrive) {
       // Store Google Drive tokens
       response.cookies.set("gdrive_access_token", tokenData.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: tokenData.expires_in || 3600,
+        maxAge: cookieMaxAge,
         path: "/",
       });
 
@@ -79,7 +173,7 @@ export async function GET(request: Request) {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
-          maxAge: 60 * 24 * 60 * 60, // 60 days
+          maxAge: refreshMaxAge,
           path: "/",
         });
       }
@@ -89,7 +183,7 @@ export async function GET(request: Request) {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: tokenData.expires_in || 3600,
+        maxAge: cookieMaxAge,
         path: "/",
       });
 
@@ -98,7 +192,7 @@ export async function GET(request: Request) {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
-          maxAge: 30 * 24 * 60 * 60, // 30 days
+          maxAge: refreshMaxAge,
           path: "/",
         });
       }
@@ -107,9 +201,11 @@ export async function GET(request: Request) {
     return response;
   } catch (err) {
     console.error("OAuth exchange exception:", err);
-    const serverErrRedirect = isGDrive
+    const serverErrRedirect = isUnified
+      ? `${baseUrl}/?google_error=server_error#google`
+      : isGDrive
       ? `${baseUrl}/?gdrive_error=server_error#books`
-      : `${baseUrl}/?yt_error=server_error`;
+      : `${baseUrl}/?yt_error=server_error#music`;
     return NextResponse.redirect(serverErrRedirect);
   }
 }

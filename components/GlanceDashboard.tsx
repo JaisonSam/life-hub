@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import {
+  Calendar,
   Calendar as CalendarIcon,
+  HardDrive,
+  Music,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
@@ -67,7 +70,7 @@ import {
 } from "@/lib/growwPortfolio";
 
 interface GlanceDashboardProps {
-  onSelectTab: (tabId: "career" | "gmat" | "books" | "habits" | "projects" | "music") => void;
+  onSelectTab: (tabId: "google" | "books" | "habits" | "projects" | "music") => void;
   currentTime?: string;
   currentDate?: string;
 }
@@ -100,7 +103,7 @@ export default function GlanceDashboard({
   const [showAddActivityForm, setShowAddActivityForm] = useState<boolean>(false);
   const [newActTitle, setNewActTitle] = useState<string>("");
   const [newActTime, setNewActTime] = useState<string>("09:30 AM");
-  const [newActCategory, setNewActCategory] = useState<PlannedActivity["category"]>("Career");
+  const [newActCategory, setNewActCategory] = useState<PlannedActivity["category"]>("Personal");
   const [newActAlsoGCal, setNewActAlsoGCal] = useState<boolean>(true);
 
   // 5. Indian Market Trends & Groww Portfolio Tracker State
@@ -770,9 +773,22 @@ export default function GlanceDashboard({
   const completedHabitsCount = safeHabits.filter((h) => h?.completedToday).length;
   const habitPct = safeHabits.length > 0 ? Math.round((completedHabitsCount / safeHabits.length) * 100) : 0;
 
-  // 4. Center Column Sub-Tabs
-  const [centerSubTab, setCenterSubTab] = useState<"career" | "gmat" | "tech">("career");
-  const [showMoreJobs, setShowMoreJobs] = useState(false);
+  // 4. Center Column Sub-Tabs (GOOGLE APPS | TECH INTEL)
+  const [centerSubTab, setCenterSubTab] = useState<"google" | "tech">("google");
+
+  // Auto-fetch real Google Calendar events if connected via OAuth
+  useEffect(() => {
+    fetch("/api/calendar/events")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.connected && data.events && data.events.length > 0) {
+          setCustomActivities(data.events);
+          setGcalStatus(`Synced ${data.events.length} live Google Calendar events`);
+          setGcalLastSynced(new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Calendar calculations
   const { monthName, year, weekNumber, calendarDays, currentDayOfMonth } = useMemo(() => {
@@ -840,14 +856,6 @@ export default function GlanceDashboard({
       currentDayOfMonth: todayDate.getDate(),
     };
   }, [calendarDate, todayDate]);
-
-  // GMAT countdown calculation (target: Dec 20, 2026)
-  const gmatDaysRemaining = useMemo(() => {
-    const target = new Date(todayDate.getFullYear(), 11, 20); // Dec 20
-    const diff = target.getTime() - todayDate.getTime();
-    return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-  }, [todayDate]);
-
 
   // Selected date derivations for day-to-day planned activities
   const selectedDateObj = useMemo(() => {
@@ -1296,12 +1304,10 @@ export default function GlanceDashboard({
                           onChange={(e) => setNewActCategory(e.target.value as any)}
                           className="text-xs px-2 py-1 rounded bg-[#101116] border border-neutral-800 text-neutral-200 flex-1 font-mono"
                         >
-                          <option value="Career">Career</option>
-                          <option value="GMAT">GMAT</option>
+                          <option value="Personal">Personal</option>
+                          <option value="Health">Health</option>
                           <option value="Spiritual">Spiritual</option>
                           <option value="Agri-Tech">Agri-Tech</option>
-                          <option value="Health">Health</option>
-                          <option value="Personal">Personal</option>
                         </select>
                       </div>
                       <label className="flex items-center gap-2 text-[11px] font-mono text-neutral-300 cursor-pointer pt-0.5 select-none">
@@ -1495,27 +1501,15 @@ export default function GlanceDashboard({
           <div className="p-4 sm:p-5 rounded-2xl bg-[#14151b] border border-[#232530] shadow-lg space-y-4">
             <div className="flex items-center gap-5 border-b border-[#232530] pb-2 text-xs font-mono tracking-wider uppercase font-bold">
               <button
-                onClick={() => setCenterSubTab("career")}
+                onClick={() => setCenterSubTab("google")}
                 className={`transition-colors flex items-center gap-1.5 relative ${
-                  centerSubTab === "career"
+                  centerSubTab === "google"
                     ? "text-white after:absolute after:-bottom-[9px] after:left-0 after:right-0 after:h-[2px] after:bg-white"
                     : "text-neutral-400 hover:text-white"
                 }`}
               >
-                <span>CAREER RADAR</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-300 font-normal">BLR</span>
-              </button>
-
-              <button
-                onClick={() => setCenterSubTab("gmat")}
-                className={`transition-colors flex items-center gap-1.5 relative ${
-                  centerSubTab === "gmat"
-                    ? "text-white after:absolute after:-bottom-[9px] after:left-0 after:right-0 after:h-[2px] after:bg-white"
-                    : "text-neutral-400 hover:text-white"
-                }`}
-              >
-                <span>GMAT INTEL</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-300 font-normal">705+</span>
+                <span>GOOGLE CONNECTED APPS</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-300 font-normal">API</span>
               </button>
 
               <button
@@ -1528,217 +1522,98 @@ export default function GlanceDashboard({
               >
                 <span>TECH INTEL</span>
               </button>
-
-
             </div>
 
             {/* 2.2 HIGH-DENSITY FEED CONTENT */}
-            {centerSubTab === "career" && (
-              <div className="space-y-4">
-                {/* Job Item 1 */}
-                <div className="space-y-1">
-                  <a
-                    href="https://www.se.com/in/en/about-us/careers/job-details/senior-business-analyst/008XYZ/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
-                  >
-                    <span>Senior ERP Business Analyst • Global Energy Automation</span>
-                    <span className="text-neutral-400 text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
-                  </a>
-                  <div className="text-xs font-mono text-neutral-300 flex items-center gap-2 flex-wrap">
-                    <span className="text-neutral-400">6h</span>
-                    <span>·</span>
-                    <span className="text-white font-medium">Schneider Electric Bengaluru</span>
-                    <span>·</span>
-                    <span className="text-emerald-400 font-semibold">Hybrid · ₹24-32 LPA</span>
-                    <span>·</span>
-                    <span className="text-neutral-400">Recruiter: SE Talent Acquisition ↗</span>
-                  </div>
-                </div>
-
-                {/* Job Item 2 */}
-                <div className="space-y-1">
-                  <a
-                    href="https://jobs.siemens.com/careers?query=ERP+Functional+Consultant+Bangalore"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
-                  >
-                    <span>Principal Functional Consultant • SAP S/4HANA & Digital Core</span>
-                    <span className="text-neutral-400 text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
-                  </a>
-                  <div className="text-xs font-mono text-neutral-300 flex items-center gap-2 flex-wrap">
-                    <span className="text-neutral-400">1d</span>
-                    <span>·</span>
-                    <span className="text-white font-medium">Siemens Technology India</span>
-                    <span>·</span>
-                    <span className="text-emerald-400 font-semibold">Electronic City, Bangalore · ₹26-35 LPA</span>
-                    <span>·</span>
-                    <span className="text-neutral-400">jobs.siemens.com ↗</span>
-                  </div>
-                </div>
-
-                {/* Job Item 3 */}
-                <div className="space-y-1">
-                  <a
-                    href="https://apply.deloitte.com/careers/SearchJobs/ERP%20Transformation%20Bangalore"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
-                  >
-                    <span>ERP Transformation Solutions Architect • Cloud ERP Modernization</span>
-                    <span className="text-neutral-400 text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
-                  </a>
-                  <div className="text-xs font-mono text-neutral-300 flex items-center gap-2 flex-wrap">
-                    <span className="text-neutral-400">2d</span>
-                    <span>·</span>
-                    <span className="text-white font-medium">Deloitte Consulting India</span>
-                    <span>·</span>
-                    <span className="text-emerald-400 font-semibold">RMZ EcoWorld, BLR · ₹28-38 LPA</span>
-                    <span>·</span>
-                    <span className="text-neutral-400">apply.deloitte.com ↗</span>
-                  </div>
-                </div>
-
-                {/* Job Item 4 */}
-                <div className="space-y-1">
-                  <a
-                    href="https://careers.abb/global/en/search-results?keywords=ERP%20Supply%20Chain%20Bangalore"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
-                  >
-                    <span>Supply Chain & ERP Systems Lead • Industrial Discrete Mfg</span>
-                    <span className="text-neutral-400 text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
-                  </a>
-                  <div className="text-xs font-mono text-neutral-300 flex items-center gap-2 flex-wrap">
-                    <span className="text-neutral-400">3d</span>
-                    <span>·</span>
-                    <span className="text-white font-medium">ABB India Nelamangala Campus</span>
-                    <span>·</span>
-                    <span className="text-emerald-400 font-semibold">₹22-30 LPA</span>
-                    <span>·</span>
-                    <span className="text-neutral-400">Workday Portal ↗</span>
-                  </div>
-                </div>
-
-                {/* Show More Expandable Items */}
-                {showMoreJobs && (
-                  <>
-                    <div className="space-y-1 animate-in fade-in duration-300">
-                      <a
-                        href="https://careers.honeywell.com/us/en/search-results?keywords=ERP%20Business%20Analyst%20Bangalore"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
-                      >
-                        <span>Enterprise Applications Lead BA • Connected Enterprise</span>
-                        <span className="text-neutral-400 text-xs">↗</span>
-                      </a>
-                      <div className="text-xs font-mono text-neutral-300 flex items-center gap-2 flex-wrap">
-                        <span className="text-neutral-400">4d</span>
-                        <span>·</span>
-                        <span className="text-white font-medium">Honeywell Bangalore</span>
-                        <span>·</span>
-                        <span className="text-emerald-400 font-semibold">₹23-31 LPA</span>
-                        <span>·</span>
-                        <span className="text-neutral-400">honeywell.com ↗</span>
-                      </div>
+            {centerSubTab === "google" && (
+              <div className="space-y-3.5">
+                {/* Google Calendar Live Snippet */}
+                <div className="p-3 rounded-xl bg-[#181920] border border-[#262834] flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white">
+                      <Calendar className="w-3.5 h-3.5" />
                     </div>
-
-                    <div className="space-y-1 animate-in fade-in duration-300">
-                      <a
-                        href="https://careers.microsoft.com/us/en/search-results?keywords=ERP%20Supply%20Chain%20Bangalore"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-white hover:text-neutral-300 font-semibold text-xs sm:text-sm leading-snug flex items-center gap-1 group transition-colors"
-                      >
-                        <span>Dynamics 365 Finance & Operations Functional Architect</span>
-                        <span className="text-neutral-400 text-xs">↗</span>
-                      </a>
-                      <div className="text-xs font-mono text-neutral-300 flex items-center gap-2 flex-wrap">
-                        <span className="text-neutral-400">5d</span>
-                        <span>·</span>
-                        <span className="text-white font-medium">Microsoft India R&D</span>
-                        <span>·</span>
-                        <span className="text-emerald-400 font-semibold">₹32-45 LPA</span>
-                        <span>·</span>
-                        <span className="text-neutral-400">careers.microsoft.com ↗</span>
-                      </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">Google Calendar</span>
+                      <span className="text-[10px] text-neutral-400 font-mono">
+                        {customActivities.length} activities scheduled
+                      </span>
                     </div>
-                  </>
-                )}
-
-                <div className="flex items-center justify-between pt-1">
-                  <button
-                    onClick={() => setShowMoreJobs(!showMoreJobs)}
-                    className="text-xs font-mono text-neutral-300 hover:text-white transition-colors uppercase tracking-wider flex items-center gap-1 font-semibold"
+                  </div>
+                  <a
+                    href="https://calendar.google.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-mono text-neutral-300 hover:text-white flex items-center gap-1 font-semibold"
                   >
-                    <span>{showMoreJobs ? "SHOW LESS ⌃" : "SHOW MORE ⌄"}</span>
-                  </button>
+                    <span>Open GCal</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </a>
+                </div>
 
-                  <button
-                    onClick={() => onSelectTab("career")}
-                    className="text-xs font-mono text-white hover:text-neutral-300 transition-colors uppercase tracking-wider flex items-center gap-1 font-bold"
+                {/* Google Drive Kobo Shelf Snippet */}
+                <div className="p-3 rounded-xl bg-[#181920] border border-[#262834] flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white">
+                      <HardDrive className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">Google Drive</span>
+                      <span className="text-[10px] text-neutral-400 font-mono">
+                        Cloud Vault & Kobo eReader Shelf
+                      </span>
+                    </div>
+                  </div>
+                  <a
+                    href="https://drive.google.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-mono text-neutral-300 hover:text-white flex items-center gap-1 font-semibold"
                   >
-                    <span>Full Career Brand Hub</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
+                    <span>Open Drive</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </a>
+                </div>
+
+                {/* YouTube Music Snippet */}
+                <div className="p-3 rounded-xl bg-[#181920] border border-[#262834] flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white">
+                      <Music className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">YouTube Music</span>
+                      <span className="text-[10px] text-neutral-400 font-mono">
+                        Personal Playlists & Stream
+                      </span>
+                    </div>
+                  </div>
+                  <a
+                    href="https://music.youtube.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-mono text-neutral-300 hover:text-white flex items-center gap-1 font-semibold"
+                  >
+                    <span>Open YT Music</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </a>
+                </div>
+
+                {/* Open Full Google Hub button */}
+                <div className="pt-1 flex items-center justify-between border-t border-[#232530] text-xs font-mono">
+                  <a
+                    href="/api/auth/google/login"
+                    className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold"
+                  >
+                    <span>⚡ Connect / Sync Google Account</span>
+                  </a>
+                  <button
+                    onClick={() => onSelectTab("google")}
+                    className="text-white hover:text-neutral-300 font-bold flex items-center gap-1"
+                  >
+                    <span>Full Google Hub →</span>
                   </button>
                 </div>
-              </div>
-            )}
-
-            {centerSubTab === "gmat" && (
-              <div className="space-y-4">
-                <div className="p-3.5 rounded-xl bg-[#1a1b23] border border-[#282a37] space-y-2">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-white font-bold uppercase tracking-wider">
-                      Target: 705+ Focus Edition (99th %ile)
-                    </span>
-                    <span className="text-neutral-300 font-semibold">{gmatDaysRemaining} Days to Exam</span>
-                  </div>
-                  <div className="text-xs text-neutral-200 leading-relaxed font-sans">
-                    Focus: <strong className="text-white">Data Insights (Multi-Source & Tables)</strong> & Quant Algebra traps. Pacing rule: max 2m15s per question; blind-guess at 2m30s to protect section completion.
-                  </div>
-                  <div className="flex items-center gap-4 text-[11px] font-mono text-neutral-300 pt-1 border-t border-[#232530]">
-                    <span>Diagnostic: <strong className="text-white">615</strong></span>
-                    <span>Practice 2: <strong className="text-neutral-200">645</strong> (+30)</span>
-                    <span>Target: <strong className="text-emerald-400">705+</strong></span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="text-white font-semibold text-xs sm:text-sm">
-                    Concept of the Day: Work-Rate Harmonized Inverses
-                  </div>
-                  <div className="text-xs font-mono text-neutral-300 flex items-center gap-2">
-                    <span className="text-neutral-400">Daily Formula</span>
-                    <span>·</span>
-                    <span className="text-white font-medium">1/A + 1/B = 1/Total</span>
-                    <span>·</span>
-                    <span className="text-neutral-400">Never average the speeds directly ↗</span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="text-white font-semibold text-xs sm:text-sm">
-                    Critical Reasoning: Assumption vs Strengthener Scope
-                  </div>
-                  <div className="text-xs font-mono text-neutral-300 flex items-center gap-2">
-                    <span className="text-neutral-400">Negation Test</span>
-                    <span>·</span>
-                    <span className="text-white font-medium">If negated assumption kills conclusion, it's correct</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => onSelectTab("gmat")}
-                  className="text-xs font-mono text-white hover:text-neutral-300 transition-colors uppercase tracking-wider flex items-center gap-1 pt-1 font-bold"
-                >
-                  <span>Launch GMAT Focus Command Center</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
               </div>
             )}
 
@@ -1842,7 +1717,7 @@ export default function GlanceDashboard({
                 },
                 {
                   id: "f-1",
-                  title: "GMAT 715+ Quant Lo-Fi",
+                  title: "Deep Focus Ambient Lo-Fi",
                   artist: "Chilled Focus Beats",
                   tag: "80 BPM Lo-Fi",
                   cover: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80",
@@ -2596,7 +2471,7 @@ export default function GlanceDashboard({
                 </button>
               </div>
               <p className="text-[11px] text-neutral-400 font-sans leading-relaxed">
-                Fetches and synchronizes all upcoming Google Calendar meetings, Schneider ERP reviews, and GMAT focus sprints onto your calendar days.
+                Fetches and synchronizes all upcoming Google Calendar meetings, reviews, and agenda items onto your calendar days.
               </p>
             </div>
 
