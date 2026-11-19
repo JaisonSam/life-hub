@@ -36,298 +36,10 @@ import {
   CloudSun,
 } from "lucide-react";
 
-export interface MapLocation {
-  id: string;
-  title: string;
-  query: string;
-  lat: number;
-  lng: number;
-  status: "visited" | "saved" | "want_to_go";
-  category: "corporate" | "agri" | "spiritual" | "gmat" | "transit" | "personal";
-  categoryLabel: string;
-  address: string;
-  notes: string;
-  elevation?: string;
-  microclimate?: string;
-  transitFromBlr?: string;
-  source?: "curated" | "imported" | "custom";
-  visitedDate?: string;
-  targetDate?: string;
-}
+import { TAKEOUT_GOOGLE_PLACES, type MapLocation } from "@/lib/takeoutMapData";
 
-export const DEFAULT_LOCATIONS: MapLocation[] = [
-  // 1. SAVED PLACES (Core Strategic Bases & Anchors)
-  {
-    id: "loc-blr-corp",
-    title: "Schneider Electric Global Hub",
-    query: "Schneider Electric, Bagmane World Technology Center, Bengaluru, Karnataka",
-    lat: 12.9866,
-    lng: 77.6898,
-    status: "saved",
-    category: "corporate",
-    categoryLabel: "Corporate & ERP",
-    address: "Outer Ring Road, Mahadevapura, Bengaluru, Karnataka 560048",
-    notes: "Senior ERP Business Analyst operational base • Global ERP governance, APAC milestone syncs, and financial ledger review.",
-    elevation: "920m ASL",
-    microclimate: "24°C • Urban Tech Corridor",
-    transitFromBlr: "Base Station (0 km)",
-    source: "curated",
-  },
-  {
-    id: "loc-tenkasi-farm",
-    title: "Veerakeralapudur Agribusiness Smart Farm",
-    query: "Veerakeralapudur, Tenkasi District, Tamil Nadu",
-    lat: 8.9564,
-    lng: 77.4428,
-    status: "saved",
-    category: "agri",
-    categoryLabel: "Agri-Tech & Farm",
-    address: "Veerakeralapudur Taluk, Tenkasi District, Tamil Nadu 627861",
-    notes: "5-Acre Precision Guava Orchard, Taiwan Pink rootstocks, IoT mesh sensor station, and solar-powered drip irrigation network.",
-    elevation: "115m ASL",
-    microclimate: "29°C • Western Ghats Rain Shadow",
-    transitFromBlr: "562 km (NH 44 / Train / Flight via IXM)",
-    source: "curated",
-  },
-  {
-    id: "loc-gmat-test",
-    title: "Pearson VUE Professional Testing Center",
-    query: "Pearson Professional Centers, Bengaluru, Karnataka",
-    lat: 12.9352,
-    lng: 77.6245,
-    status: "saved",
-    category: "gmat",
-    categoryLabel: "GMAT 705+ Milestone",
-    address: "Koramangala 4th Block, Bengaluru, Karnataka 560034",
-    notes: "Official GMAT Focus Edition appointment testing venue • Target score 705+ (Q85+ / V83+ / DI81+). High-focus test suite.",
-    elevation: "910m ASL",
-    microclimate: "Executive Testing Facility",
-    transitFromBlr: "14 km from Hub",
-    source: "curated",
-  },
-  {
-    id: "loc-blr-airport",
-    title: "Kempegowda International Airport (BLR)",
-    query: "Kempegowda International Airport, Devanahalli, Bengaluru",
-    lat: 13.1986,
-    lng: 77.7066,
-    status: "saved",
-    category: "transit",
-    categoryLabel: "Aviation Gateway",
-    address: "KIAL Rd, Devanahalli, Bengaluru, Karnataka 560300",
-    notes: "Aviation hub connecting weekly executive flight routes to Madurai (IXM) & Tuticorin (TCR) for agribusiness inspections.",
-    elevation: "915m ASL",
-    microclimate: "Airport North Sector",
-    transitFromBlr: "42 km North via Airport Expressway",
-    source: "curated",
-  },
-  {
-    id: "loc-madurai-transit",
-    title: "Madurai Airport Gateway (IXM)",
-    query: "Madurai Airport, Madurai, Tamil Nadu",
-    lat: 9.8345,
-    lng: 78.0934,
-    status: "saved",
-    category: "transit",
-    categoryLabel: "Transit Gateway",
-    address: "Madurai Airport, Madurai, Tamil Nadu 625022",
-    notes: "Key transfer hub connecting 1h 10m flight from Bengaluru with 2h taxi drive to the Veerakeralapudur farm.",
-    elevation: "135m ASL",
-    microclimate: "Southern Plains Transit Hub",
-    transitFromBlr: "435 km South Flight Path",
-    source: "curated",
-  },
-  {
-    id: "loc-tenkasi-junction",
-    title: "Tenkasi Junction Railway Station (TSI)",
-    query: "Tenkasi Junction, Tenkasi, Tamil Nadu",
-    lat: 8.9592,
-    lng: 77.3134,
-    status: "saved",
-    category: "transit",
-    categoryLabel: "Agri Logistics Railhead",
-    address: "Tenkasi Junction, Railway Feeder Rd, Tenkasi, Tamil Nadu 627811",
-    notes: "Rail terminal for overnight express routes (Silambu / Podhigai Express) and freight dispatch for guava harvests.",
-    elevation: "140m ASL",
-    microclimate: "Foothills Railhead",
-    transitFromBlr: "Overnight Train from SBC / SMVB",
-    source: "curated",
-  },
-
-  // 2. PLACES VISITED (Historical Milestones, Spiritual, and Field Inspections)
-  {
-    id: "loc-st-marks",
-    title: "St. Mark's Cathedral & Fellowship",
-    query: "St. Mark's Cathedral, MG Road, Bengaluru, Karnataka",
-    lat: 12.9738,
-    lng: 77.6015,
-    status: "visited",
-    category: "spiritual",
-    categoryLabel: "Spiritual Sanctuary",
-    address: "1, Mahatma Gandhi Rd, Shanthala Nagar, Bengaluru, Karnataka 560001",
-    notes: "Weekly Sunday morning Liturgical sanctuary, Holy Communion worship, choir hymnody, and community fellowship.",
-    elevation: "916m ASL",
-    microclimate: "Heritage Tree Canopy • 23°C",
-    transitFromBlr: "12 km from Tech Park",
-    source: "curated",
-    visitedDate: "Weekly Liturgy",
-  },
-  {
-    id: "loc-bagmane-wtc",
-    title: "Bagmane World Technology Center (WTC)",
-    query: "Bagmane World Technology Center, KR Puram, Bengaluru",
-    lat: 12.9912,
-    lng: 77.6931,
-    status: "visited",
-    category: "corporate",
-    categoryLabel: "Corporate Campus",
-    address: "Mahadevapura, Bengaluru, Karnataka 560048",
-    notes: "Frequent corporate project sprints, ERP cross-functional governance, and partner vendor reviews.",
-    elevation: "918m ASL",
-    microclimate: "Tech Corridor",
-    transitFromBlr: "1 km from SE Base",
-    source: "curated",
-    visitedDate: "Daily Operations",
-  },
-  {
-    id: "loc-tirunelveli-heritage",
-    title: "Tirunelveli Town & Iruttu Kadai Halwa Landmark",
-    query: "Iruttu Kadai Halwa, Tirunelveli, Tamil Nadu",
-    lat: 8.7291,
-    lng: 77.6946,
-    status: "visited",
-    category: "personal",
-    categoryLabel: "Heritage & Culture",
-    address: "East Car Street, Tirunelveli Town, Tamil Nadu 627006",
-    notes: "Visited during Southern transit; world-renowned wheat ghee halwa culinary heritage and local market trade exploration.",
-    elevation: "47m ASL",
-    microclimate: "Tamirabarani River Basin",
-    transitFromBlr: "50 km East of Tenkasi Farm",
-    source: "curated",
-    visitedDate: "Transit Route",
-  },
-  {
-    id: "loc-cubbon-park",
-    title: "Cubbon Park & Central Executive Walk",
-    query: "Cubbon Park, Kasturba Road, Bengaluru, Karnataka",
-    lat: 12.9763,
-    lng: 77.5929,
-    status: "visited",
-    category: "personal",
-    categoryLabel: "Wellness Haven",
-    address: "Kasturba Road, Behind High Court, Bengaluru, Karnataka 560001",
-    notes: "Visited for Saturday morning aerobic walks, botanical biodiversity reflection, and executive calm in Bengaluru.",
-    elevation: "925m ASL",
-    microclimate: "Bamboo & Mahogany Canopy • 22°C",
-    transitFromBlr: "14 km from Hub",
-    source: "curated",
-    visitedDate: "Regular Weekend Walks",
-  },
-  {
-    id: "loc-holy-trinity",
-    title: "Holy Trinity Church (MG Road Circle)",
-    query: "Holy Trinity Church, Trinity Circle, Bengaluru, Karnataka",
-    lat: 12.9727,
-    lng: 77.6206,
-    status: "visited",
-    category: "spiritual",
-    categoryLabel: "Spiritual Heritage",
-    address: "Trinity Circle, MG Road, Bengaluru, Karnataka 560008",
-    notes: "Historical 1851 English Renaissance garrison church; visited for evening devotion, choral recitals, and pipe organ acoustics.",
-    elevation: "920m ASL",
-    microclimate: "Trinity Greenery",
-    transitFromBlr: "9 km West",
-    source: "curated",
-    visitedDate: "Special Services",
-  },
-
-  // 3. WANT TO GO (Future Agribusiness Expansions, Executive Milestones, & Travel)
-  {
-    id: "loc-courtallam-falls",
-    title: "Courtallam Waterfalls & Eco-Agritourism Hub",
-    query: "Courtallam Main Falls, Tenkasi District, Tamil Nadu",
-    lat: 8.9295,
-    lng: 77.2694,
-    status: "want_to_go",
-    category: "agri",
-    categoryLabel: "Agritourism Target",
-    address: "Courtallam, Tenkasi District, Tamil Nadu 627802",
-    notes: "Target destination for Western Ghats herbal mineral water analysis, ecotourism farmstay conceptualization, and farm guest retreats.",
-    elevation: "160m ASL",
-    microclimate: "Southwest Monsoon Spray Zone • 21°C",
-    transitFromBlr: "12 km Southwest of Veerakeralapudur Farm",
-    source: "curated",
-    targetDate: "Next Monsoon",
-  },
-  {
-    id: "loc-iimb",
-    title: "Indian Institute of Management Bangalore (IIMB)",
-    query: "IIM Bangalore, Bannerghatta Road, Bengaluru",
-    lat: 12.8953,
-    lng: 77.6015,
-    status: "want_to_go",
-    category: "gmat",
-    categoryLabel: "Executive Target",
-    address: "Bannerghatta Main Rd, Bilekahalli, Bengaluru, Karnataka 560076",
-    notes: "Premier target institution for Executive Post Graduate MBA and Agribusiness Supply Chain Strategy summits post-GMAT 705+.",
-    elevation: "912m ASL",
-    microclimate: "Granite Stone Campus Sanctuary",
-    transitFromBlr: "22 km South",
-    source: "curated",
-    targetDate: "Post-GMAT 705+",
-  },
-  {
-    id: "loc-tnau-killikulam",
-    title: "TNAU Agricultural College & Research Institute",
-    query: "Agricultural College and Research Institute, Killikulam, Vallanadu, Tamil Nadu",
-    lat: 8.7042,
-    lng: 77.8572,
-    status: "want_to_go",
-    category: "agri",
-    categoryLabel: "Soil Science Research",
-    address: "Killikulam, Vallanadu, Thoothukudi / Tirunelveli Border, Tamil Nadu 628252",
-    notes: "Target research visit for precision soil micronutrient profiling, bio-fertilizer cultures, and ultra-high-density guava pruning seminars.",
-    elevation: "42m ASL",
-    microclimate: "Southern Dry Agro-Climatic Zone",
-    transitFromBlr: "68 km Southeast of Farm",
-    source: "curated",
-    targetDate: "Q1 AgTech Summit",
-  },
-  {
-    id: "loc-iisc-bangalore",
-    title: "Indian Institute of Science (IISc)",
-    query: "Indian Institute of Science, CV Raman Rd, Bengaluru",
-    lat: 13.0219,
-    lng: 77.5671,
-    status: "want_to_go",
-    category: "corporate",
-    categoryLabel: "IoT & Eco-Research",
-    address: "CV Raman Rd, Bengaluru, Karnataka 560012",
-    notes: "Target visit for Center for Sustainable Technologies, solar drip valve telemetry protocols, and LoRaWAN agricultural mesh workshops.",
-    elevation: "935m ASL",
-    microclimate: "Dense Botanical Reserve",
-    transitFromBlr: "18 km Northwest",
-    source: "curated",
-    targetDate: "Summer Workshop",
-  },
-  {
-    id: "loc-shencottah-reserve",
-    title: "Shencottah Border & Aryankavu Ghat Pass",
-    query: "Shencottah, Tenkasi District, Tamil Nadu",
-    lat: 8.9854,
-    lng: 77.2464,
-    status: "want_to_go",
-    category: "agri",
-    categoryLabel: "Highland Spice Frontier",
-    address: "Shencottah Taluk, Tenkasi District, Tamil Nadu 627809",
-    notes: "Border pass connecting Tamil Nadu to Kerala through the Western Ghats; target study for high-value vanilla & Malabar pepper intercropping.",
-    elevation: "240m ASL",
-    microclimate: "Rainforest Transition Gap",
-    transitFromBlr: "16 km West of Farm",
-    source: "curated",
-    targetDate: "Western Ghats Survey",
-  },
-];
+export type { MapLocation };
+export const DEFAULT_LOCATIONS: MapLocation[] = TAKEOUT_GOOGLE_PLACES;
 
 export default function GoogleMapsVisualizer() {
   const [locations, setLocations] = useState<MapLocation[]>(DEFAULT_LOCATIONS);
@@ -370,7 +82,7 @@ export default function GoogleMapsVisualizer() {
       const stored = localStorage.getItem("lifehub_google_map_places");
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed) && parsed.length > 15) {
           // Normalize existing stored places to ensure status property exists
           const normalized = parsed.map((item: any) => ({
             ...item,
@@ -378,8 +90,13 @@ export default function GoogleMapsVisualizer() {
           }));
           setLocations(normalized);
           setActiveLocation(normalized[0]);
+          return;
         }
       }
+      // If no stored places or legacy demo cache (<=15 items), default to the 60 real Takeout places
+      setLocations(TAKEOUT_GOOGLE_PLACES);
+      setActiveLocation(TAKEOUT_GOOGLE_PLACES[0]);
+      localStorage.setItem("lifehub_google_map_places", JSON.stringify(TAKEOUT_GOOGLE_PLACES));
     } catch (e) {
       console.warn("Could not load stored map places:", e);
     }
@@ -540,30 +257,68 @@ export default function GoogleMapsVisualizer() {
         try {
           const json = JSON.parse(text);
 
-          // Format A: Google Takeout Saved Places (GeoJSON)
+          // Format A: Google Takeout Saved Places / Reviews / Labeled Places (GeoJSON)
           if (json.features && Array.isArray(json.features)) {
             importedPlaces = json.features.map((feat: any, idx: number) => {
               const coords = feat.geometry?.coordinates || [77.5946, 12.9716];
-              const title = feat.properties?.Title || feat.properties?.name || `Imported Place ${idx + 1}`;
-              const address = feat.properties?.address || feat.properties?.Location?.Address || title;
-              
+              const lng = Number(coords[0]) || 77.5946;
+              const lat = Number(coords[1]) || 12.9716;
+
+              const locObj = feat.properties?.location;
+              const rawName = feat.properties?.name || feat.properties?.Title || locObj?.name || `Imported Place ${idx + 1}`;
+              const rawAddress = locObj?.address || feat.properties?.address || feat.properties?.Location?.Address || rawName;
+
               let placeStatus = fileStatus;
-              const listName = (feat.properties?.listName || feat.properties?.List || "").toLowerCase();
-              if (listName.includes("want")) placeStatus = "want_to_go";
-              else if (listName.includes("star") || listName.includes("fav")) placeStatus = "saved";
+              let category: MapLocation["category"] = "personal";
+              let categoryLabel = "Google Saved";
+              let notes = feat.properties?.review_text_published || feat.properties?.Comment || "Imported from Google Maps Takeout";
+
+              if (feat.properties?.five_star_rating_published) {
+                placeStatus = "visited";
+                notes = `⭐ ${feat.properties.five_star_rating_published}/5 Rating. ${notes}`;
+                categoryLabel = "Reviewed Place";
+              }
+
+              const lowerTitle = rawName.toLowerCase();
+              let title = rawName;
+              let address = rawAddress;
+
+              if (lowerTitle === "home") {
+                title = "Family Haven (Home Base)";
+                address = address === "Home" ? "Tripunithura, Kochi, Kerala" : address;
+                category = "personal";
+                categoryLabel = "Home Base";
+                placeStatus = "saved";
+              } else if (lowerTitle === "work") {
+                title = "Schneider Electric Global Hub";
+                address = address === "Work" ? "Prestige Tech Park II, Bengaluru" : address;
+                category = "corporate";
+                categoryLabel = "Corporate HQ";
+                placeStatus = "saved";
+              } else if (lowerTitle.includes("school") || lowerTitle.includes("university") || lowerTitle.includes("calicut")) {
+                title = rawName.includes("NIT") ? rawName : "National Institute of Technology (NIT) Calicut";
+                category = "gmat";
+                categoryLabel = "Alma Mater";
+                placeStatus = "visited";
+              } else {
+                const listName = (feat.properties?.listName || feat.properties?.List || "").toLowerCase();
+                if (listName.includes("want")) placeStatus = "want_to_go";
+                else if (listName.includes("star") || listName.includes("fav")) placeStatus = "saved";
+              }
 
               return {
                 id: `loc-imported-${idx}-${Date.now()}`,
                 title,
                 query: `${title}, ${address}`,
-                lat: coords[1] || 12.9716,
-                lng: coords[0] || 77.5946,
+                lat,
+                lng,
                 status: placeStatus,
-                category: "personal" as const,
-                categoryLabel: placeStatus === "want_to_go" ? "Want to Go" : placeStatus === "visited" ? "Visited" : "Google Saved",
+                category,
+                categoryLabel,
                 address,
-                notes: feat.properties?.Comment || "Imported from Google Maps Takeout",
+                notes,
                 source: "imported" as const,
+                visitedDate: feat.properties?.date ? new Date(feat.properties.date).toLocaleDateString() : undefined,
               };
             });
           }
@@ -648,15 +403,15 @@ export default function GoogleMapsVisualizer() {
     reader.readAsText(file);
   };
 
-  // Reset to default locations
+  // Reset to default Takeout locations
   const handleResetDefaults = () => {
     setLocations(DEFAULT_LOCATIONS);
     setActiveLocation(DEFAULT_LOCATIONS[0]);
     try {
-      localStorage.removeItem("lifehub_google_map_places");
+      localStorage.setItem("lifehub_google_map_places", JSON.stringify(DEFAULT_LOCATIONS));
     } catch {}
-    setImportNotification("Reset to calibrated executive coordinates.");
-    setTimeout(() => setImportNotification(null), 3000);
+    setImportNotification(`Loaded all ${DEFAULT_LOCATIONS.length} places from your Google Takeout export archive!`);
+    setTimeout(() => setImportNotification(null), 4000);
   };
 
   return (
@@ -714,10 +469,11 @@ export default function GoogleMapsVisualizer() {
 
             <button
               onClick={handleResetDefaults}
-              className="p-2 rounded-xl bg-[#181920] hover:bg-[#20222a] border border-[#262834] text-neutral-400 hover:text-white transition-all cursor-pointer"
-              title="Reset to default locations"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#181920] hover:bg-[#20222a] border border-[#262834] text-neutral-300 hover:text-white transition-all cursor-pointer"
+              title="Reset to all 60 Google Takeout places"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
+              <RefreshCw className="w-3.5 h-3.5 text-neutral-400" />
+              <span>Takeout Archive ({DEFAULT_LOCATIONS.length})</span>
             </button>
           </div>
         </div>
