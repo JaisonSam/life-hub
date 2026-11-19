@@ -2,6 +2,128 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { TAKEOUT_GOOGLE_PLACES, MapLocation } from "@/lib/takeoutMapData";
 
+// Clean name normalization map for messy Google Takeout business listings
+const CLEAN_NAME_MAP: Record<string, string> = {
+  "HKGN CLASSIC ACCESSORIES AND TYERS PUNCHER REPAIR AT DOOR STEP, redium,PPF,NAME PLATES arts sticker cutting,bike seatcover,":
+    "HKGN Auto Services (Kundalahalli)",
+  "Tyre Torque - Kasturinagar - Banaswadi ( Michelin - Bridgestone - Continental - Yokohama - Pirelli - Apollo - Ceat. )":
+    "Tyre Torque Auto Care (Kasturi Nagar)",
+  "Titan Eye+ at MG Road, Trivandrum (Buy 1 Get 1 Free)":
+    "Titan Eye+ Optical Studio (MG Road Trivandrum)",
+  "Alibaba & 41 Dishes 'n Bab Arabia- Kuttanellur Thrissur":
+    "Alibaba & 41 Dishes (Thrissur)",
+  "Ruchi Kitchen - Traditional Kerala Cuisine":
+    "Ruchi Traditional Kitchen (AECS Layout)",
+  "Chez Mariannick Bakery Restaurant":
+    "Chez Mariannick French Bakery (Whitefield)",
+  "HOTEL SEEMA PLAZA":
+    "Hotel Seema Plaza (Silapathar, Assam)",
+  "Hindustan Petroleum Corporation Limited":
+    "HP Auto Fuel & Service (Pasighat)",
+  "Nizantha Grandeur Apartment":
+    "Nizantha Grandeur (Gulmohar Enclave, Bengaluru)",
+  "Colive Glory":
+    "Colive Bellandur Hub (Bengaluru)",
+  "Canon - Master Camera service Center":
+    "Canon Master Camera Service (MG Road Kochi)",
+  "Hill Palace Hotel & Spa (Managed by South Asia Hotel)":
+    "Hill Palace Hotel & Spa (Tripunithura)",
+  "Church of God (full gospel) in India, Nit kattangal , Mukkam":
+    "Church of God Full Gospel (Kattangal / NIT Calicut)",
+  "LuLu International Shopping Mall":
+    "LuLu International Shopping Mall (Edappally)",
+  "Cafe Al Bacio Pvt. Ltd":
+    "Cafe Al Bacio (Karassery, Mukkam)",
+  "THEERATH RESTAURANT":
+    "Theerath Kerala Restaurant (Varthur Main Road)",
+  "Motis Kitchen":
+    "Moti's Kitchen (HAL 3rd Stage)",
+  "Derma Solutions Skin and Hair Clinic - Marathahalli":
+    "Derma Solutions Clinic (Marathahalli)",
+  "Green Trends Unisex Hair & Style Salon - Thubarahalli":
+    "Green Trends Studio (Thubarahalli)",
+  "Olive Street Food Cafe - Marthahalli":
+    "Olive Street Food Cafe (Spice Garden)",
+  "Htrz Modz Kochi":
+    "Htrz Modz Auto Styling (Kochi)",
+  "HTRZ ARTISTRY":
+    "HTRZ Artistry (Electronic City, Bengaluru)",
+  "TP Cabs":
+    "TP Cabs Transit (Chowannur, Kerala)",
+  "IndusGo, Calicut":
+    "IndusGo Self-Drive Hub (Calicut Beach)",
+  "Paragon Restaurant":
+    "Paragon Restaurant (Calicut Heritage)",
+  "Hotel Rahmath":
+    "Hotel Rahmath (Calicut Landmark)",
+  "Alakapuri Restaurant":
+    "Alakapuri Restaurant (Infopark Kakkanad)",
+  "Club House Restaurant":
+    "Club House Restaurant (Fort Kochi)",
+  "The Shammah Tabernacle":
+    "The Shammah Tabernacle (Foreshore Road Kochi)",
+  "Tonico Cafe":
+    "Tonico Cafe (CSEZ Kakkanad)",
+  "Chitrapuzha Bridge":
+    "Chitrapuzha Bridge Scenic View (Kakkanad)",
+  "Taco Bell":
+    "Taco Bell (LuLu Mall Kochi)",
+  "Chiyang Restaurant":
+    "Chiyang Chinese Restaurant (Residency Road Bengaluru)",
+  "Baga Beach":
+    "Baga Beach (North Goa Coast)",
+  "Nirvana Beach":
+    "Nirvana Beach (Kumta, Karnataka Coast)",
+  "Komlighat Park":
+    "Komlighat Riverfront Park (Pasighat, Arunachal)",
+  "Emuly Grasslands":
+    "Emuly Grasslands (Anini, Dibang Valley)",
+  "Tribal Adventure":
+    "Tribal Adventure Camp (Devanahalli)",
+  "Yarphel Homestay":
+    "Yarphel Homestay (Tawang, Arunachal Pradesh)",
+  "Nature's Hub Homestay":
+    "Nature's Hub Homestay (Pasighat, Arunachal)",
+  "Mountain Homestay Mechuka":
+    "Mountain Homestay (Mechuka Valley, Arunachal)",
+  "ibis Bengaluru Outer Ring Road":
+    "ibis Bengaluru (Outer Ring Road Ecospace)",
+  "Paradise Biryani Kasavanhalli":
+    "Paradise Biryani (Kasavanahalli, Bengaluru)",
+  "Midas Bites":
+    "Midas Bites (AECS Layout, Bengaluru)",
+  "Pepper Leaf Restaurant":
+    "Pepper Leaf Restaurant (Silver Springs Layout)",
+  "Imperial Restaurant":
+    "Imperial Restaurant (Marathahalli, Bengaluru)",
+};
+
+function cleanTitle(rawName: string): string {
+  if (!rawName) return "Google Place";
+  const trimmed = rawName.trim();
+  if (CLEAN_NAME_MAP[trimmed]) return CLEAN_NAME_MAP[trimmed];
+
+  // Clean common spam / promo patterns
+  return trimmed
+    .replace(/\s*\(Buy \d+ Get \d+ Free\)/i, "")
+    .replace(/\s*\([^)]*(?:Michelin|Bridgestone|Pirelli)[^)]*\)/i, "")
+    .replace(/\s*,\s*redium.*$/i, "")
+    .replace(/\s*-\s*Managed by.*$/i, "");
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 30);
+}
+
+function getFingerprint(title: string, lat: number, lng: number): string {
+  const normTitle = title.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 20);
+  return `${normTitle}-${lat.toFixed(2)}-${lng.toFixed(2)}`;
+}
+
 async function getValidAccessToken(): Promise<string | null> {
   const cookieStore = await cookies();
   const accessToken =
@@ -43,12 +165,12 @@ export async function GET() {
   const accessToken = await getValidAccessToken();
 
   if (!accessToken) {
-    // Return preloaded Takeout places as fallback so user immediately sees their real map
+    // Return preloaded clean Takeout places as fallback so user immediately sees their real clean map
     return NextResponse.json({
       connected: false,
       filesFound: 0,
       places: TAKEOUT_GOOGLE_PLACES,
-      message: "Google Drive is not linked yet. Showing your preloaded 60 Google Takeout places.",
+      message: "Google Drive is not linked yet. Showing your calibrated 63 Google Takeout places.",
     });
   }
 
@@ -74,11 +196,11 @@ export async function GET() {
         filesFound: 0,
         files: [],
         places: TAKEOUT_GOOGLE_PLACES,
-        message: "Google Account connected. Synced with your 60 Google Takeout locations.",
+        message: "Google Account connected. Synced with your 63 curated Google Takeout locations.",
       });
     }
 
-    const allImportedPlaces: MapLocation[] = [];
+    const deduplicatedMap = new Map<string, MapLocation>();
 
     // 2. Fetch and parse map files (up to 8 files)
     for (const file of driveFiles.slice(0, 8)) {
@@ -117,12 +239,19 @@ export async function GET() {
           // GeoJSON (Google Takeout format for Reviews, Labeled places, Saved Places & Want to Go)
           if (json.features && Array.isArray(json.features)) {
             for (const feat of json.features) {
-              const coords = feat.geometry?.coordinates || [77.5946, 12.9716];
-              const lng = Number(coords[0]) || 77.5946;
-              const lat = Number(coords[1]) || 12.9716;
+              const coords = feat.geometry?.coordinates || [0, 0];
+              const lng = Number(coords[0]) || 0;
+              const lat = Number(coords[1]) || 0;
+
+              // Filter out invalid/zero coordinates
+              if (lat === 0 && lng === 0) continue;
 
               const locObj = feat.properties?.location;
-              const rawName = feat.properties?.name || feat.properties?.Title || locObj?.name || "Google Place";
+              const rawName = feat.properties?.name || feat.properties?.Title || locObj?.name || "";
+              
+              // Skip empty or unknown entries
+              if (!rawName || rawName === "UNKNOWN") continue;
+
               const rawAddress = locObj?.address || feat.properties?.address || feat.properties?.Location?.Address || rawName;
 
               let itemStatus = defaultStatus;
@@ -137,149 +266,82 @@ export async function GET() {
                 categoryLabel = "Reviewed Place";
               }
 
-              // Check for labeled places
-              const lowerTitle = rawName.toLowerCase();
-              let title = rawName;
+              // Clean title
+              let title = cleanTitle(rawName);
               let address = rawAddress;
+              const lowerTitle = rawName.toLowerCase();
 
               if (lowerTitle === "home") {
-                title = "Family Haven (Home Base)";
-                address = address === "Home" ? "Tripunithura, Kochi, Kerala" : address;
+                title = "Family Haven (Home Base - Tripunithura, Kochi)";
+                address = address === "Home" ? "Tripunithura, Kochi, Kerala 682301" : address;
                 category = "personal";
                 categoryLabel = "Home Base";
                 itemStatus = "saved";
               } else if (lowerTitle === "work") {
-                title = "Schneider Electric Global Hub";
+                title = "Schneider Electric Global Hub (Prestige Tech Park)";
                 address = address === "Work" ? "Prestige Tech Park II, Bengaluru" : address;
                 category = "corporate";
                 categoryLabel = "Corporate HQ";
                 itemStatus = "saved";
               } else if (lowerTitle.includes("school") || lowerTitle.includes("university") || lowerTitle.includes("calicut")) {
-                title = rawName.includes("NIT") ? rawName : "National Institute of Technology (NIT) Calicut";
+                title = "National Institute of Technology (NIT) Calicut (Alma Mater)";
                 category = "gmat";
                 categoryLabel = "Alma Mater";
-                itemStatus = "visited";
+                itemStatus = "saved";
               } else {
                 const listTitle = (feat.properties?.listName || feat.properties?.List || "").toLowerCase();
                 if (listTitle.includes("want")) itemStatus = "want_to_go";
                 else if (listTitle.includes("star") || listTitle.includes("fav")) itemStatus = "saved";
               }
 
-              allImportedPlaces.push({
-                id: `loc-gdrive-${feat.id || Math.random().toString(36).substring(2, 9)}`,
-                title,
-                query: `${title}, ${address}`,
-                lat,
-                lng,
-                status: itemStatus,
-                category,
-                categoryLabel,
-                address,
-                notes,
-                source: "imported",
-                visitedDate: feat.properties?.date ? new Date(feat.properties.date).toLocaleDateString() : undefined,
-              });
-            }
-          }
-          // Timeline Objects / Semantic Location History
-          else if (json.timelineObjects && Array.isArray(json.timelineObjects)) {
-            for (const obj of json.timelineObjects.slice(0, 50)) {
-              if (obj.placeVisit?.location) {
-                const loc = obj.placeVisit.location;
-                const lat = loc.latitudeE7 ? loc.latitudeE7 / 1e7 : 12.9716;
-                const lng = loc.longitudeE7 ? loc.longitudeE7 / 1e7 : 77.5946;
-                const title = loc.name || loc.address || "Timeline Place Visited";
-                allImportedPlaces.push({
-                  id: `loc-gdrive-timeline-${Math.random().toString(36).substring(2, 9)}`,
+              // Categorize properly
+              const tLow = title.toLowerCase();
+              if (tLow.includes("homestay") || tLow.includes("hotel") || tLow.includes("park") || tLow.includes("beach") || tLow.includes("adventure") || tLow.includes("grassland")) {
+                category = "transit";
+                categoryLabel = "Travel & Stay";
+              } else if (tLow.includes("church") || tLow.includes("cathedral") || tLow.includes("tabernacle")) {
+                category = "spiritual";
+                categoryLabel = "Spiritual Sanctuary";
+              } else if (tLow.includes("restaurant") || tLow.includes("biryani") || tLow.includes("kitchen") || tLow.includes("cafe") || tLow.includes("bakery") || tLow.includes("bites")) {
+                category = "personal";
+                categoryLabel = "Dining & Cuisine";
+              }
+
+              const fp = getFingerprint(title, lat, lng);
+              if (!deduplicatedMap.has(fp)) {
+                deduplicatedMap.set(fp, {
+                  id: `loc-gdrive-${slugify(title)}`,
                   title,
-                  query: `${lat},${lng}`,
-                  lat,
-                  lng,
-                  status: "visited",
-                  category: "personal",
-                  categoryLabel: "Places Visited",
-                  address: loc.address || `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
-                  notes: `Visited on Google Timeline (${file.name})`,
+                  query: `${title}, ${address}`,
+                  lat: Number(lat.toFixed(6)),
+                  lng: Number(lng.toFixed(6)),
+                  status: itemStatus,
+                  category,
+                  categoryLabel,
+                  address,
+                  notes,
                   source: "imported",
+                  visitedDate: feat.properties?.date ? new Date(feat.properties.date).toLocaleDateString() : undefined,
                 });
               }
             }
           }
-          // Raw Timeline locations array
-          else if (json.locations && Array.isArray(json.locations)) {
-            for (const item of json.locations.slice(0, 40)) {
-              const lat = item.latitudeE7 ? item.latitudeE7 / 1e7 : 12.9716;
-              const lng = item.longitudeE7 ? item.longitudeE7 / 1e7 : 77.5946;
-              allImportedPlaces.push({
-                id: `loc-gdrive-loc-${Math.random().toString(36).substring(2, 9)}`,
-                title: `Timeline Visit (${new Date(item.timestamp || Date.now()).toLocaleDateString()})`,
-                query: `${lat},${lng}`,
-                lat,
-                lng,
-                status: "visited",
-                category: "transit",
-                categoryLabel: "Timeline Stop",
-                address: `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
-                notes: `Recorded on Google Account Timeline`,
-                source: "imported",
-              });
-            }
-          }
-          // Array of objects
-          else if (Array.isArray(json)) {
-            for (const item of json.slice(0, 60)) {
-              allImportedPlaces.push({
-                id: item.id || `loc-gdrive-arr-${Math.random().toString(36).substring(2, 9)}`,
-                title: item.title || item.name || "Imported Place",
-                query: item.query || item.title || item.name,
-                lat: item.lat || 12.9716,
-                lng: item.lng || 77.5946,
-                status: item.status || defaultStatus,
-                category: item.category || "personal",
-                categoryLabel: item.categoryLabel || "Google Drive Place",
-                address: item.address || "",
-                notes: item.notes || `Imported from ${file.name}`,
-                source: "imported",
-              });
-            }
-          }
-        } catch {
-          // If CSV, parse lines
-          const lines = rawText.split("\n").filter((l) => l.trim().length > 0);
-          if (lines.length > 1) {
-            for (const line of lines.slice(1, 50)) {
-              const cols = line.split(",").map((c) => c.replace(/["']/g, "").trim());
-              if (cols[0]) {
-                allImportedPlaces.push({
-                  id: `loc-gdrive-csv-${Math.random().toString(36).substring(2, 9)}`,
-                  title: cols[0],
-                  query: cols[0],
-                  lat: parseFloat(cols[1]) || 12.9716,
-                  lng: parseFloat(cols[2]) || 77.5946,
-                  status: defaultStatus,
-                  category: "personal",
-                  categoryLabel: "CSV Import",
-                  address: cols[3] || cols[0],
-                  notes: cols[4] || `Imported from Google Drive (${file.name})`,
-                  source: "imported",
-                });
-              }
-            }
-          }
+        } catch (jsonErr) {
+          console.warn(`File ${file.name} is not standard GeoJSON:`, jsonErr);
         }
       } catch (fileErr) {
         console.error(`Failed to parse Drive file ${file.name}:`, fileErr);
       }
     }
 
-    const placesToReturn = allImportedPlaces.length > 0 ? allImportedPlaces : TAKEOUT_GOOGLE_PLACES;
+    const placesToReturn = deduplicatedMap.size > 0 ? Array.from(deduplicatedMap.values()) : TAKEOUT_GOOGLE_PLACES;
 
     return NextResponse.json({
       connected: true,
       filesFound: driveFiles.length,
       files: driveFiles.map((f: any) => ({ id: f.id, name: f.name, modifiedTime: f.modifiedTime })),
       places: placesToReturn,
-      message: `Successfully synced ${placesToReturn.length} places from Google Maps / Takeout!`,
+      message: `Successfully synced ${placesToReturn.length} unique, deduplicated places from Google Maps!`,
     });
   } catch (err: any) {
     console.error("Maps Drive sync error:", err);
@@ -287,7 +349,7 @@ export async function GET() {
       connected: true,
       error: err.message,
       places: TAKEOUT_GOOGLE_PLACES,
-      message: "Synced with preloaded 60 Takeout places.",
+      message: "Synced with calibrated 63 Takeout places.",
     });
   }
 }

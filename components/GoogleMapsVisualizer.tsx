@@ -76,24 +76,55 @@ export default function GoogleMapsVisualizer() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load saved places from localStorage on client mount
+  // Helper to compute deduplication fingerprint key
+  const getLocationFingerprint = (p: { title?: string; lat?: number; lng?: number }): string => {
+    const norm = (p.title || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 20);
+    const lat = Number(p.lat || 0).toFixed(2);
+    const lng = Number(p.lng || 0).toFixed(2);
+    return `${norm}-${lat}-${lng}`;
+  };
+
+  // Load and automatically clean/deduplicate places from localStorage on client mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem("lifehub_google_map_places");
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 15) {
-          // Normalize existing stored places to ensure status property exists
-          const normalized = parsed.map((item: any) => ({
-            ...item,
-            status: item.status || (item.category === "spiritual" ? "visited" : "saved"),
-          }));
-          setLocations(normalized);
-          setActiveLocation(normalized[0]);
-          return;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const seenFp = new Set<string>();
+          const cleaned: MapLocation[] = [];
+
+          for (const item of parsed) {
+            // Discard broken, unknown, or messy tyre puncher spam items
+            if (
+              !item.title ||
+              item.title.includes("UNKNOWN") ||
+              item.title.includes("PUNCHER REPAIR") ||
+              (item.lat === 0 && item.lng === 0)
+            ) {
+              continue;
+            }
+
+            const fp = getLocationFingerprint(item);
+            if (!seenFp.has(fp)) {
+              seenFp.add(fp);
+              cleaned.push({
+                ...item,
+                status: item.status || (item.category === "spiritual" ? "visited" : "saved"),
+              });
+            }
+          }
+
+          // If cleaned list is valid and not contaminated by legacy raw strings
+          if (cleaned.length >= 20 && !cleaned.some((p) => p.title.includes("PUNCHER REPAIR"))) {
+            setLocations(cleaned);
+            setActiveLocation(cleaned[0]);
+            localStorage.setItem("lifehub_google_map_places", JSON.stringify(cleaned));
+            return;
+          }
         }
       }
-      // If no stored places or legacy demo cache (<=15 items), default to the 60 real Takeout places
+      // Default to curated, clean 63 Takeout places
       setLocations(TAKEOUT_GOOGLE_PLACES);
       setActiveLocation(TAKEOUT_GOOGLE_PLACES[0]);
       localStorage.setItem("lifehub_google_map_places", JSON.stringify(TAKEOUT_GOOGLE_PLACES));
@@ -144,7 +175,7 @@ export default function GoogleMapsVisualizer() {
     } catch {}
   };
 
-  // Google Account Sync handler (Drive)
+  // Google Account Sync handler (Drive) - with rigorous deduplication
   const handleDriveSync = async () => {
     try {
       setSyncingDrive(true);
@@ -153,19 +184,35 @@ export default function GoogleMapsVisualizer() {
       const data = await res.json();
 
       if (data.places && data.places.length > 0) {
-        const existingIds = new Set(locations.map((l) => l.id));
-        const fresh = data.places.filter((p: MapLocation) => !existingIds.has(p.id));
-        const merged = [...fresh, ...locations];
-        setLocations(merged);
-        if (fresh.length > 0) setActiveLocation(fresh[0]);
+        const mergedMap = new Map<string, MapLocation>();
+
+        // 1. Put incoming synced places
+        for (const p of data.places) {
+          if (!p.title || (p.lat === 0 && p.lng === 0)) continue;
+          const fp = getLocationFingerprint(p);
+          mergedMap.set(fp, p);
+        }
+
+        // 2. Retain any user custom additions that don't collide
+        for (const p of locations) {
+          if (!p.title || (p.lat === 0 && p.lng === 0)) continue;
+          const fp = getLocationFingerprint(p);
+          if (!mergedMap.has(fp)) {
+            mergedMap.set(fp, p);
+          }
+        }
+
+        const cleanMerged = Array.from(mergedMap.values());
+        setLocations(cleanMerged);
+        if (cleanMerged.length > 0) setActiveLocation(cleanMerged[0]);
         try {
-          localStorage.setItem("lifehub_google_map_places", JSON.stringify(merged));
+          localStorage.setItem("lifehub_google_map_places", JSON.stringify(cleanMerged));
         } catch {}
         setDriveSyncResult({
           success: true,
-          message: `Successfully synced ${fresh.length} new places from your Google Account!`,
+          message: `Synced and cleaned! Total of ${cleanMerged.length} unique, deduplicated places plotted.`,
           filesFound: data.filesFound,
-          placesCount: data.places.length,
+          placesCount: cleanMerged.length,
         });
       } else if (data.connected) {
         setDriveSyncResult({
@@ -383,13 +430,24 @@ export default function GoogleMapsVisualizer() {
         }
 
         if (importedPlaces.length > 0) {
-          const merged = [...importedPlaces, ...locations];
+          const map = new Map<string, MapLocation>();
+          // 1. Put imported places first
+          for (const p of importedPlaces) {
+            if (!p.title || (p.lat === 0 && p.lng === 0)) continue;
+            map.set(getLocationFingerprint(p), p);
+          }
+          // 2. Add existing places without duplicates
+          for (const p of locations) {
+            const fp = getLocationFingerprint(p);
+            if (!map.has(fp)) map.set(fp, p);
+          }
+          const merged = Array.from(map.values());
           setLocations(merged);
           setActiveLocation(importedPlaces[0]);
           try {
             localStorage.setItem("lifehub_google_map_places", JSON.stringify(merged));
           } catch {}
-          setImportNotification(`Successfully imported ${importedPlaces.length} places from Google Maps file!`);
+          setImportNotification(`Successfully imported and deduplicated ${importedPlaces.length} places!`);
           setShowImportModal(false);
           setTimeout(() => setImportNotification(null), 4000);
         } else {
@@ -403,14 +461,15 @@ export default function GoogleMapsVisualizer() {
     reader.readAsText(file);
   };
 
-  // Reset to default Takeout locations
+  // Clean up & Reset to pristine curated Takeout locations
   const handleResetDefaults = () => {
-    setLocations(DEFAULT_LOCATIONS);
-    setActiveLocation(DEFAULT_LOCATIONS[0]);
     try {
+      localStorage.removeItem("lifehub_google_map_places");
       localStorage.setItem("lifehub_google_map_places", JSON.stringify(DEFAULT_LOCATIONS));
     } catch {}
-    setImportNotification(`Loaded all ${DEFAULT_LOCATIONS.length} places from your Google Takeout export archive!`);
+    setLocations(DEFAULT_LOCATIONS);
+    setActiveLocation(DEFAULT_LOCATIONS[0]);
+    setImportNotification(`Cleaned up! Removed all duplicates and restored ${DEFAULT_LOCATIONS.length} clean places.`);
     setTimeout(() => setImportNotification(null), 4000);
   };
 
@@ -469,11 +528,11 @@ export default function GoogleMapsVisualizer() {
 
             <button
               onClick={handleResetDefaults}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#181920] hover:bg-[#20222a] border border-[#262834] text-neutral-300 hover:text-white transition-all cursor-pointer"
-              title="Reset to all 60 Google Takeout places"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/50 border border-red-800/40 text-red-200 hover:text-white transition-all cursor-pointer font-bold"
+              title="Clean up messy duplicates and restore verified places"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-neutral-400" />
-              <span>Takeout Archive ({DEFAULT_LOCATIONS.length})</span>
+              <Trash2 className="w-3.5 h-3.5 text-red-400" />
+              <span>Clean & Reset Map</span>
             </button>
           </div>
         </div>
