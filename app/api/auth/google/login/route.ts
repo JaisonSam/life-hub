@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const service = searchParams.get("service") || "calendar";
+  // Default to "all" for the common connection point
+  const service = searchParams.get("service") || "all";
 
   const host = request.headers.get("host") || "localhost:3000";
   const protocol = host.includes("localhost") ? "http" : "https";
@@ -21,10 +22,8 @@ export async function GET(request: Request) {
     );
   }
 
-  // Google OAuth forbids requesting Drive and YouTube in the same request.
-  // Each service is authorized independently without include_granted_scopes to prevent scope collisions.
   let scopes: string[] = [];
-  let state = "google_calendar";
+  let state = "google_all_step1";
 
   if (service === "drive") {
     scopes = [
@@ -43,8 +42,7 @@ export async function GET(request: Request) {
       "https://www.googleapis.com/auth/youtube.readonly",
     ];
     state = "google_youtube";
-  } else {
-    // Default: Google Calendar & Profile ONLY (Zero conflict with YouTube or Drive)
+  } else if (service === "calendar") {
     scopes = [
       "openid",
       "https://www.googleapis.com/auth/userinfo.profile",
@@ -52,6 +50,19 @@ export async function GET(request: Request) {
       "https://www.googleapis.com/auth/calendar.readonly",
     ];
     state = "google_calendar";
+  } else {
+    // "all" - Common Connection Point
+    // Step 1: Calendar + Drive Workspace (100% compatible in Google Workspace, zero scope conflict)
+    // Upon completion, callback immediately auto-redirects to Step 2 for YouTube Music!
+    scopes = [
+      "openid",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/calendar.readonly",
+      "https://www.googleapis.com/auth/drive.readonly",
+      "https://www.googleapis.com/auth/drive.file",
+    ];
+    state = "google_all_step1";
   }
 
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(

@@ -197,20 +197,34 @@ export default function GoogleConnectedAppsDeck() {
       const googleDisconnected = params.get("google_disconnected");
 
       if (googleConnected) {
-        const serviceName =
-          googleConnected === "calendar"
-            ? "Google Calendar"
-            : googleConnected === "drive"
-            ? "Google Drive"
-            : googleConnected === "youtube"
-            ? "YouTube Music"
-            : "Google Service";
+        if (googleConnected === "all") {
+          setUrlMessage({
+            type: "success",
+            title: "🎉 All Google Services Connected!",
+            description: "Google Calendar, Google Drive, and YouTube Music are now live-synced in one go!",
+          });
+        } else if (googleConnected === "workspace_only") {
+          setUrlMessage({
+            type: "success",
+            title: "Google Calendar & Drive Connected!",
+            description: "Workspace apps are live-synced. You can connect YouTube Music separately below whenever you like.",
+          });
+        } else {
+          const serviceName =
+            googleConnected === "calendar"
+              ? "Google Calendar"
+              : googleConnected === "drive"
+              ? "Google Drive"
+              : googleConnected === "youtube"
+              ? "YouTube Music"
+              : "Google Service";
 
-        setUrlMessage({
-          type: "success",
-          title: `${serviceName} Connected!`,
-          description: "Authentication successful. Your live data is now synchronizing smoothly into Life Hub.",
-        });
+          setUrlMessage({
+            type: "success",
+            title: `${serviceName} Connected!`,
+            description: "Authentication successful. Your live data is now synchronizing smoothly into Life Hub.",
+          });
+        }
       } else if (googleDisconnected === "true") {
         setUrlMessage({
           type: "info",
@@ -309,14 +323,36 @@ export default function GoogleConnectedAppsDeck() {
                     </span>
                   ) : (
                     <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700 font-mono">
-                      Modular Integration
+                      Unified Integration
                     </span>
                   )}
                 </h2>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  Independent connections for Google Calendar, Google Drive, and YouTube Music. Connect each service individually below.
+                  Unified Google workspace synchronizing Google Calendar, Google Drive, and YouTube Music.
                 </p>
               </div>
+            </div>
+
+            {/* ONE-GO COMMON CONNECTION POINT HERO BUTTON */}
+            <div className="pt-1 flex flex-wrap items-center gap-3">
+              {(!isCalConnected || !isDriveConnected || !isYtConnected) ? (
+                <a
+                  href="/api/auth/google/login?service=all"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-extrabold text-xs font-mono shadow-xl transition-all hover:scale-[1.02] cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  <span>⚡ Connect All in One Go (Calendar, Drive & Music)</span>
+                </a>
+              ) : (
+                <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono text-xs font-bold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>All Google Services Connected in One Go</span>
+                </div>
+              )}
+
+              <span className="text-[11px] text-neutral-400 font-mono hidden sm:inline">
+                Automated 2-step sequence • Zero Error 400 scope collisions
+              </span>
             </div>
 
             {/* Individual Service Live Status Badges */}

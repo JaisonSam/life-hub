@@ -1600,12 +1600,13 @@ export default function GlanceDashboard({
 
                 {/* Open Full Google Hub button */}
                 <div className="pt-1 flex items-center justify-between border-t border-[#232530] text-xs font-mono">
-                  <button
-                    onClick={() => onSelectTab("google")}
+                  <a
+                    href="/api/auth/google/login?service=all"
                     className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold cursor-pointer"
+                    title="Connect Google Calendar, Drive, and YouTube Music in one flow"
                   >
-                    <span>⚡ Google Connected Apps Hub</span>
-                  </button>
+                    <span>⚡ Connect All (Calendar, Drive & Music)</span>
+                  </a>
                   <button
                     onClick={() => onSelectTab("google")}
                     className="text-white hover:text-neutral-300 font-bold flex items-center gap-1 cursor-pointer"

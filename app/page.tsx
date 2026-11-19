@@ -1491,7 +1491,7 @@ export default function LifeHub() {
                     className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold shadow-sm transition-all"
                   >
                     <Music className="w-3.5 h-3.5" />
-                    <span>Connect Google</span>
+                    <span>Connect YouTube Music</span>
                   </a>
                 )}
               </div>
