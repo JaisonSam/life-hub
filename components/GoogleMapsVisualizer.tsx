@@ -39,11 +39,11 @@ import {
 import { TAKEOUT_GOOGLE_PLACES, type MapLocation } from "@/lib/takeoutMapData";
 
 export type { MapLocation };
-export const DEFAULT_LOCATIONS: MapLocation[] = TAKEOUT_GOOGLE_PLACES;
+export const DEFAULT_LOCATIONS: MapLocation[] = [];
 
 export default function GoogleMapsVisualizer() {
-  const [locations, setLocations] = useState<MapLocation[]>(DEFAULT_LOCATIONS);
-  const [activeLocation, setActiveLocation] = useState<MapLocation>(DEFAULT_LOCATIONS[0]);
+  const [locations, setLocations] = useState<MapLocation[]>([]);
+  const [activeLocation, setActiveLocation] = useState<MapLocation | null>(null);
   const [viewMode, setViewMode] = useState<"interactive-map" | "corridor-radar" | "analytics">("interactive-map");
   const [mapType, setMapType] = useState<"m" | "k" | "p">("m"); // m = roadmap, k = satellite, p = terrain
   const [zoomLevel, setZoomLevel] = useState<number>(14);
@@ -84,18 +84,37 @@ export default function GoogleMapsVisualizer() {
     return `${norm}-${lat}-${lng}`;
   };
 
-  // Load and automatically clean/deduplicate places from localStorage on client mount
+  // Load places from localStorage on client mount (purging any legacy mock/prefixed items)
   useEffect(() => {
     try {
       const stored = localStorage.getItem("lifehub_google_map_places");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          // Check if stored has any legacy mock / prefixed data
+          const hasPrefixedMock = parsed.some(
+            (p: any) =>
+              p.source === "curated" ||
+              p.title?.includes("Pearson VUE") ||
+              p.title?.includes("Veerakeralapudur Agribusiness") ||
+              p.title?.includes("Courtallam") ||
+              p.title?.includes("IIMB") ||
+              p.title?.includes("TNAU") ||
+              p.title?.includes("IISc")
+          );
+
+          if (hasPrefixedMock) {
+            // Purge legacy mock cache immediately!
+            localStorage.removeItem("lifehub_google_map_places");
+            setLocations([]);
+            setActiveLocation(null);
+            return;
+          }
+
           const seenFp = new Set<string>();
           const cleaned: MapLocation[] = [];
 
           for (const item of parsed) {
-            // Discard broken, unknown, or messy tyre puncher spam items
             if (
               !item.title ||
               item.title.includes("UNKNOWN") ||
@@ -115,8 +134,7 @@ export default function GoogleMapsVisualizer() {
             }
           }
 
-          // If cleaned list is valid and not contaminated by legacy raw strings
-          if (cleaned.length >= 20 && !cleaned.some((p) => p.title.includes("PUNCHER REPAIR"))) {
+          if (cleaned.length > 0) {
             setLocations(cleaned);
             setActiveLocation(cleaned[0]);
             localStorage.setItem("lifehub_google_map_places", JSON.stringify(cleaned));
@@ -124,10 +142,10 @@ export default function GoogleMapsVisualizer() {
           }
         }
       }
-      // Default to curated, clean 63 Takeout places
-      setLocations(TAKEOUT_GOOGLE_PLACES);
-      setActiveLocation(TAKEOUT_GOOGLE_PLACES[0]);
-      localStorage.setItem("lifehub_google_map_places", JSON.stringify(TAKEOUT_GOOGLE_PLACES));
+      // Start completely clean - no prefixed locations before Drive sync
+      setLocations([]);
+      setActiveLocation(null);
+      localStorage.removeItem("lifehub_google_map_places");
     } catch (e) {
       console.warn("Could not load stored map places:", e);
     }
@@ -152,11 +170,17 @@ export default function GoogleMapsVisualizer() {
     });
   }, [locations, statusFilter, categoryFilter, searchQuery]);
 
+  // Resolved active place (safely fall back to first filtered or null)
+  const activePlace = activeLocation || filteredLocations[0] || locations[0] || null;
+
   // Construct Google Maps Embed URL
   const embedUrl = useMemo(() => {
-    const q = encodeURIComponent(activeLocation.query || `${activeLocation.lat},${activeLocation.lng}`);
+    if (!activePlace) {
+      return "https://maps.google.com/maps?q=Bengaluru&t=m&z=12&ie=UTF8&iwloc=&output=embed";
+    }
+    const q = encodeURIComponent(activePlace.query || `${activePlace.lat},${activePlace.lng}`);
     return `https://maps.google.com/maps?q=${q}&t=${mapType}&z=${zoomLevel}&ie=UTF8&iwloc=&output=embed`;
-  }, [activeLocation, mapType, zoomLevel]);
+  }, [activePlace, mapType, zoomLevel]);
 
   // 1-Click Status Switcher for active location
   const handleUpdateStatus = (locId: string, targetStatus: "visited" | "saved" | "want_to_go") => {
@@ -167,7 +191,7 @@ export default function GoogleMapsVisualizer() {
       return loc;
     });
     setLocations(updated);
-    if (activeLocation.id === locId) {
+    if (activeLocation && activeLocation.id === locId) {
       setActiveLocation({ ...activeLocation, status: targetStatus });
     }
     try {
@@ -461,15 +485,14 @@ export default function GoogleMapsVisualizer() {
     reader.readAsText(file);
   };
 
-  // Clean up & Reset to pristine curated Takeout locations
+  // Clean up & Reset Map to zero locations
   const handleResetDefaults = () => {
     try {
       localStorage.removeItem("lifehub_google_map_places");
-      localStorage.setItem("lifehub_google_map_places", JSON.stringify(DEFAULT_LOCATIONS));
     } catch {}
-    setLocations(DEFAULT_LOCATIONS);
-    setActiveLocation(DEFAULT_LOCATIONS[0]);
-    setImportNotification(`Cleaned up! Removed all duplicates and restored ${DEFAULT_LOCATIONS.length} clean places.`);
+    setLocations([]);
+    setActiveLocation(null);
+    setImportNotification("Map cleared! All locations and cached data removed.");
     setTimeout(() => setImportNotification(null), 4000);
   };
 
@@ -618,7 +641,38 @@ export default function GoogleMapsVisualizer() {
       </div>
 
       {/* 2. MAIN VISUALIZATION AREA */}
-      {viewMode === "interactive-map" && (
+      {viewMode === "interactive-map" && locations.length === 0 && (
+        <div className="p-10 sm:p-14 rounded-3xl bg-[#14151b] border border-[#232530] text-center space-y-6 shadow-2xl">
+          <div className="w-16 h-16 mx-auto rounded-3xl bg-[#101116] border border-[#262834] flex items-center justify-center text-neutral-400 shadow-inner">
+            <MapPin className="w-8 h-8 text-white/80" />
+          </div>
+          <div className="max-w-md mx-auto space-y-2">
+            <h3 className="text-xl font-bold text-white tracking-tight">No Locations Loaded</h3>
+            <p className="text-xs text-neutral-400">
+              All prefixed mock locations have been cleared. Sync your actual saved, visited, and want-to-go places directly from your Google Drive Takeout files or import a file manually.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              onClick={handleDriveSync}
+              disabled={syncingDrive}
+              className="px-5 py-2.5 rounded-2xl bg-white hover:bg-neutral-200 text-black text-xs font-bold font-mono transition-transform hover:scale-105 cursor-pointer flex items-center gap-2 disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${syncingDrive ? "animate-spin" : ""}`} />
+              <span>{syncingDrive ? "Scanning Drive..." : "Sync from Google Drive"}</span>
+            </button>
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="px-5 py-2.5 rounded-2xl bg-[#101116] hover:bg-[#181a22] text-neutral-300 border border-[#262834] text-xs font-bold font-mono transition-colors cursor-pointer flex items-center gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              <span>Import Takeout File</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {viewMode === "interactive-map" && locations.length > 0 && activePlace && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
           {/* LEFT: LOCATIONS DIRECTORY & FILTER (5 Cols) */}
           <div className="lg:col-span-5 space-y-4">
@@ -721,7 +775,7 @@ export default function GoogleMapsVisualizer() {
             {/* Location Cards Scroll List */}
             <div className="space-y-2.5 max-h-[640px] overflow-y-auto pr-1">
               {filteredLocations.map((loc) => {
-                const isSelected = activeLocation.id === loc.id;
+                const isSelected = (activeLocation?.id || filteredLocations[0]?.id) === loc.id;
                 return (
                   <div
                     key={loc.id}
@@ -809,12 +863,12 @@ export default function GoogleMapsVisualizer() {
               <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#232530]">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-white">{activeLocation.title}</span>
+                    <span className="font-bold text-sm text-white">{activePlace.title}</span>
                     <span className="text-[10px] px-2 py-0.5 rounded bg-[#101116] border border-[#282a38] font-mono text-neutral-400">
-                      {activeLocation.lat.toFixed(4)}°N, {activeLocation.lng.toFixed(4)}°E
+                      {activePlace.lat.toFixed(4)}°N, {activePlace.lng.toFixed(4)}°E
                     </span>
                   </div>
-                  <p className="text-[11px] text-neutral-400 font-mono mt-0.5">{activeLocation.address}</p>
+                  <p className="text-[11px] text-neutral-400 font-mono mt-0.5">{activePlace.address}</p>
                 </div>
 
                 {/* Map Type Controls (Roadmap / Satellite / Terrain) */}
@@ -871,14 +925,14 @@ export default function GoogleMapsVisualizer() {
               <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-2xl bg-[#101116] border border-[#232530] text-xs font-mono">
                 <span className="text-[11px] text-neutral-400 flex items-center gap-1.5">
                   <span>Current Status:</span>
-                  <strong className="text-white capitalize">{activeLocation.status.replace("_", " ")}</strong>
+                  <strong className="text-white capitalize">{activePlace.status.replace("_", " ")}</strong>
                 </span>
 
                 <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => handleUpdateStatus(activeLocation.id, "visited")}
+                    onClick={() => handleUpdateStatus(activePlace.id, "visited")}
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                      activeLocation.status === "visited"
+                      activePlace.status === "visited"
                         ? "bg-emerald-500 text-white shadow-sm"
                         : "bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-emerald-300"
                     }`}
@@ -887,9 +941,9 @@ export default function GoogleMapsVisualizer() {
                   </button>
 
                   <button
-                    onClick={() => handleUpdateStatus(activeLocation.id, "saved")}
+                    onClick={() => handleUpdateStatus(activePlace.id, "saved")}
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                      activeLocation.status === "saved"
+                      activePlace.status === "saved"
                         ? "bg-blue-600 text-white shadow-sm"
                         : "bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-blue-300"
                     }`}
@@ -898,9 +952,9 @@ export default function GoogleMapsVisualizer() {
                   </button>
 
                   <button
-                    onClick={() => handleUpdateStatus(activeLocation.id, "want_to_go")}
+                    onClick={() => handleUpdateStatus(activePlace.id, "want_to_go")}
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                      activeLocation.status === "want_to_go"
+                      activePlace.status === "want_to_go"
                         ? "bg-amber-500 text-black shadow-sm"
                         : "bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-amber-300"
                     }`}
@@ -913,7 +967,7 @@ export default function GoogleMapsVisualizer() {
               {/* Responsive Embedded Google Map Iframe */}
               <div className="relative w-full h-[460px] sm:h-[500px] rounded-2xl overflow-hidden border border-[#262834] bg-[#0c0d11]">
                 <iframe
-                  title={`Google Map - ${activeLocation.title}`}
+                  title={`Google Map - ${activePlace.title}`}
                   src={embedUrl}
                   width="100%"
                   height="100%"
@@ -927,14 +981,14 @@ export default function GoogleMapsVisualizer() {
                 {/* Floating Map Legend Overlay */}
                 <div className="absolute top-3 left-3 px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-neutral-700 text-xs font-mono text-white shadow-xl flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="font-bold">{activeLocation.title}</span>
-                  <span className="text-[10px] text-neutral-400">({activeLocation.categoryLabel})</span>
+                  <span className="font-bold">{activePlace.title}</span>
+                  <span className="text-[10px] text-neutral-400">({activePlace.categoryLabel})</span>
                 </div>
 
                 {/* Floating Directions Action */}
                 <div className="absolute bottom-3 right-3 flex items-center gap-2">
                   <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activeLocation.query)}`}
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activePlace.query)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-xs shadow-2xl flex items-center gap-1.5 font-mono transition-transform hover:scale-105"
@@ -944,7 +998,7 @@ export default function GoogleMapsVisualizer() {
                   </a>
 
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activeLocation.query)}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activePlace.query)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="p-2 rounded-xl bg-black/80 hover:bg-black text-white border border-neutral-700 shadow-xl transition-all"
@@ -959,20 +1013,20 @@ export default function GoogleMapsVisualizer() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 text-xs font-mono">
                 <div className="p-3 rounded-xl bg-[#101116] border border-[#232530]">
                   <span className="text-[10px] text-neutral-500 block uppercase font-bold">Elevation</span>
-                  <span className="font-bold text-white mt-0.5 block">{activeLocation.elevation || "915m ASL"}</span>
+                  <span className="font-bold text-white mt-0.5 block">{activePlace.elevation || "915m ASL"}</span>
                 </div>
                 <div className="p-3 rounded-xl bg-[#101116] border border-[#232530]">
                   <span className="text-[10px] text-neutral-500 block uppercase font-bold">Microclimate</span>
-                  <span className="font-bold text-white mt-0.5 block truncate">{activeLocation.microclimate || "Subtropical"}</span>
+                  <span className="font-bold text-white mt-0.5 block truncate">{activePlace.microclimate || "Subtropical"}</span>
                 </div>
                 <div className="p-3 rounded-xl bg-[#101116] border border-[#232530]">
                   <span className="text-[10px] text-neutral-500 block uppercase font-bold">Transit Status</span>
-                  <span className="font-bold text-white mt-0.5 block truncate">{activeLocation.transitFromBlr || "Connected"}</span>
+                  <span className="font-bold text-white mt-0.5 block truncate">{activePlace.transitFromBlr || "Connected"}</span>
                 </div>
                 <div className="p-3 rounded-xl bg-[#101116] border border-[#232530]">
                   <span className="text-[10px] text-neutral-500 block uppercase font-bold">Category & Status</span>
                   <span className="font-bold text-emerald-400 mt-0.5 block capitalize truncate">
-                    {activeLocation.status.replace("_", " ")}
+                    {activePlace.status.replace("_", " ")}
                   </span>
                 </div>
               </div>
@@ -1110,61 +1164,74 @@ export default function GoogleMapsVisualizer() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {locations.map((loc) => (
-              <div
-                key={loc.id}
-                className="p-5 rounded-2xl bg-[#101116] border border-[#262834] space-y-3 hover:border-neutral-500 transition-all"
+          {locations.length === 0 ? (
+            <div className="p-10 rounded-2xl bg-[#101116] border border-[#262834] text-center text-xs text-neutral-400 space-y-3">
+              <p>No locations to analyze yet. Sync from Google Drive or import Takeout to view geospatial telemetry.</p>
+              <button
+                onClick={handleDriveSync}
+                disabled={syncingDrive}
+                className="px-4 py-2 rounded-xl bg-white text-black font-bold font-mono text-xs cursor-pointer disabled:opacity-50"
               >
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-sm text-white truncate max-w-[180px]">{loc.title}</h4>
-                  <span
-                    className={`text-[9px] px-2 py-0.5 rounded-full font-mono font-bold border ${
-                      loc.status === "visited"
-                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
-                        : loc.status === "saved"
-                        ? "bg-blue-500/10 text-blue-300 border-blue-500/30"
-                        : "bg-amber-500/10 text-amber-300 border-amber-500/30"
-                    }`}
-                  >
-                    {loc.status === "visited" ? "Visited" : loc.status === "saved" ? "Saved" : "Want to Go"}
-                  </span>
-                </div>
+                {syncingDrive ? "Scanning Drive..." : "Sync from Google Drive"}
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {locations.map((loc) => (
+                <div
+                  key={loc.id}
+                  className="p-5 rounded-2xl bg-[#101116] border border-[#262834] space-y-3 hover:border-neutral-500 transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-sm text-white truncate max-w-[180px]">{loc.title}</h4>
+                    <span
+                      className={`text-[9px] px-2 py-0.5 rounded-full font-mono font-bold border ${
+                        loc.status === "visited"
+                          ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                          : loc.status === "saved"
+                          ? "bg-blue-500/10 text-blue-300 border-blue-500/30"
+                          : "bg-amber-500/10 text-amber-300 border-amber-500/30"
+                      }`}
+                    >
+                      {loc.status === "visited" ? "Visited" : loc.status === "saved" ? "Saved" : "Want to Go"}
+                    </span>
+                  </div>
 
-                <div className="space-y-1.5 text-xs text-neutral-400 font-mono">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Category:</span>
-                    <span className="text-white">{loc.categoryLabel}</span>
+                  <div className="space-y-1.5 text-xs text-neutral-400 font-mono">
+                    <div className="flex justify-between">
+                      <span className="text-neutral-500">Category:</span>
+                      <span className="text-white">{loc.categoryLabel}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-neutral-500">Elevation:</span>
+                      <span className="text-white">{loc.elevation || "N/A"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-neutral-500">Microclimate:</span>
+                      <span className="text-white truncate max-w-[150px]">{loc.microclimate || "Regional"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-neutral-500">Coordinates:</span>
+                      <span className="text-neutral-300">{loc.lat.toFixed(4)}°, {loc.lng.toFixed(4)}°</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Elevation:</span>
-                    <span className="text-white">{loc.elevation || "N/A"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Microclimate:</span>
-                    <span className="text-white truncate max-w-[150px]">{loc.microclimate || "Regional"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Coordinates:</span>
-                    <span className="text-neutral-300">{loc.lat.toFixed(4)}°, {loc.lng.toFixed(4)}°</span>
-                  </div>
-                </div>
 
-                <div className="pt-2 border-t border-[#232530] flex items-center justify-between text-xs font-mono">
-                  <span className="text-[10px] text-neutral-500 uppercase">{loc.source || "Curated"}</span>
-                  <button
-                    onClick={() => {
-                      setActiveLocation(loc);
-                      setViewMode("interactive-map");
-                    }}
-                    className="text-white hover:text-neutral-300 font-bold flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>View on Map →</span>
-                  </button>
+                  <div className="pt-2 border-t border-[#232530] flex items-center justify-between text-xs font-mono">
+                    <span className="text-[10px] text-neutral-500 uppercase">{loc.source || "Curated"}</span>
+                    <button
+                      onClick={() => {
+                        setActiveLocation(loc);
+                        setViewMode("interactive-map");
+                      }}
+                      className="text-white hover:text-neutral-300 font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>View on Map →</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
