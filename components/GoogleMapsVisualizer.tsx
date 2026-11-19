@@ -76,12 +76,45 @@ export default function GoogleMapsVisualizer() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Helper to compute deduplication fingerprint key
+  // Helper to compute deduplication fingerprint key (with canonical anchors for core hubs like NIT Calicut)
   const getLocationFingerprint = (p: { title?: string; lat?: number; lng?: number }): string => {
-    const norm = (p.title || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 20);
-    const lat = Number(p.lat || 0).toFixed(2);
-    const lng = Number(p.lng || 0).toFixed(2);
-    return `${norm}-${lat}-${lng}`;
+    const raw = (p.title || "").toLowerCase();
+
+    // Canonical deduplication key for core institutional & personal hubs
+    if (
+      raw.includes("nit calicut") ||
+      raw.includes("national institute of technology calicut") ||
+      raw.includes("national institute of technology (nit) calicut") ||
+      raw === "nitc"
+    ) {
+      return "canonical-nit-calicut";
+    }
+
+    if (raw.includes("family haven") || raw.includes("home base - tripunithura") || raw === "home") {
+      return "canonical-home-haven";
+    }
+
+    if (
+      raw.includes("schneider electric") ||
+      raw.includes("prestige tech park") ||
+      raw === "work"
+    ) {
+      return "canonical-schneider-work";
+    }
+
+    if (raw.includes("veerakeralapudur") || raw.includes("guava orchard")) {
+      return "canonical-tenkasi-farm";
+    }
+
+    const norm = raw
+      .replace(/\(.*?\)/g, "")
+      .replace(/[^a-z0-9]/g, "")
+      .slice(0, 24);
+
+    const latGrid = (Math.round(Number(p.lat || 0) * 20) / 20).toFixed(2);
+    const lngGrid = (Math.round(Number(p.lng || 0) * 20) / 20).toFixed(2);
+
+    return `${norm}-${latGrid}-${lngGrid}`;
   };
 
   // Load places from localStorage on client mount (purging any legacy mock/prefixed items)
@@ -217,9 +250,9 @@ export default function GoogleMapsVisualizer() {
           mergedMap.set(fp, p);
         }
 
-        // 2. Retain any user custom additions that don't collide
+        // 2. Retain only manually created custom additions that don't collide
         for (const p of locations) {
-          if (!p.title || (p.lat === 0 && p.lng === 0)) continue;
+          if (!p.title || (p.lat === 0 && p.lng === 0) || p.source !== "custom") continue;
           const fp = getLocationFingerprint(p);
           if (!mergedMap.has(fp)) {
             mergedMap.set(fp, p);
@@ -354,6 +387,15 @@ export default function GoogleMapsVisualizer() {
               let title = rawName;
               let address = rawAddress;
 
+              const isNitCalicut =
+                lowerTitle === "school" ||
+                lowerTitle === "college" ||
+                lowerTitle === "alma mater" ||
+                lowerTitle === "nitc" ||
+                lowerTitle.includes("nit calicut") ||
+                lowerTitle.includes("national institute of technology calicut") ||
+                lowerTitle.includes("national institute of technology, calicut");
+
               if (lowerTitle === "home") {
                 title = "Family Haven (Home Base)";
                 address = address === "Home" ? "Tripunithura, Kochi, Kerala" : address;
@@ -366,11 +408,11 @@ export default function GoogleMapsVisualizer() {
                 category = "corporate";
                 categoryLabel = "Corporate HQ";
                 placeStatus = "saved";
-              } else if (lowerTitle.includes("school") || lowerTitle.includes("university") || lowerTitle.includes("calicut")) {
-                title = rawName.includes("NIT") ? rawName : "National Institute of Technology (NIT) Calicut";
+              } else if (isNitCalicut) {
+                title = "National Institute of Technology (NIT) Calicut (Alma Mater)";
                 category = "gmat";
                 categoryLabel = "Alma Mater";
-                placeStatus = "visited";
+                placeStatus = "saved";
               } else {
                 const listName = (feat.properties?.listName || feat.properties?.List || "").toLowerCase();
                 if (listName.includes("want")) placeStatus = "want_to_go";

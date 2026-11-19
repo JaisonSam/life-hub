@@ -139,8 +139,44 @@ function slugify(text: string): string {
 }
 
 function getFingerprint(title: string, lat: number, lng: number): string {
-  const normTitle = title.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 20);
-  return `${normTitle}-${lat.toFixed(2)}-${lng.toFixed(2)}`;
+  const tLow = title.toLowerCase();
+
+  // Canonical deduplication key for core institutional & personal hubs
+  if (
+    tLow.includes("nit calicut") ||
+    tLow.includes("national institute of technology calicut") ||
+    tLow.includes("national institute of technology (nit) calicut") ||
+    tLow === "nitc"
+  ) {
+    return "canonical-nit-calicut";
+  }
+
+  if (tLow.includes("family haven") || tLow.includes("home base - tripunithura") || tLow === "home") {
+    return "canonical-home-haven";
+  }
+
+  if (
+    tLow.includes("schneider electric") ||
+    tLow.includes("prestige tech park") ||
+    tLow === "work"
+  ) {
+    return "canonical-schneider-work";
+  }
+
+  if (tLow.includes("veerakeralapudur") || tLow.includes("guava orchard")) {
+    return "canonical-tenkasi-farm";
+  }
+
+  const normTitle = title
+    .toLowerCase()
+    .replace(/\(.*?\)/g, "")
+    .replace(/[^a-z0-9]/g, "")
+    .slice(0, 24);
+
+  // Group coordinates within ~5.5 km grid
+  const latGrid = (Math.round(lat * 20) / 20).toFixed(2);
+  const lngGrid = (Math.round(lng * 20) / 20).toFixed(2);
+  return `${normTitle}-${latGrid}-${lngGrid}`;
 }
 
 function parseGeoJsonFeatures(
@@ -198,6 +234,15 @@ function parseGeoJsonFeatures(
     let address = rawAddress;
     const lowerTitle = rawName.toLowerCase();
 
+    const isNitCalicut =
+      lowerTitle === "school" ||
+      lowerTitle === "college" ||
+      lowerTitle === "alma mater" ||
+      lowerTitle === "nitc" ||
+      lowerTitle.includes("nit calicut") ||
+      lowerTitle.includes("national institute of technology calicut") ||
+      lowerTitle.includes("national institute of technology, calicut");
+
     if (lowerTitle === "home") {
       title = "Family Haven (Home Base - Tripunithura, Kochi)";
       address = address === "Home" ? "Tripunithura, Kochi, Kerala 682301" : address;
@@ -210,11 +255,7 @@ function parseGeoJsonFeatures(
       category = "corporate";
       categoryLabel = "Corporate HQ";
       itemStatus = "saved";
-    } else if (
-      lowerTitle.includes("school") ||
-      lowerTitle.includes("university") ||
-      lowerTitle.includes("calicut")
-    ) {
+    } else if (isNitCalicut) {
       title = "National Institute of Technology (NIT) Calicut (Alma Mater)";
       category = "gmat";
       categoryLabel = "Alma Mater";
